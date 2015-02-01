@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D491BFF2-A90F-4A7E-BC49-D3D994ADFBE0}</ProjectGuid>
+    <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VisiPlacer</RootNamespace>
+    <AssemblyName>VisiPlacer</AssemblyName>
+    <TargetFrameworkIdentifier>WindowsPhone</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v8.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\x86\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\x86\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\ARM\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\ARM\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\Code\BoundProperty_List.cs">
+      <Link>BoundProperty_List.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\ButtonLayout.cs">
+      <Link>ButtonLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\GridLayout.cs">
+      <Link>GridLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\GridView.cs">
+      <Link>GridView.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\ImageLayout.cs">
+      <Link>ImageLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutCache.cs">
+      <Link>LayoutCache.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutChoice_Set.cs">
+      <Link>LayoutChoice_Set.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutDimensions.cs">
+      <Link>LayoutDimensions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutQuery.cs">
+      <Link>LayoutQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutQuery_And_Response.cs">
+      <Link>LayoutQuery_And_Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutScore.cs">
+      <Link>LayoutScore.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\LayoutUnion.cs">
+      <Link>LayoutUnion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\MaxScore_LayoutQuery.cs">
+      <Link>MaxScore_LayoutQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\MinHeight_LayoutQuery.cs">
+      <Link>MinHeight_LayoutQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\MinWidth_LayoutQuery.cs">
+      <Link>MinWidth_LayoutQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\PixelatedLayout.cs">
+      <Link>PixelatedLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\ScoreShifted_View.cs">
+      <Link>ScoreShifted_View.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\SingleItem_Layout.cs">
+      <Link>SingleItem_Layout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\SingleItem_View.cs">
+      <Link>SingleItem_View.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\SpecificLayout.cs">
+      <Link>SpecificLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\Specific_SingleItem_Layout.cs">
+      <Link>Specific_SingleItem_Layout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\Specific_TextLayout.cs">
+      <Link>Specific_TextLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\SubviewLocation.cs">
+      <Link>SubviewLocation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\TextblockLayout.cs">
+      <Link>TextblockLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\TextBlock_Configurer.cs">
+      <Link>TextBlock_Configurer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\TextboxLayout.cs">
+      <Link>TextboxLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\TextBox_Configurer.cs">
+      <Link>TextBox_Configurer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\TextItem_Configurer.cs">
+      <Link>TextItem_Configurer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\TextLayout.cs">
+      <Link>TextLayout.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\ViewManager.cs">
+      <Link>ViewManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Code\VisiPlacer.cs">
+      <Link>VisiPlacer.cs</Link>
+    </Compile>
+    <Compile Include="App.xaml.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="App.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\StatList\StatList\Projects\Phone\StatList\StatList.csproj">
+      <Project>{7F60DDC6-466F-4D56-AE30-6FD963550BD7}</Project>
+      <Name>StatList</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
+  <ProjectExtensions />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
