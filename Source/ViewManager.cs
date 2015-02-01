@@ -52,6 +52,8 @@ namespace VisiPlacement
 
         public void DoLayout(Size size)
         {
+            if (Double.IsInfinity(size.Width) || Double.IsInfinity(size.Height))
+                throw new ArgumentException();
             this.displaySize = size;
             this.DoLayout();
         }

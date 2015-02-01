@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -83,101 +83,39 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\Code\BoundProperty_List.cs">
-      <Link>BoundProperty_List.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\ButtonLayout.cs">
-      <Link>ButtonLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\GridLayout.cs">
-      <Link>GridLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\GridView.cs">
-      <Link>GridView.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\ImageLayout.cs">
-      <Link>ImageLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutCache.cs">
-      <Link>LayoutCache.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutChoice_Set.cs">
-      <Link>LayoutChoice_Set.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutDimensions.cs">
-      <Link>LayoutDimensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutQuery.cs">
-      <Link>LayoutQuery.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutQuery_And_Response.cs">
-      <Link>LayoutQuery_And_Response.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutScore.cs">
-      <Link>LayoutScore.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\LayoutUnion.cs">
-      <Link>LayoutUnion.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\MaxScore_LayoutQuery.cs">
-      <Link>MaxScore_LayoutQuery.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\MinHeight_LayoutQuery.cs">
-      <Link>MinHeight_LayoutQuery.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\MinWidth_LayoutQuery.cs">
-      <Link>MinWidth_LayoutQuery.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\PixelatedLayout.cs">
-      <Link>PixelatedLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\ScoreShifted_View.cs">
-      <Link>ScoreShifted_View.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\SingleItem_Layout.cs">
-      <Link>SingleItem_Layout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\SingleItem_View.cs">
-      <Link>SingleItem_View.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\SpecificLayout.cs">
-      <Link>SpecificLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\Specific_SingleItem_Layout.cs">
-      <Link>Specific_SingleItem_Layout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\Specific_TextLayout.cs">
-      <Link>Specific_TextLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\SubviewLocation.cs">
-      <Link>SubviewLocation.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\TextblockLayout.cs">
-      <Link>TextblockLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\TextBlock_Configurer.cs">
-      <Link>TextBlock_Configurer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\TextboxLayout.cs">
-      <Link>TextboxLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\TextBox_Configurer.cs">
-      <Link>TextBox_Configurer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\TextItem_Configurer.cs">
-      <Link>TextItem_Configurer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\TextLayout.cs">
-      <Link>TextLayout.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\ViewManager.cs">
-      <Link>ViewManager.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\Code\VisiPlacer.cs">
-      <Link>VisiPlacer.cs</Link>
-    </Compile>
-    <Compile Include="App.xaml.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\BoundProperty_List.cs"/>
+    <Compile Include="Source\ButtonLayout.cs"/>
+    <Compile Include="Source\GridLayout.cs"/>
+    <Compile Include="Source\GridView.cs"/>
+    <Compile Include="Source\ImageLayout.cs"/>
+    <Compile Include="Source\LayoutCache.cs"/>
+    <Compile Include="Source\LayoutChoice_Set.cs"/>
+    <Compile Include="Source\LayoutDimensions.cs"/>
+    <Compile Include="Source\LayoutQuery.cs"/>
+    <Compile Include="Source\LayoutQuery_And_Response.cs"/>
+    <Compile Include="Source\LayoutScore.cs"/>
+    <Compile Include="Source\LayoutUnion.cs"/>
+    <Compile Include="Source\MaxScore_LayoutQuery.cs"/>
+    <Compile Include="Source\MinHeight_LayoutQuery.cs"/>
+    <Compile Include="Source\MinWidth_LayoutQuery.cs"/>
+    <Compile Include="Source\PixelatedLayout.cs"/>
+    <Compile Include="Source\ScoreShifted_View.cs"/>
+    <Compile Include="Source\SingleItem_Layout.cs"/>
+    <Compile Include="Source\SingleItem_View.cs"/>
+    <Compile Include="Source\SpecificLayout.cs"/>
+    <Compile Include="Source\Specific_SingleItem_Layout.cs"/>
+    <Compile Include="Source\Specific_TextLayout.cs"/>
+    <Compile Include="Source\SubviewLocation.cs"/>
+    <Compile Include="Source\TextblockLayout.cs"/>
+    <Compile Include="Source\TextBlock_Configurer.cs"/>
+    <Compile Include="Source\TextboxLayout.cs"/>
+    <Compile Include="Source\TextBox_Configurer.cs"/>
+    <Compile Include="Source\TextItem_Configurer.cs"/>
+    <Compile Include="Source\TextLayout.cs"/>
+    <Compile Include="Source\ViewManager.cs"/>
+    <Compile Include="Source\VisiPlacer.cs"/>
+    <Compile Include="App.xaml.cs"/>
+    <Compile Include="Properties\AssemblyInfo.cs"/>
   </ItemGroup>
   <ItemGroup>
     <Page Include="App.xaml">
@@ -185,7 +123,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\StatList\StatList\Projects\Phone\StatList\StatList.csproj">
+    <ProjectReference Include="..\StatList\StatList.csproj">
       <Project>{7F60DDC6-466F-4D56-AE30-6FD963550BD7}</Project>
       <Name>StatList</Name>
     </ProjectReference>

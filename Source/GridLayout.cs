@@ -1611,6 +1611,8 @@ namespace VisiPlacement
         }
         public void AddCoordinate(double value)
         {
+            if (Double.IsNaN(value))
+                throw new ArgumentException();
             if (this.NextCoordinateAffectsWidth)
             {
                 this.columnWidths.Set_GroupTotal(this.NumCoordinatesSetInCurrentDimension, value);
@@ -1670,6 +1672,8 @@ namespace VisiPlacement
                 if (error > 0)
                     System.Diagnostics.Debug.WriteLine("Rounding Error!");
             }
+            if (Double.IsNaN(remainder))
+                throw new InvalidOperationException();
             return remainder;
         }
         public override double Width
