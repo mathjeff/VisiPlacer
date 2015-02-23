@@ -69,6 +69,7 @@ namespace VisiPlacement
                 this.subLayout = value;
                 if (this.subLayout != null)
                     this.subLayout.AddParent(this);
+                this.AnnounceChange(true);
             }
         }
         public LayoutScore BonusScore { get; set; }
@@ -96,6 +97,7 @@ namespace VisiPlacement
                 {
                     Specific_SingleItem_Layout result = new Specific_SingleItem_Layout(this.View, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
                     result.FillAvailableSpace = this.FillAvailableSpace;
+                    this.prepareLayoutForQuery(result, query);
                     return result;
                 }
                 return null;

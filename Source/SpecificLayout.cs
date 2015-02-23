@@ -54,15 +54,37 @@ namespace VisiPlacement
         //public abstract void Set_SubviewLocations(IEnumerable<SubviewDimensions> locations);
         public abstract void Remove_VisualDescendents();
 
-        // returns a list of LayoutChoice_Sets where the first item created/found this item, and the second item found the first, etc
+        // returns a list of general LayoutChoice_Sets where the first item created/found this item, and the second item found the first, etc
+        // Note that this is different than the specific layout that contains this one as a visual parent
         public IEnumerable<LayoutChoice_Set> GetAncestors()
         {
             return this.ancestors;
         }
-        public void SetParent(LayoutChoice_Set parent)
+        // Sets the general layout that created this specific layout
+        public void Set_SourceParent(LayoutChoice_Set parent)
         {
             this.ancestors.AddLast(parent);
         }
+        
+        // the layout that actually contains this particular layout
+        //public SpecificLayout VisualParent { get; set; }
+
+        public virtual ViewManager Get_ViewManager()
+        {
+            FrameworkElement view = this.View;
+            while (true)
+            {
+                ManageableView managedView = view as ManageableView;
+                if (managedView != null)
+                {
+                    return managedView.ViewManager;
+                }
+                view = view.Parent as FrameworkElement;
+                if (view == null)
+                    return null;
+            }
+        }
+
         LinkedList<LayoutChoice_Set> ancestors;
     }
 

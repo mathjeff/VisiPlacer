@@ -37,11 +37,7 @@ namespace VisiPlacement
             }
         }
 
-        /*protected override void OnChildDesiredSizeChanged(FrameworkElement child)
-        {
-            this.InvalidateMeasure();
-        }*/
-        public void ClearLayout()
+        public void Remove_VisualDescendents()
         {
             foreach (SpecificLayout layout in this.visibleLayouts)
             {
@@ -61,9 +57,9 @@ namespace VisiPlacement
         public void DoLayout()
         {
             DateTime startTime = DateTime.Now;
-            this.Reset_ChangeAnnouncement();
-            this.ClearLayout();
+            this.Remove_VisualDescendents();
             FrameworkElement newView = this.DoLayout(this.layoutToManage, this.displaySize);
+            this.Reset_ChangeAnnouncement();
             //newView.Width = this.parentView.Width = this.displaySize.Width;
             //newView.Height = this.parentView.Height = this.displaySize.Height;
             this.parentView.Content = newView;

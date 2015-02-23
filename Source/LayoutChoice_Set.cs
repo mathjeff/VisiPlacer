@@ -36,8 +36,7 @@ namespace VisiPlacement
         // Given a SpecificLayout, sets any necessary properties to make it suitable to return to the caller of GetBestLayout(LayoutQuery)
         protected SpecificLayout prepareLayoutForQuery(SpecificLayout layout, LayoutQuery query)
         {
-            this.changedSinceLatestQuery = false;
-            this.changedSinceLastRender = false;
+            this.Reset_ChangeAnnouncement();
 
             int numMatches;
             if (query.Debug)
@@ -53,7 +52,7 @@ namespace VisiPlacement
 
             if (layout != null)
             {
-                layout.SetParent(this);
+                layout.Set_SourceParent(this);
 
                 numMatches = 0;
                 foreach (LayoutChoice_Set ancestor in layout.GetAncestors())
