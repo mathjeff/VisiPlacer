@@ -14,23 +14,32 @@ namespace VisiPlacement
     {
         public TextblockLayout(TextBlock textBlock)
         {
-            this.Initialize(textBlock);
+            this.Initialize(textBlock, -1);
         }
-        public TextblockLayout(String text)
+        public TextblockLayout(String text, double fontsize = -1)
         {
             TextBlock textBlock = new TextBlock();
             textBlock.Text = text;
             textBlock.TextWrapping = TextWrapping.Wrap;
-            this.Initialize(textBlock);
+            this.Initialize(textBlock, fontsize);
         }
-        private void Initialize(TextBlock textBlock)
+        private void Initialize(TextBlock textBlock, double fontsize)
         {
             textBlock.Margin = new Thickness(0);
             textBlock.Padding = new Thickness(0);
             this.textBlock = textBlock;
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
-            layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 12));
+            if (fontsize > 0)
+            {
+                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), fontsize));
+            }
+            else
+            {
+                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 10));
+                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 16));
+                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 30));
+            }
                 
             this.LayoutToManage = new LayoutUnion(layouts);
 

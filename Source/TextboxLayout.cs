@@ -22,7 +22,8 @@ namespace VisiPlacement
             this.TextBox = textBox;
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
-            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 12));
+            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
+            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 30));
 
             this.LayoutToManage = new LayoutUnion(layouts);
 

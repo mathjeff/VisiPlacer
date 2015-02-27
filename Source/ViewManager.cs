@@ -70,9 +70,6 @@ namespace VisiPlacement
             System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
             System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
             TextLayout.NumMeasures = 0;
-            TextLayout.TextTime = new TimeSpan();
-            TextBlock block = new TextBlock();
-            //block.Inlines.Add(;
         }
 
         public FrameworkElement DoLayout(LayoutChoice_Set layout, Size bounds)
