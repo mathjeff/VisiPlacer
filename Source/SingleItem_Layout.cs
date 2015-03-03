@@ -30,15 +30,15 @@ namespace VisiPlacement
             this.SubLayout = subLayout;
             this.BorderThickness = borderThickness;
             this.BonusScore = bonusScore;
-            this.FillAvailableSpace = fillAvailableSpace;
+            this.ChildFillsAvailableSpace = fillAvailableSpace;
         }
         private void Initialize()
         {
-            this.FillAvailableSpace = true;
+            this.ChildFillsAvailableSpace = true;
         }
         public void CopyFrom(SingleItem_Layout original)
         {
-            this.FillAvailableSpace = original.FillAvailableSpace;
+            this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
             base.CopyFrom(original);
         }
         private FrameworkElement view;
@@ -47,7 +47,10 @@ namespace VisiPlacement
             get
             {
                 if (this.view == null)
-                    this.view = new SingleItem_View();
+                {
+                    if (!this.BorderThickness.Equals(new Thickness(0)))
+                        this.view = new SingleItem_View();
+                }
                 return this.view;
             }
             set
@@ -55,7 +58,7 @@ namespace VisiPlacement
                 this.view = value;
             }
         }
-        public bool FillAvailableSpace { get; set; }
+        public bool ChildFillsAvailableSpace { get; set; }
         public LayoutChoice_Set SubLayout 
         {
             get
@@ -74,13 +77,8 @@ namespace VisiPlacement
         }
         public LayoutScore BonusScore { get; set; }
 
-        public Thickness BorderThickness {get;set;}
-        /*{
-            getC:\Users\Jeff\Documents\Visual Studio 2012\Projects\Interesting\VisiPlacer\VisiPlacer\VisiPlacer\Specific_TextLayout.cs
-            {
-                return new Size(this.View.Padding.Left + this.View.Padding.Right + this.View.BorderThickness.Left + this.View.BorderThickness.Right, this.View.Padding.Top + this.View.Padding.Bottom + this.View.BorderThickness.Top + this.View.BorderThickness.Bottom);
-            }
-        }*/
+        // TODO: split SingleItem_Layout into more classes having different handling of BorderThickness: one that crops with a small penalty, and one that fails if cropped
+        public Thickness BorderThickness { get; set; }
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
@@ -91,12 +89,17 @@ namespace VisiPlacement
                 double borderHeight = this.BorderThickness.Top + this.BorderThickness.Bottom;
                 subQuery.MaxWidth = subQuery.MaxWidth - borderWidth;
                 subQuery.MaxHeight = subQuery.MaxHeight - borderHeight;
+                if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
+                {
+                    // If there is no room for the border, then that violates a requirement and we return the worst possible score
+                    return new Specific_SingleItem_Layout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
+                }
                 subQuery.MinScore = subQuery.MinScore.Minus(this.BonusScore);
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
                     Specific_SingleItem_Layout result = new Specific_SingleItem_Layout(this.View, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
-                    result.FillAvailableSpace = this.FillAvailableSpace;
+                    result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;
                 }

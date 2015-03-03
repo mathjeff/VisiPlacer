@@ -20,6 +20,7 @@ namespace VisiPlacement
         FrameworkElement View { get; }
         String Text { get; set; }
         void Add_TextChanged_Handler(PropertyChangedCallback handler);
+        //void Add_LostFocus_Handler(RoutedEventHandler handler);
         //TextItem_Configurer Clone();
     }
 }

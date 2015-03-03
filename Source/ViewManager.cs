@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Windows.Graphics.Display;
@@ -14,7 +15,7 @@ namespace VisiPlacement
     {
         public ViewManager(ContentControl parentView, LayoutChoice_Set layoutToManage)
         {
-            this.visibleLayouts = new LinkedList<SpecificLayout>();
+            //this.visibleLayouts = new LinkedList<SpecificLayout>();
             this.layoutToManage = layoutToManage;
             layoutToManage.AddParent(this);
 
@@ -37,14 +38,14 @@ namespace VisiPlacement
             }
         }
 
-        public void Remove_VisualDescendents()
+        /*public void Remove_VisualDescendents()
         {
             foreach (SpecificLayout layout in this.visibleLayouts)
             {
                 layout.Remove_VisualDescendents();
             }
             this.visibleLayouts.Clear();
-        }
+        }*/
 
         public void DoLayout(Size size)
         {
@@ -56,8 +57,10 @@ namespace VisiPlacement
 
         public void DoLayout()
         {
+            //object focusedElement = FocusManager.GetFocusedElement();
+
             DateTime startTime = DateTime.Now;
-            this.Remove_VisualDescendents();
+            //this.Remove_VisualDescendents();
             FrameworkElement newView = this.DoLayout(this.layoutToManage, this.displaySize);
             this.Reset_ChangeAnnouncement();
             //newView.Width = this.parentView.Width = this.displaySize.Width;
@@ -70,6 +73,14 @@ namespace VisiPlacement
             System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
             System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
             TextLayout.NumMeasures = 0;
+
+            /*
+            Control control = focusedElement as Control;
+            if (control != null)
+                control.Focus();
+            */
+            
+
         }
 
         public FrameworkElement DoLayout(LayoutChoice_Set layout, Size bounds)
@@ -80,17 +91,20 @@ namespace VisiPlacement
             SpecificLayout bestLayout = layout.GetBestLayout(query);
 
             // figure out where the subviews are placed
-            IEnumerable<SubviewDimensions> locations = bestLayout.DoLayout(bounds);
+            return bestLayout.DoLayout(bounds);
 
-            this.visibleLayouts.AddLast(bestLayout);
+            /*this.visibleLayouts.AddLast(bestLayout);
 
             // update each subview
             foreach (SubviewDimensions location in locations)
             {
-                location.SubLayout.View.InvalidateMeasure();
+                // determine whether this layout wants to just delegate to its child views without making a view of its own
+                FrameworkElement view = location.SubLayout.View;
+                view.InvalidateMeasure();
                 this.DoLayout(location.SubLayout, location.Size);
             }
             return bestLayout.View;
+            */
         }
 
         public override void On_ContentsChanged(bool mustRedraw)
@@ -207,7 +221,7 @@ namespace VisiPlacement
 
         private ContentControl parentView;
         private LayoutChoice_Set layoutToManage;
-        private LinkedList<SpecificLayout> visibleLayouts;
+        //private LinkedList<SpecificLayout> visibleLayouts;
         private Size displaySize;
     }
 

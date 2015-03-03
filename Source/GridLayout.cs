@@ -44,6 +44,7 @@ namespace VisiPlacement
             this.bonusScore = bonusScore;
             //this.pixelSize = (double)1/(double)128;
             this.pixelSize = 1;
+            this.view = new GridView();
         }
         // puts this layout in the designated part of the grid
         public virtual void PutLayout(LayoutChoice_Set layout, int xIndex, int yIndex)
@@ -156,6 +157,9 @@ namespace VisiPlacement
 
                 layout = shrunken;
             }
+
+            if (layout != null)
+                layout.GridView = this.view; // reuse the same view to decrease the amount of redrawing the caller has to do
 
             return this.prepareLayoutForQuery(layout, query);
         }
@@ -673,8 +677,9 @@ namespace VisiPlacement
                     {
                         // If we're shrinking a coordinate in the second dimension, and we don't care to maximize the score,
                         // then we can compute a worse score that we may still shrink to
-                        if (currentSublayout.Score.CompareTo(query.MinScore) > 0)
-                            allowedScoreDecrease = currentSublayout.Score.Minus(query.MinScore);
+                        LayoutScore decrease = currentSublayout.Score.Minus(query.MinScore);
+                        if (decrease.CompareTo(LayoutScore.Zero) > 0)
+                            allowedScoreDecrease = decrease;
                     }
                     // if we get here, we wish to decrease the size of the layout
                     if (semiFixedLayout.NextCoordinateAffectsWidth)
@@ -820,6 +825,11 @@ namespace VisiPlacement
         // sourceQuery is the LayoutQuery that caused this call to ShrinkWidth
         private void ShrinkWidth(SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, LayoutQuery sourceQuery, LayoutScore totalAllowedScoreDecrease)
         {
+            if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
+            {
+                Console.WriteLine("Error: cannot improve score by shrinking");
+            }
+
             //layout = new SemiFixed_GridLayout(layout);
             //double maxWidth = layout.Get_GroupWidth(indexOf_propertyGroup_toShrink);
             List<int> indices = layout.Get_WidthGroup_AtIndex(indexOf_propertyGroup_toShrink);
@@ -937,6 +947,10 @@ namespace VisiPlacement
         // shrinks the specified height as much as possible without decreasing the layout's score
         private void ShrinkHeight(SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, LayoutQuery sourceQuery, LayoutScore totalAllowedScoreDecrease)
         {
+            if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
+            {
+                Console.WriteLine("Error: cannot improve score by shrinking");
+            }
             //layout = new SemiFixed_GridLayout(layout);
             //double maxHeight = layout.Get_GroupHeight(indexOf_propertyGroup_toShrink);
             List<int> indices = layout.Get_HeightGroup_AtIndex(indexOf_propertyGroup_toShrink);
@@ -1460,6 +1474,8 @@ namespace VisiPlacement
             }
         }
 
+
+
         private LayoutChoice_Set[,] elements;
         private BoundProperty_List rowHeights;
         private BoundProperty_List columnWidths;
@@ -1469,6 +1485,7 @@ namespace VisiPlacement
         int nextOpenColumn;
         double numQueries;
         double numComputations;
+        GridView view;
 
 
     }
@@ -1522,6 +1539,7 @@ namespace VisiPlacement
             this.bonusScore = original.bonusScore;
             this.setWidthBeforeHeight = original.setWidthBeforeHeight;
             this.score = original.score;
+            this.view = original.view;
         }
         private void Initialize()
         {
@@ -1622,6 +1640,7 @@ namespace VisiPlacement
                 this.rowHeights.Set_GroupTotal(this.NumCoordinatesSetInCurrentDimension, value);
             }
             this.nextDimensionToSet++;
+            this.InvalidateScore();
         }
         public double LatestCoordinateValue
         {
@@ -1942,9 +1961,8 @@ namespace VisiPlacement
                 return this.nextDimensionToSet;
             }
         }
-        public override IEnumerable<SubviewDimensions> DoLayout(Size bounds)
+        public override FrameworkElement DoLayout(Size bounds)
         {
-            List<SubviewDimensions> locations = new List<SubviewDimensions>();
             int rowNumber, columnNumber;
             double unscaledX, unscaledY;    // paying a lot of attention to rounding;
             double nextUnscaledX, nextUnscaledY;
@@ -1966,6 +1984,7 @@ namespace VisiPlacement
             y = unscaledY = 0;
             List<double> columnWidths = new List<double>();
             List<double> rowHeights = new List<double>();
+            FrameworkElement[,] subviews = new FrameworkElement[this.columnWidths.NumProperties, this.rowHeights.NumProperties];
             for (rowNumber = 0; rowNumber < this.rowHeights.NumProperties; rowNumber++)
             {
                 // compute the coordinates in the unscaled coordinate system
@@ -1990,24 +2009,27 @@ namespace VisiPlacement
 
 
                     LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
+                    FrameworkElement subview = null;
                     if (subLayout != null)
                     {
                         MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
                         query.MaxWidth = width;
                         query.MaxHeight = height;
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
-                        SubviewDimensions location = new SubviewDimensions(bestLayout, new Size(width, height));
-                        locations.Add(location);
-                        this.GridView.PutView(bestLayout.View, columnNumber, rowNumber);
+                        subview = bestLayout.DoLayout(new Size(width, height));
                     }
+                    subviews[columnNumber, rowNumber] = subview;
+
                     unscaledX = nextUnscaledX;
                     x = nextX;
                 }
                 unscaledY = nextUnscaledY;
                 y = nextY;
             }
+            // Now that the computation is done, update the GridView
             this.GridView.SetDimensions(columnWidths, rowHeights);
-            return locations;
+            this.GridView.SetChildren(subviews);
+            return this.View;
         }
 
         public override FrameworkElement View
@@ -2022,6 +2044,13 @@ namespace VisiPlacement
                     this.view = new GridView();
                 return this.view;
             }
+            set
+            {
+                if (this.view == null)
+                    this.view = value;
+                else
+                    throw new InvalidOperationException();
+            }
         }
 
         public SpecificLayout GetChildLayout(int columnNumber, int rowNumber)
@@ -2029,10 +2058,10 @@ namespace VisiPlacement
             return this.subLayouts[columnNumber, rowNumber];
         }
 
-        public override void Remove_VisualDescendents()
+        /*public override void Remove_VisualDescendents()
         {
             this.GridView.Remove_VisualDescendents();
-        }
+        }*/
 
         LayoutChoice_Set[,] elements;
         int nextDimensionToSet;

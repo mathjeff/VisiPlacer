@@ -13,7 +13,9 @@ namespace VisiPlacement
         {
             get
             {
-                return new LayoutScore(double.PositiveInfinity, double.NegativeInfinity);
+                LayoutScore minimum = new LayoutScore();
+                minimum.components.Add(double.PositiveInfinity, double.NegativeInfinity);
+                return minimum;
             }
         }
         // adding or subtracting Zero will never change the score
@@ -40,7 +42,7 @@ namespace VisiPlacement
         // this score indicates that some space has been used
         public static LayoutScore Get_UsedSpace_LayoutScore(double numPixels)
         {
-            return new LayoutScore(1, numPixels);
+            return new LayoutScore(1, Math.Sqrt(numPixels));
         }
         // this score indicates that some items were laid out awkwardly
         /*public static LayoutScore Get_Disjointed_LayoutScore(double numItems)
@@ -60,7 +62,7 @@ namespace VisiPlacement
         public LayoutScore(double priority, double weight)
         {
             this.Initialize();
-            this.components.Add(priority, weight);
+            this.addComponent(priority, weight);
         }
         public LayoutScore(LayoutScore original)
         {
@@ -140,7 +142,7 @@ namespace VisiPlacement
                 }
                 // only add the coordinate if it is nonzero, because zeros are always provided by default
                 if (weight != 0)
-                    sum.components.Add(priority, weight);
+                    sum.addComponent(priority, weight);
             }
         }
         public LayoutScore Times(double weightScale)
@@ -148,7 +150,7 @@ namespace VisiPlacement
             LayoutScore product = new LayoutScore();
             foreach (ListItemStats<double, double> item in this.components.AllItems)
             {
-                product.components.Add(item.Key, item.Value * weightScale);
+                product.addComponent(item.Key, item.Value * weightScale);
             }
             return product;
         }
@@ -257,6 +259,20 @@ namespace VisiPlacement
         {
             throw new NotImplementedException();
         }
+
+        private void addComponent(double priority, double weight)
+        {
+            // workaround for rounding error
+            if (Math.Abs(weight) < 0.0000001)
+                weight = 0;
+            this.components.Add(priority, weight);
+            if (this.CompareTo(LayoutScore.Minimum) < 0)
+            {
+                // not allowed to be worse than the worst
+                this.CopyFrom(LayoutScore.Minimum);
+            }
+        }
+
 
         #region Required for IComparer<double>
 

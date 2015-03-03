@@ -40,7 +40,7 @@ namespace VisiPlacement
                 return null;
             return this;
         }
-        public abstract IEnumerable<SubviewDimensions> DoLayout(Size bounds);
+        public abstract FrameworkElement DoLayout(Size bounds);
         public void CopyFrom(SpecificLayout original)
         {
             base.CopyFrom(original);
@@ -52,7 +52,7 @@ namespace VisiPlacement
 
         // for directly modifying what will show onscreen
         //public abstract void Set_SubviewLocations(IEnumerable<SubviewDimensions> locations);
-        public abstract void Remove_VisualDescendents();
+        //public abstract void Remove_VisualDescendents();
 
         // returns a list of general LayoutChoice_Sets where the first item created/found this item, and the second item found the first, etc
         // Note that this is different than the specific layout that contains this one as a visual parent

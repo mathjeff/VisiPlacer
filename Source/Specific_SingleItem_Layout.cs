@@ -25,11 +25,11 @@ namespace VisiPlacement
         }
         private void Initialize()
         {
-            this.FillAvailableSpace = true;
+            this.ChildFillsAvailableSpace = true;
         }
 
-        public bool FillAvailableSpace { get; set; }
-        public override IEnumerable<SubviewDimensions> DoLayout(Size displaySize)
+        public bool ChildFillsAvailableSpace { get; set; }
+        public override FrameworkElement DoLayout(Size displaySize)
         {
             LinkedList<SubviewDimensions> subLayouts = new LinkedList<SubviewDimensions>();
             //if (this.subLayout != null)
@@ -42,32 +42,31 @@ namespace VisiPlacement
                 subLayouts.AddLast(new SubviewLocation(this.subLayout, new Rect(new Point(subviewX, subviewY), new Size(subviewWidth, subviewHeight))));
 #else
                 double outerWidth = displaySize.Width;
-                if (this.Size.Width < outerWidth && !this.FillAvailableSpace)
+                if (this.Size.Width < outerWidth && !this.ChildFillsAvailableSpace)
                     outerWidth = this.Size.Width;
                 double outerHeight = displaySize.Height;
-                if (this.Size.Height < outerHeight && !this.FillAvailableSpace)
+                if (this.Size.Height < outerHeight && !this.ChildFillsAvailableSpace)
                     outerHeight = this.Size.Height;
                 double subviewWidth = outerWidth - this.BorderThickness.Left - this.BorderThickness.Right;
                 double subviewHeight = outerHeight - this.BorderThickness.Top - this.BorderThickness.Bottom;
 
                 ContentControl contentView = this.View as ContentControl;
+                SubviewDimensions dimensions = new SubviewDimensions(this.subLayout, new Size(subviewWidth, subviewHeight));
+                FrameworkElement childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
                 if (contentView != null)
                 {
-                    if (this.subLayout != null)
-                    {
-                        subLayouts.AddLast(new SubviewDimensions(this.subLayout, new Size(subviewWidth, subviewHeight)));
-                        contentView.Content = this.subLayout.View;
-                    }
+                    contentView.Content = childContent;
                     contentView.Width = displaySize.Width;
                     contentView.Height = displaySize.Height;
+                    return contentView;
                 }
+                return childContent;
 #endif
             }
             //if (this.view != null)
             {
             }
             
-            return subLayouts;
         }
         public override SpecificLayout Clone()
         {
@@ -83,7 +82,7 @@ namespace VisiPlacement
             this.score = original.score;
             this.subLayout = original.subLayout;
             this.BorderThickness = original.BorderThickness;
-            this.FillAvailableSpace = original.FillAvailableSpace;
+            this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
         }
         public Size Size { get; set; }
         public override double Width
@@ -110,18 +109,21 @@ namespace VisiPlacement
         public override FrameworkElement View
         {
             get
-            { 
+            {
                 if (this.view == null)
-                    this.view = new SingleItem_View();
+                {
+                    if (!this.BorderThickness.Equals(new Thickness(0)))
+                        this.view = new SingleItem_View();
+                }
                 return this.view;
             }
         }
-        public override void Remove_VisualDescendents()
+        /*public override void Remove_VisualDescendents()
         {
             ContentControl content = this.view as ContentControl;
             if (content != null)
                 content.Content = null;
-        }
+        }*/
 
         public Thickness BorderThickness { get; set; }
         private LayoutScore score;

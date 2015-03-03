@@ -79,6 +79,8 @@ namespace VisiPlacement
             // It seems silly that we have to do this to get notification of when the text changes
             this.Setup_PropertyChange_Listener("Text", this.TextBox, handler);
         }
+        
+
 
 
         private void Setup_PropertyChange_Listener(string propertyName, FrameworkElement element, PropertyChangedCallback callback)

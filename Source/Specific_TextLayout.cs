@@ -57,7 +57,7 @@ namespace VisiPlacement
         public bool Cropped { get; set; }
         public String TextForDebugging { get; set; }
 
-        public override IEnumerable<SubviewDimensions> DoLayout(Size displaySize)
+        public override FrameworkElement DoLayout(Size displaySize)
         {
             if (displaySize.Width != this.textItem.Width)
                 this.textItem.Width = displaySize.Width;
@@ -65,13 +65,13 @@ namespace VisiPlacement
                 this.textItem.Height = displaySize.Height;
             if (this.fontSize != this.textItem.FontSize)
                 this.textItem.FontSize = this.fontSize;
-            return new List<SubviewDimensions>();
+            return this.textItem.View;
         }
 
-        public override void Remove_VisualDescendents()
+        /*public override void Remove_VisualDescendents()
         {
             // can't put any views inside of a text block so there's nothing to remove
-        }
+        }*/
 
         public LayoutScore BonusScore { get; set; }
         public bool LoggingEnabled { get; set; }

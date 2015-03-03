@@ -214,29 +214,11 @@ namespace VisiPlacement
             numComputations++;
             //System.Diagnostics.Debug.WriteLine("Text items: computations per query: " + AverageNumComputationsPerQuery);
 
-            //Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, availableSize.width, availableSize.Height, this.TextItem_Configurer.FontSize, );
-
-            /*
-            TextBlock testBlock = new TextBlock();
-            testBlock.Text = "a s d f g h j k l";
-            testBlock.FontSize = 11;
-            testBlock.InvalidateMeasure();
-            testBlock.Measure(new Size(40, 1000));
-            System.Diagnostics.Debug.WriteLine(testBlock.DesiredSize);
-            System.Diagnostics.Debug.WriteLine(testBlock.ActualWidth);
-            System.Diagnostics.Debug.WriteLine(testBlock.ActualHeight);*/
             TextFormatter textFormatter = this.MakeTextFormatter();
             Size desiredSize = textFormatter.FormatText(text, availableSize.Width);
-            /* // if the text can fit in the box, then have it do so
-            if (availableSize.Width >= textFormatter.DesiredSize.Width && !double.IsPositiveInfinity(availableSize.Width))
-            {
-                textFormatter.MaxWidth = availableSize.Width;
-                textFormatter.Measure(availableSize);
-            }*/
             bool cropped = false;
             double width, height;
             // assign the width, height, and score
-            //if (textFormatter.DesiredSize.Width <= availableSize.Width && textFormatter.DesiredSize.Height <= availableSize.Height)
             if (desiredSize.Width <= availableSize.Width && desiredSize.Height <= availableSize.Height)
             {
                 // no cropping is necessary
@@ -251,7 +233,6 @@ namespace VisiPlacement
                 width = height = 0;
             }
             Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(cropped));
-            //Specific_TextLayout specificLayout = new Specific_TextLayout(new TextBlock_Configurer(this.textFormatter), width, height, this.FontSize, this.ComputeScore(cropped));
             specificLayout.Cropped = cropped;
 
             // diagnostics

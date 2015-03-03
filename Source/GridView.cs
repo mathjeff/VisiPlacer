@@ -17,6 +17,7 @@ namespace VisiPlacement
         {
             if (view != null)
             {
+                this.children[columnNumber, rowNumber] = view;
                 this.Children.Add(view);
                 Grid.SetColumn(view, columnNumber);
                 Grid.SetRow(view, rowNumber);
@@ -24,8 +25,41 @@ namespace VisiPlacement
             }
         }
 
+        // provides new views to use
+        public void SetChildren(FrameworkElement[,] newChildren)
+        {
+            int rowNumber, columnNumber;
+            for (columnNumber = 0; columnNumber < newChildren.GetLength(0); columnNumber++)
+            {
+                for (rowNumber = 0; rowNumber < newChildren.GetLength(1); rowNumber++)
+                {
+                    FrameworkElement newChild = newChildren[columnNumber, rowNumber];
+                    FrameworkElement oldChild;
+                    if (this.children == null)
+                        oldChild = null;
+                    else
+                        oldChild = this.children[columnNumber, rowNumber];
+                    if (newChild != oldChild)
+                    {
+                        if (oldChild != null)
+                            this.Children.Remove(oldChild);
+                        if (newChild != null)
+                        {
+                            this.Children.Add(newChild);
+                            Grid.SetColumn(newChild, columnNumber);
+                            Grid.SetRow(newChild, rowNumber);
+                        }
+                    }
+                }
+            }
+            this.InvalidateMeasure();
+            this.children = newChildren;
+
+        }
+
         public void SetDimensions(IEnumerable<double> columnWidths, IEnumerable<double> rowHeights)
         {
+
             this.RowDefinitions.Clear();
 
             foreach (double rowHeight in rowHeights)
@@ -43,11 +77,12 @@ namespace VisiPlacement
                 this.ColumnDefinitions.Add(columnDefinition);
             }
         }
+        FrameworkElement[,] children;
 
-        public void Remove_VisualDescendents()
+        /*public void Remove_VisualDescendents()
         {
             this.Children.Clear();
-        }
+        }*/
 
         /*protected override void OnChildDesiredSizeChanged(UIElement child)
         {
