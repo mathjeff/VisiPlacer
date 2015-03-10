@@ -79,10 +79,18 @@ namespace VisiPlacement
         }
         FrameworkElement[,] children;
 
-        /*public void Remove_VisualDescendents()
+        public void Remove_VisualDescendents()
         {
             this.Children.Clear();
-        }*/
+            int rowNumber, columnNumber;
+            for (columnNumber = 0; columnNumber < this.children.GetLength(0); columnNumber++)
+            {
+                for (rowNumber = 0; rowNumber < this.children.GetLength(1); rowNumber++)
+                {
+                    this.children[columnNumber, rowNumber] = null;
+                }
+            }
+        }
 
         /*protected override void OnChildDesiredSizeChanged(UIElement child)
         {

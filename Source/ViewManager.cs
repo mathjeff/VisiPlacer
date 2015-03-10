@@ -23,7 +23,6 @@ namespace VisiPlacement
             parentView.Content = this.parentView;
             this.displaySize = parentView.RenderSize;
 
-            //this.DoLayout(new Size(456, 657));
 
         }
         public void SetLayout(LayoutChoice_Set layoutToManage)
@@ -38,14 +37,11 @@ namespace VisiPlacement
             }
         }
 
-        /*public void Remove_VisualDescendents()
+        public void Remove_VisualDescendents()
         {
-            foreach (SpecificLayout layout in this.visibleLayouts)
-            {
-                layout.Remove_VisualDescendents();
-            }
-            this.visibleLayouts.Clear();
-        }*/
+            if (this.specificLayout != null)
+                this.specificLayout.Remove_VisualDescendents();
+        }
 
         public void DoLayout(Size size)
         {
@@ -57,10 +53,10 @@ namespace VisiPlacement
 
         public void DoLayout()
         {
-            //object focusedElement = FocusManager.GetFocusedElement();
+            object focusedElement = FocusManager.GetFocusedElement();
 
             DateTime startTime = DateTime.Now;
-            //this.Remove_VisualDescendents();
+            this.Remove_VisualDescendents();
             FrameworkElement newView = this.DoLayout(this.layoutToManage, this.displaySize);
             this.Reset_ChangeAnnouncement();
             //newView.Width = this.parentView.Width = this.displaySize.Width;
@@ -74,11 +70,11 @@ namespace VisiPlacement
             System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
             TextLayout.NumMeasures = 0;
 
-            /*
+            
             Control control = focusedElement as Control;
             if (control != null)
                 control.Focus();
-            */
+            
             
 
         }
@@ -88,10 +84,10 @@ namespace VisiPlacement
             LayoutQuery query = new MaxScore_LayoutQuery();
             query.MaxWidth = bounds.Width;
             query.MaxHeight = bounds.Height;
-            SpecificLayout bestLayout = layout.GetBestLayout(query);
+            this.specificLayout = layout.GetBestLayout(query);
 
             // figure out where the subviews are placed
-            return bestLayout.DoLayout(bounds);
+            return this.specificLayout.DoLayout(bounds);
 
             /*this.visibleLayouts.AddLast(bestLayout);
 
@@ -223,6 +219,7 @@ namespace VisiPlacement
         private LayoutChoice_Set layoutToManage;
         //private LinkedList<SpecificLayout> visibleLayouts;
         private Size displaySize;
+        private SpecificLayout specificLayout;
     }
 
     class ManageableView : ContentControl
@@ -231,116 +228,24 @@ namespace VisiPlacement
         {
             this.Background = new SolidColorBrush(Colors.Green);
             this.ViewManager = viewManager;
-            //Size size = new Size(456, 744);
-            Size size = new Size(744, 456);
-            this.makeContent(size);
-            this.latestSize = size;
-
         }
 
         public ViewManager ViewManager { get; set; }
 
-#if true
         protected override Size MeasureOverride(Size bounds)
         {
-            /*if (!Size.Equals(this.latestSize, bounds))
-            {
-                if (timer == null)
-                {
-                    timer = new DispatcherTimer();
-                    timer.Interval = TimeSpan.FromSeconds(0);
-                    timer.Tick += timer_Tick;
-                    timer.Start();
-                }
-                this.latestSize = bounds;
-            }*/
             this.ViewManager.DoLayout(bounds);
 
             base.MeasureOverride(bounds);
             return bounds;
-#if false
-            bool matches = Size.Equals(bounds, this.latestSize);
-
-            //if (!Size.Equals(this.latestSize, new Size()))
-            //    bounds = new Size(this.latestSize.Height, this.latestSize.Width);
-            this.latestSize = bounds;
-
-            //if (bounds.Height < bounds.Width)
-            //if (!matches && bounds.Height > bounds.Width)
-            if (!matches)
-            {
-                /*if (timer == null)
-                {
-                    timer = new DispatcherTimer();
-                    timer.Interval = TimeSpan.FromSeconds(2);
-                    timer.Tick += timer_Tick;
-                    timer.Start();
-                }*/
-                FrameworkElement content = (FrameworkElement)this.Content;
-                //content.Width = bounds.Width;
-                //content.Height = bounds.Height;
-                content.InvalidateMeasure();
-                content.InvalidateArrange();
-                content.Measure(bounds);
-                
-                this.UpdateLayout();
-
-                //((FrameworkElement)this.Content).Measure(bounds);
-                //this.makeContent(bounds);
-
-                base.Measure(bounds);
-
-            }
-            //this.ViewManager.DoLayout(bounds);
-
-            this.latestSize = bounds;
-            //return this.latestSize;
-            return this.latestSize;
-#endif
-        }
-#endif
-
-        void timer_Tick(object sender, EventArgs e)
-        {
-            timer.Stop();
-            timer = null;
-
-            this.ViewManager.DoLayout(this.latestSize);
-            //this.makeContent(this.latestSize);
-            //base.Measure(this.latestSize);
-
         }
         
         protected override Size ArrangeOverride(Size finalSize)
         {
             FrameworkElement element = (FrameworkElement)this.Content;
-            //element.Arrange(new Rect(new Point(), finalSize));
             Size tempSize = base.ArrangeOverride(finalSize);
-            //System.Diagnostics.Debug.WriteLine(tempSize);
             return finalSize;
         }
 
-        private void makeContent(Size bounds)
-        {
-            TextBlock block = new TextBlock();
-            block.TextWrapping = TextWrapping.Wrap;
-            block.Width = bounds.Width;
-            block.Height = bounds.Height;
-            block.Text = "Loading...\nPlease Wait";
-            this.Content = block;
-            this.Background = new SolidColorBrush(Colors.Blue);
-
-        }
-
-        void DisplayProperties_OrientationChanged(object sender)
-        {
-            System.Diagnostics.Debug.WriteLine("orientation changed!");
-        }
-        private Size latestSize = new Size();
-        private DispatcherTimer timer;
-        //private Size latestSize = new Size();
-        //private int numMatches = 0;
-        //private bool measured = true;
-        //private bool measured = false;
     }
 }

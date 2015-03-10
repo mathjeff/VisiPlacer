@@ -16,12 +16,14 @@ namespace VisiPlacement
         {
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
+            this.ScoreIfEmpty = true;
             this.previousText = this.TextItem_Configurer.Text;
             textItem.Add_TextChanged_Handler(new PropertyChangedCallback(this.On_TextChanged));
 
         }
         protected TextItem_Configurer TextItem_Configurer { get; set; }
         public double FontSize { get; set; }
+        public bool ScoreIfEmpty { get; set; }
 
         public String Text
         {
@@ -35,7 +37,7 @@ namespace VisiPlacement
             get
             {
                 String result = this.Text;
-                if (result == "")
+                if (result == "" && this.ScoreIfEmpty)
                     result = "A";
                 return result;
             }
@@ -232,7 +234,7 @@ namespace VisiPlacement
                 cropped = true;
                 width = height = 0;
             }
-            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(cropped));
+            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(cropped, text));
             specificLayout.Cropped = cropped;
 
             // diagnostics
@@ -243,8 +245,10 @@ namespace VisiPlacement
 
             return specificLayout;
         }
-        private LayoutScore ComputeScore(bool dimensionsAreCropped)
+        private LayoutScore ComputeScore(bool dimensionsAreCropped, string text)
         {
+            if (text == "" && !this.ScoreIfEmpty)
+                return LayoutScore.Zero;
             LayoutScore score = new LayoutScore(this.BonusScore);
             if (dimensionsAreCropped)
                 return LayoutScore.Get_CutOff_LayoutScore(1);
@@ -285,6 +289,10 @@ namespace VisiPlacement
         }
         public void On_TextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            this.On_TextChanged();
+        }
+        public void On_TextChanged()
+        {
             // when we set the size of the text item, it generates a change event that we don't want
             // So, here we make sure that it actually changed
             if (this.Text != this.previousText)
@@ -292,27 +300,34 @@ namespace VisiPlacement
                 if (this.Get_ChangedSinceLastRender())
                     return; // nothing new to report
                 bool mustRedraw = false;
-                Specific_TextLayout layoutForNewText = this.ComputeDimensions(this.TextItem_Configurer.View.RenderSize, this.Text);
-                if (!layoutForNewText.Cropped)
+                if (!this.ScoreIfEmpty && (this.Text == "" || this.previousText == ""))
                 {
-                    // The new text fits in the existing box, so this box doesn't need any more space
-                    // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
-                    mustRedraw = false;
+                    mustRedraw = true;
                 }
                 else
                 {
-                    Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(this.TextItem_Configurer.View.RenderSize, this.previousText);
-                    if (!layoutForCurrentText.Cropped)
+                    Specific_TextLayout layoutForNewText = this.ComputeDimensions(new Size(this.TextItem_Configurer.View.Width, this.TextItem_Configurer.View.Height), this.Text);
+                    if (!layoutForNewText.Cropped)
                     {
-                        // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
-                        mustRedraw = true;
+                        // The new text fits in the existing box, so this box doesn't need any more space
+                        // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
+                        mustRedraw = false;
                     }
                     else
                     {
-                        // If the text layout was cropped before and after then we might need to ask the engine for more space,
-                        // but it would annoy the user to keep redoing the layout and probably see no change
-                        // So, we don't bother asking for more space since we probably already had as much space as we could get anyway
-                        mustRedraw = false;
+                        Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(this.TextItem_Configurer.View.RenderSize, this.previousText);
+                        if (!layoutForCurrentText.Cropped)
+                        {
+                            // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
+                            mustRedraw = true;
+                        }
+                        else
+                        {
+                            // If the text layout was cropped before and after then we might need to ask the engine for more space,
+                            // but it would annoy the user to keep redoing the layout and probably see no change
+                            // So, we don't bother asking for more space since we probably already had as much space as we could get anyway
+                            mustRedraw = false;
+                        }
                     }
                 }
 
@@ -363,8 +378,8 @@ namespace VisiPlacement
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         public Size FormatText(String text, double desiredWidth)
         {
-            if (text == null)
-                text = "";
+            if (text == null || text == "")
+                return new Size();
 
             double maxWidth = 0;
             double totalHeight = 0;

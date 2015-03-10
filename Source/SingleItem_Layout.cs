@@ -92,7 +92,10 @@ namespace VisiPlacement
                 if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
                 {
                     // If there is no room for the border, then that violates a requirement and we return the worst possible score
-                    return new Specific_SingleItem_Layout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
+                    SpecificLayout result = new Specific_SingleItem_Layout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
+                    if (query.Accepts(result))
+                        return result;
+                    return null;
                 }
                 subQuery.MinScore = subQuery.MinScore.Minus(this.BonusScore);
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);

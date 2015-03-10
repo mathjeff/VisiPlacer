@@ -68,10 +68,10 @@ namespace VisiPlacement
             return this.textItem.View;
         }
 
-        /*public override void Remove_VisualDescendents()
+        public override void Remove_VisualDescendents()
         {
             // can't put any views inside of a text block so there's nothing to remove
-        }*/
+        }
 
         public LayoutScore BonusScore { get; set; }
         public bool LoggingEnabled { get; set; }

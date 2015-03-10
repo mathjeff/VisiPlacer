@@ -118,12 +118,14 @@ namespace VisiPlacement
                 return this.view;
             }
         }
-        /*public override void Remove_VisualDescendents()
+        public override void Remove_VisualDescendents()
         {
+            if (this.subLayout != null)
+                this.subLayout.Remove_VisualDescendents();
             ContentControl content = this.view as ContentControl;
             if (content != null)
                 content.Content = null;
-        }*/
+        }
 
         public Thickness BorderThickness { get; set; }
         private LayoutScore score;

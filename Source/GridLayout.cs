@@ -2016,6 +2016,7 @@ namespace VisiPlacement
                         query.MaxWidth = width;
                         query.MaxHeight = height;
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
+                        this.specificSublayouts.AddLast(bestLayout);
                         subview = bestLayout.DoLayout(new Size(width, height));
                     }
                     subviews[columnNumber, rowNumber] = subview;
@@ -2058,10 +2059,15 @@ namespace VisiPlacement
             return this.subLayouts[columnNumber, rowNumber];
         }
 
-        /*public override void Remove_VisualDescendents()
+        public override void Remove_VisualDescendents()
         {
             this.GridView.Remove_VisualDescendents();
-        }*/
+            foreach (SpecificLayout layout in this.specificSublayouts)
+            {
+                layout.Remove_VisualDescendents();
+            }
+            this.specificSublayouts.Clear();
+        }
 
         LayoutChoice_Set[,] elements;
         int nextDimensionToSet;
@@ -2072,6 +2078,7 @@ namespace VisiPlacement
         bool setWidthBeforeHeight;
         GridView view;
         LayoutScore score;
+        LinkedList<SpecificLayout> specificSublayouts = new LinkedList<SpecificLayout>();
         //private List<SpecificLayout> childLayouts;
         //LayoutDimensions cachedDimensions;
     }

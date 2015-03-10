@@ -12,9 +12,9 @@ namespace VisiPlacement
 {
     public class TextblockLayout : LayoutCache
     {
-        public TextblockLayout(TextBlock textBlock)
+        public TextblockLayout(TextBlock textBlock, double fontSize = -1)
         {
-            this.Initialize(textBlock, -1);
+            this.Initialize(textBlock, fontSize);
         }
         public TextblockLayout(String text, double fontsize = -1)
         {
@@ -32,13 +32,13 @@ namespace VisiPlacement
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
             if (fontsize > 0)
             {
-                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), fontsize));
+                layouts.Add(this.makeLayout(fontsize));
             }
             else
             {
-                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 10));
-                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 16));
-                layouts.Add(new TextLayout(new TextBlock_Configurer(textBlock), 30));
+                layouts.Add(this.makeLayout(10));
+                layouts.Add(this.makeLayout(16));
+                layouts.Add(this.makeLayout(30));
             }
                 
             this.LayoutToManage = new LayoutUnion(layouts);
@@ -49,7 +49,13 @@ namespace VisiPlacement
             //this.Setup_PropertyChange_Listener("Text", this.textBlock, this.OnTextChange);
         }
 
-
+        private LayoutChoice_Set makeLayout(double fontsize)
+        {
+            TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock);
+            TextLayout layout = new TextLayout(configurer, fontsize);
+            layout.ScoreIfEmpty = false; // no points for an empty text box
+            return layout;
+        }
 
 
 

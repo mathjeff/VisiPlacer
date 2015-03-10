@@ -7,7 +7,7 @@ using System.Windows.Controls;
 
 namespace VisiPlacement
 {
-    public class ButtonLayout : LayoutUnion
+    public class ButtonLayout : SingleItem_Layout
     {
         public ButtonLayout(ContentControl button, LayoutChoice_Set subLayout)
         {
@@ -23,11 +23,10 @@ namespace VisiPlacement
 
         private void Initialize(ContentControl button, LayoutChoice_Set subLayout)
         {
-            LinkedList<LayoutChoice_Set> layoutChoices = new LinkedList<LayoutChoice_Set>();
-            // TODO: figure out how to get the button to stop automatically adding padding inside itself. The padding should be controlled only from here.
-            layoutChoices.AddLast(new SingleItem_Layout(button, subLayout, new Thickness(10), LayoutScore.Zero, false)); // We want to include a border inside the button if possible
-            layoutChoices.AddLast(new SingleItem_Layout(button, subLayout, new Thickness(0), LayoutScore.Get_CutOff_LayoutScore(1), false)); // If there isn't room for the border, then it's cropped
-            this.Set_LayoutChoices(layoutChoices);
+            // add a small border, so that it's easy to see where the buttons end
+            this.BorderThickness = new Thickness(1);
+            // we don't need any additional border inside of the button itself
+            this.SubLayout = new SingleItem_Layout(button, subLayout, new Thickness(0), LayoutScore.Zero, false);
         }
     }
 }

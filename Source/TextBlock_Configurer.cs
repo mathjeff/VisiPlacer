@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -11,17 +12,12 @@ namespace VisiPlacement
 {
     class TextBlock_Configurer : TextItem_Configurer
     {
-        /*public TextBlock_Configurer(TextBlock TextBlock)
-        {
-            this.TextBlock = TextBlock;
-            TextBlock.TextWrapping = TextWrapping.Wrap;
-        }
-        */
         public TextBlock_Configurer(TextBlock TextBlock)
         {
             this.TextBlock = TextBlock;
             TextBlock.TextWrapping = TextWrapping.Wrap;
             TextBlock.FontFamily = new FontFamily("Segoe WP");
+            this.listener = new PropertyListener(TextBlock);
         }
 
         public double Width
@@ -75,26 +71,64 @@ namespace VisiPlacement
         public void Add_TextChanged_Handler(PropertyChangedCallback handler)
         {
             // It seems silly that we have to do this to get notification of when the text changes
-            this.Setup_PropertyChange_Listener("Text", this.TextBlock, handler);
-        }
-        public void Add_Exit_Handler(RoutedEventHandler handler)
-        {
-            this.TextBlock.LostFocus += handler;
+            this.Setup_PropertyChange_Listener("Text", this.TextBlock, handler, true);
         }
 
-
-        private void Setup_PropertyChange_Listener(string propertyName, FrameworkElement element, PropertyChangedCallback callback)
+        private void Setup_PropertyChange_Listener(string propertyName, FrameworkElement element, PropertyChangedCallback callback, bool triggerOnProgrammaticUpdates)
         {
             Binding b = new Binding(propertyName) { Source = element };
+            PropertyMetadata metadata;
+            if (triggerOnProgrammaticUpdates)
+                metadata = new PropertyMetadata(null);
+            else
+                metadata = new PropertyMetadata(callback);
             var prop = System.Windows.DependencyProperty.RegisterAttached(
                 "ListenAttached" + propertyName,
                 typeof(object),
                 typeof(TextBlock),
-                new System.Windows.PropertyMetadata(callback));
+                metadata);
+
+
+            if (triggerOnProgrammaticUpdates)
+            {
+                b.Converter = this.listener;
+                this.listener.AddHandler(callback);
+            }
 
             element.SetBinding(prop, b);
         }
 
         private TextBlock TextBlock;
+        private PropertyListener listener;
+    }
+
+    class PropertyListener : IValueConverter
+    {
+        public PropertyListener(DependencyObject source)
+        {
+            this.source = source;
+        }
+        public void AddHandler(PropertyChangedCallback handler)
+        {
+            this.handlers.AddLast(handler);
+        }
+        public object Convert(object item, Type targetType, object parameter, CultureInfo currentCulture)
+        {
+            this.triggerAll();
+            return item;
+        }
+        public object ConvertBack(object item, Type targetType, object parameter, CultureInfo currentCulture)
+        {
+            return item;
+        }
+        private void triggerAll()
+        {
+            foreach (PropertyChangedCallback handler in this.handlers)
+            {
+                handler.Invoke(this.source, new DependencyPropertyChangedEventArgs());
+            }
+        }
+        LinkedList<PropertyChangedCallback> handlers = new LinkedList<PropertyChangedCallback>();
+        DependencyObject source;
     }
 }

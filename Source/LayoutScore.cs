@@ -18,6 +18,15 @@ namespace VisiPlacement
                 return minimum;
             }
         }
+        public static LayoutScore Maximum
+        {
+            get
+            {
+                LayoutScore maximum = new LayoutScore();
+                maximum.components.Add(double.PositiveInfinity, double.PositiveInfinity);
+                return maximum;
+            }
+        }
         // adding or subtracting Zero will never change the score
         public static LayoutScore Zero
         {
@@ -42,7 +51,10 @@ namespace VisiPlacement
         // this score indicates that some space has been used
         public static LayoutScore Get_UsedSpace_LayoutScore(double numPixels)
         {
-            return new LayoutScore(1, Math.Sqrt(numPixels));
+            double value = Math.Sqrt(numPixels);
+            double multiplier = 256;
+            double rounded = Math.Round(value * multiplier) / multiplier;
+            return new LayoutScore(1, rounded);
         }
         // this score indicates that some items were laid out awkwardly
         /*public static LayoutScore Get_Disjointed_LayoutScore(double numItems)
@@ -82,7 +94,6 @@ namespace VisiPlacement
             int ourIndex = 0;
             int theirIndex = 0;
             LayoutScore sum = new LayoutScore();
-            //StatList<double, double> summedCoordinates = new StatList<double, double>(this, 
             while (true)
             {
                 double priority;
@@ -137,6 +148,8 @@ namespace VisiPlacement
                                 System.Diagnostics.Debug.WriteLine("error: layout score has a duplicate key");
                             }
                         }
+                        
+
                         return sum;
                     }
                 }
@@ -266,10 +279,13 @@ namespace VisiPlacement
             if (Math.Abs(weight) < 0.0000001)
                 weight = 0;
             this.components.Add(priority, weight);
-            if (this.CompareTo(LayoutScore.Minimum) < 0)
+            ListItemStats<double, double> lastItem = this.components.GetLastValue();
+            if (double.IsPositiveInfinity(lastItem.Key))
             {
-                // not allowed to be worse than the worst
-                this.CopyFrom(LayoutScore.Minimum);
+                if (lastItem.Value > 0)
+                    this.CopyFrom(LayoutScore.Maximum);
+                else
+                    this.CopyFrom(LayoutScore.Minimum);
             }
         }
 
