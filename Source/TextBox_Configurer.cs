@@ -16,6 +16,8 @@ namespace VisiPlacement
             this.TextBox = TextBox;
             TextBox.TextWrapping = TextWrapping.Wrap;
             TextBox.FontFamily = new FontFamily("Segoe WP");
+            TextBox.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 153, 217, 234));
+            //TextBox.BorderThickness = new Thickness(1);
         }
         public double Width
         {

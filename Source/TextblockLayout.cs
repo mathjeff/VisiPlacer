@@ -23,6 +23,14 @@ namespace VisiPlacement
             textBlock.TextWrapping = TextWrapping.Wrap;
             this.Initialize(textBlock, fontsize);
         }
+        public TextblockLayout(string text, TextAlignment textAlignment)
+        {
+            TextBlock textBlock = new TextBlock();
+            textBlock.Text = text;
+            textBlock.TextWrapping = TextWrapping.Wrap;
+            textBlock.TextAlignment = textAlignment;
+            this.Initialize(textBlock, -1);
+        }
         private void Initialize(TextBlock textBlock, double fontsize)
         {
             textBlock.Margin = new Thickness(0);

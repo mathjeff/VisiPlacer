@@ -44,14 +44,8 @@ namespace VisiPlacement
         }
         private TextFormatter MakeTextFormatter()
         {
-            /*return new FormattedText(this.TextToFit, CultureInfo.CurrentCulture, System.Windows.FlowDirection.LeftToRight, 
-                new Typeface(this.TextItem_Configurer.FontFamily, this.TextItem_Configurer.FontStyle, this.TextItem_Configurer.FontWeight, this.TextItem_Configurer.FontStretch),
-                this.FontSize, Brushes.Black);
-             */
-            //TextFormatter formatter = new TextFormatter();
             TextFormatter formatter = TextFormatter.Default;
             formatter.FontFamily = this.TextItem_Configurer.FontFamily;
-            //formatter.FontFamily = new FontFamily("Segoe WP");
             formatter.FontStyle = this.TextItem_Configurer.FontStyle;
             formatter.FontWeight = this.TextItem_Configurer.FontWeight;
             formatter.FontStretch = this.TextItem_Configurer.FontStretch;
@@ -96,9 +90,6 @@ namespace VisiPlacement
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
             Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight));
-            //if (dimensions.Cropped)
-            //    dimensions.Width = dimensions.Height = 0;
-            //Specific_TextLayout specificLayout = new Specific_TextLayout(dimensions, this.TextItem_Configurer);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
             return null;
@@ -113,8 +104,6 @@ namespace VisiPlacement
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
             specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight));
-            //if (this.dimensions.Cropped)
-            //    this.dimensions.Width = this.dimensions.Height = 0;
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout.GetBestLayout(query), query);
             return null;
@@ -144,12 +133,9 @@ namespace VisiPlacement
             Size bestAllowedSize = new Size(double.PositiveInfinity, 0);
             double pixelSize = 1;
             double maxRejectedWidth = 0;
-            //int i;
-            //for (i = 0; i < 10; i++)    // only iterate 10 times using the algorithm that is usually fast but can be slow
             while (maxRejectedWidth < bestAllowedSize.Width - pixelSize / 2)
             {
                 // given the current width, compute the required height
-                //Size desiredSize = this.InternalMeasure(new Size(maxWidth, double.PositiveInfinity));
                 Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity));
                 if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
                 {
@@ -185,23 +171,9 @@ namespace VisiPlacement
                     maxWidth = maxRejectedWidth + pixelSize / 2;
                 if (maxWidth > bestAllowedSize.Width - pixelSize / 2)
                     maxWidth = bestAllowedSize.Width - pixelSize / 2;
-                //if (maxWidth < pixelSize)
-                //    break;
-                //if (maxWidth < maxRejectedWidth + pixelSize)
-                //    break;  // small enough error remaining that it makes more sense to switch to a binary search
             }
             if (bestAllowedSize.Width > query.MaxWidth)
                 return null;
-            // Now finish with a binary search
-            /*while (maxRejectedWidth < bestAllowedSize.Width - pixelSize)
-            {
-                maxWidth = (maxRejectedWidth + bestAllowedSize.Width) / 2;
-                Specific_TextLayout desiredDimensions = this.ComputeDimensions(new Size(maxWidth, query.MaxHeight));
-                if (!desiredDimensions.Cropped)
-                    bestAllowedSize = new Size(desiredDimensions.Width, desiredDimensions.Height);
-                else
-                    maxRejectedWidth = maxWidth;
-            }*/
             Specific_TextLayout dimensions = this.ComputeDimensions(bestAllowedSize);
             return dimensions;
         }
@@ -260,10 +232,7 @@ namespace VisiPlacement
         {
             get
             {
-                //if (this.textFormatter == null || this.textFormatter.Text != this.TextToFit)
                 this.textFormatter = this.MakeTextFormatter();
-                //this.textFormatter = new FormattedText(this.TextBlock.Text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(this.TextBlock.FontFamily, this.TextBlock.FontStyle, this.TextBlock.FontWeight, this.TextBlock.FontStretch), this.FontSize, Brushes.Black);
-                //double dummyWidth = this.textFormatter.Width;
                 return this.textFormatter;
             }
         }
@@ -386,14 +355,6 @@ namespace VisiPlacement
             double x = 0;
             double currentHeight = 0;
             string[] components = text.Split(' ');
-            /*TextBlock block = new TextBlock();
-            block.FontFamily = this.FontFamily;
-            block.FontStyle = this.FontStyle;
-            block.FontWeight = this.FontWeight;
-            block.FontStretch = this.FontStretch;
-            block.FontSize = this.FontSize;
-            block.Padding = block.Margin = new Thickness();
-            */
             string blockText;
             foreach (string component in components)
             {
