@@ -54,6 +54,7 @@ namespace VisiPlacement
         public void DoLayout()
         {
             object focusedElement = FocusManager.GetFocusedElement();
+            int num_grid_preComputations = GridLayout.NumComputations;
 
             DateTime startTime = DateTime.Now;
             this.Remove_VisualDescendents();
@@ -68,13 +69,16 @@ namespace VisiPlacement
             TimeSpan duration = endTime.Subtract(startTime);
             System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
             System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
+            int num_grid_postComputations = GridLayout.NumComputations;
+            System.Diagnostics.Debug.WriteLine("Num grid computations = " + (num_grid_postComputations - num_grid_preComputations));
             TextLayout.NumMeasures = 0;
 
             
             Control control = focusedElement as Control;
             if (control != null)
                 control.Focus();
-            
+
+
             
 
         }
