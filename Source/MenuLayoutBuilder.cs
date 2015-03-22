@@ -38,7 +38,6 @@ namespace VisiPlacement
         private Button MakeButton(string name, LayoutChoice_Set target)
         {
             Button button = new Button();
-            button.Content = name;
             this.buttonsByName[name] = button;
             button.Click += this.button_Click;
             ButtonLayout buttonLayout = new ButtonLayout(button, new TextblockLayout(name));

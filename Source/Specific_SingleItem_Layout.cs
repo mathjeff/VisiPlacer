@@ -32,15 +32,8 @@ namespace VisiPlacement
         public override FrameworkElement DoLayout(Size displaySize)
         {
             LinkedList<SubviewDimensions> subLayouts = new LinkedList<SubviewDimensions>();
-            //if (this.subLayout != null)
+            if (this.subLayout != null)
             {
-#if false
-                double subviewWidth = this.Size.Width - this.BorderThickness.Left - this.BorderThickness.Right;
-                double subviewHeight = this.Size.Height - this.BorderThickness.Top - this.BorderThickness.Bottom;
-                double subviewX = this.BorderThickness.Left;
-                double subviewY = this.BorderThickness.Top;
-                subLayouts.AddLast(new SubviewLocation(this.subLayout, new Rect(new Point(subviewX, subviewY), new Size(subviewWidth, subviewHeight))));
-#else
                 double outerWidth = displaySize.Width;
                 if (this.Size.Width < outerWidth && !this.ChildFillsAvailableSpace)
                     outerWidth = this.Size.Width;
@@ -50,23 +43,37 @@ namespace VisiPlacement
                 double subviewWidth = outerWidth - this.BorderThickness.Left - this.BorderThickness.Right;
                 double subviewHeight = outerHeight - this.BorderThickness.Top - this.BorderThickness.Bottom;
 
-                ContentControl contentView = this.View as ContentControl;
                 SubviewDimensions dimensions = new SubviewDimensions(this.subLayout, new Size(subviewWidth, subviewHeight));
                 FrameworkElement childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
-                if (contentView != null)
+                if (this.View != null)
                 {
-                    contentView.Content = childContent;
-                    contentView.Width = displaySize.Width;
-                    contentView.Height = displaySize.Height;
-                    return contentView;
+                    this.View.Width = displaySize.Width;
+                    this.View.Height = displaySize.Height;
+                    this.PutContentInView(this.View, childContent);
+                    return this.View;
                 }
                 return childContent;
-#endif
             }
-            //if (this.view != null)
-            {
-            }
+            return this.View;
             
+        }
+        // Makes one FrameworkElement be a direct child visual child of another one
+        // TODO: refactor this into a helper class for each case, for easier customization
+        private void PutContentInView(FrameworkElement parent, FrameworkElement child)
+        {
+            ContentControl parentAsContentControl = parent as ContentControl;
+            if (parentAsContentControl != null)
+            {
+                parentAsContentControl.Content = child;
+                return;
+            }
+            Border parentAsBorder = parent as Border;
+            if (parentAsBorder != null)
+            {
+                parentAsBorder.Child = child;
+                return;
+            }
+            throw new ArgumentException("Unrecognized view type");
         }
         public override SpecificLayout Clone()
         {

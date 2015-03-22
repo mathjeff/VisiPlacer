@@ -82,26 +82,33 @@ namespace VisiPlacement
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            Specific_SingleItem_Layout result;
+
+            // Determine whether there's room for the border
+            LayoutQuery subQuery = query.Clone();
+            double borderWidth = this.BorderThickness.Left + this.BorderThickness.Right;
+            double borderHeight = this.BorderThickness.Top + this.BorderThickness.Bottom;
+            subQuery.MaxWidth = subQuery.MaxWidth - borderWidth;
+            subQuery.MaxHeight = subQuery.MaxHeight - borderHeight;
+            if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
+            {
+                // If there is no room for the border, then that violates a requirement and we return the worst possible score
+                result = new Specific_SingleItem_Layout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
+                this.prepareLayoutForQuery(result, query);
+                if (query.Accepts(result))
+                    return result;
+                return null;
+            }
+
+
+            // Query sublayout if it exists
             if (this.SubLayout != null)
             {
-                LayoutQuery subQuery = query.Clone();
-                double borderWidth = this.BorderThickness.Left + this.BorderThickness.Right;
-                double borderHeight = this.BorderThickness.Top + this.BorderThickness.Bottom;
-                subQuery.MaxWidth = subQuery.MaxWidth - borderWidth;
-                subQuery.MaxHeight = subQuery.MaxHeight - borderHeight;
-                if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
-                {
-                    // If there is no room for the border, then that violates a requirement and we return the worst possible score
-                    SpecificLayout result = new Specific_SingleItem_Layout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
-                    if (query.Accepts(result))
-                        return result;
-                    return null;
-                }
                 subQuery.MinScore = subQuery.MinScore.Minus(this.BonusScore);
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
-                    Specific_SingleItem_Layout result = new Specific_SingleItem_Layout(this.View, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
+                    result = new Specific_SingleItem_Layout(this.View, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
                     result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;
@@ -109,7 +116,9 @@ namespace VisiPlacement
                 return null;
             }
             // if there is no subLayout, for now we just return an empty size
-            return null;
+            result = new Specific_SingleItem_Layout(this.View, new Size(), LayoutScore.Zero, null, new Thickness());
+            this.prepareLayoutForQuery(result, query);
+            return result;
         }
 
         LayoutChoice_Set subLayout;

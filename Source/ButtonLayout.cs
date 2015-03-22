@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace VisiPlacement
 {
@@ -24,9 +26,27 @@ namespace VisiPlacement
         private void Initialize(ContentControl button, LayoutChoice_Set subLayout)
         {
             // add a small border, so that it's easy to see where the buttons end
-            this.BorderThickness = new Thickness(1);
-            // we don't need any additional border inside of the button itself
-            this.SubLayout = new SingleItem_Layout(button, subLayout, new Thickness(0), LayoutScore.Zero, false);
+            Thickness buttonPadding = new Thickness(1);
+            this.BorderThickness = buttonPadding;
+
+            // The color of the inside of the bevel
+            Thickness innerBevelThickness = new Thickness(2);
+            Border border = new Border();
+            border.BorderThickness = innerBevelThickness;
+            border.BorderBrush = new SolidColorBrush(Colors.Gray);
+            border.Padding = new Thickness();
+            border.Margin = new Thickness();
+
+            Thickness outerBevelThickness = new Thickness(2);
+            button.Margin = new Thickness();
+            button.Padding = new Thickness();
+            button.BorderThickness = outerBevelThickness;
+
+            // Put the desired content directly inside the bevel without any extra margin
+            SingleItem_Layout contentLayout = new SingleItem_Layout(border, subLayout, innerBevelThickness, LayoutScore.Zero, false);
+            // Put the inner bevel color directly inside the outer bevel color without any blank space
+            this.SubLayout = new SingleItem_Layout(button, contentLayout, innerBevelThickness, LayoutScore.Zero, true);
+
         }
     }
 }
