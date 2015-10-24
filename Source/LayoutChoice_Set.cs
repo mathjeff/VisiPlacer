@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 
-// A LayoutChoice_Set describes different layouts for an IView's child IViews
+// A LayoutChoice_Set describes different layouts for a view's child views
 // The LayoutChoice_Set can be asked to choose the best layout (such as the highest-scoring layout) fitting inside a certain size
+// The base LayoutChoice_Set is the generic version that potentially must do intensive queries to child views before answering
+// The SpecificLayout is the precomputed version that is the result of these calucations and knows where to put the child views
 namespace VisiPlacement
 {
     public abstract class LayoutChoice_Set

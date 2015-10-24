@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 
-// A FixedLayout specifies precisely where a view's subviews belong
+// Unlike a general LayoutChoice_Set, A SpecificLayout can render reasonably quickly because
+// it is the result of having queried any child layouts about what scores they give for certain sizes
 namespace VisiPlacement
 {
     public abstract class SpecificLayout : LayoutChoice_Set

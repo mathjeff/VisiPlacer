@@ -174,10 +174,10 @@ namespace VisiPlacement
         // Divides the two scores and truncates the result into a double
         public double DividedBy(LayoutScore other)
         {
-            ListItemStats<double, double> ourFirstItem = this.components.GetFirstValue();
+            ListItemStats<double, double> ourFirstItem = this.components.GetLastValue();
             if (ourFirstItem == null)
                 ourFirstItem = new ListItemStats<double, double>(double.NegativeInfinity, 0);
-            ListItemStats<double, double> theirFirstItem = other.components.GetFirstValue();
+            ListItemStats<double, double> theirFirstItem = other.components.GetLastValue();
             if (theirFirstItem == null)
                 theirFirstItem = new ListItemStats<double, double>(double.NegativeInfinity, 0);
             double ourValue = 0;
@@ -189,7 +189,7 @@ namespace VisiPlacement
             if (ourFirstItem.Key < theirFirstItem.Key)
                 ourValue = 0;
             else
-                ourValue = ourFirstItem.Key;
+                ourValue = ourFirstItem.Value;
             return ourValue / theirValue;
         }
         public int CompareTo(LayoutScore other)
@@ -289,6 +289,16 @@ namespace VisiPlacement
             }
         }
 
+        public override string ToString()
+        {
+            String result = "";
+            //ListItemStats<double, double> component;
+            foreach (ListItemStats<double, double> component in this.components.AllItems)
+            {
+                result += component.Key + ":" + component.Value + ",";
+            }
+            return result;
+        }
 
         #region Required for IComparer<double>
 

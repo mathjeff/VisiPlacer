@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 // Intended for displaying an image
+// Just computes score = width * height * constant and answers LayoutQueries accordingly
 namespace VisiPlacement
 {
     public class ImageLayout : LayoutChoice_Set
@@ -30,6 +31,12 @@ namespace VisiPlacement
                     // the score has some additional components that the division didn't catch, so we have to add another pixel
                     width += this.pixelSize;
                 }
+                if (width > query.MaxWidth)
+                {
+                    // We had to round up past the max height, so there is no solution
+                    return null;
+                }
+
                 return this.MakeLayout(width, query.MaxHeight, query);
             }
             if (query.MinimizesHeight())
@@ -40,13 +47,24 @@ namespace VisiPlacement
                     // the score has some additional components that the division didn't catch, so we have to add another pixel
                     height += this.pixelSize;
                 }
+                if (height > query.MaxHeight)
+                {
+                    // We had to round up past the max height, so there is no solution
+                    return null;
+                }
+
                 return this.MakeLayout(query.MaxWidth, height, query);
             }
             return MakeLayout(query.MaxWidth, query.MaxHeight, query);
         }
         private SpecificLayout MakeLayout(double width, double height, LayoutQuery layoutQuery)
         {
-            return this.prepareLayoutForQuery(new Specific_SingleItem_Layout(this.view, new Size(width, height), this.ComputeScore(width, height), null, new Thickness()), layoutQuery);
+            SpecificLayout layout = this.prepareLayoutForQuery(new Specific_SingleItem_Layout(this.view, new Size(width, height), this.ComputeScore(width, height), null, new Thickness()), layoutQuery);
+            if (!layoutQuery.Accepts(layout))
+            {
+                Console.WriteLine("Error; ImageLayout attempted to return an invalid layout result");
+            }
+            return layout;
         }
         private LayoutScore ComputeScore(double width, double height)
         {

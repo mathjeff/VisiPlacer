@@ -8,7 +8,7 @@ using System.Windows.Controls;
 // a Specific_SingleItem_Layout just has a view, a size, a subLayout, and a score
 namespace VisiPlacement
 {
-    class Specific_SingleItem_Layout : SpecificLayout
+    public class Specific_SingleItem_Layout : SpecificLayout
     {
         public Specific_SingleItem_Layout()
         {
@@ -31,7 +31,6 @@ namespace VisiPlacement
         public bool ChildFillsAvailableSpace { get; set; }
         public override FrameworkElement DoLayout(Size displaySize)
         {
-            LinkedList<SubviewDimensions> subLayouts = new LinkedList<SubviewDimensions>();
             if (this.subLayout != null)
             {
                 double outerWidth = displaySize.Width;

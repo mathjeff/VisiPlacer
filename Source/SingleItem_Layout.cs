@@ -93,7 +93,7 @@ namespace VisiPlacement
             if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
             {
                 // If there is no room for the border, then that violates a requirement and we return the worst possible score
-                result = new Specific_SingleItem_Layout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
+                result = this.makeSpecificLayout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
                 this.prepareLayoutForQuery(result, query);
                 if (query.Accepts(result))
                     return result;
@@ -108,7 +108,7 @@ namespace VisiPlacement
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
-                    result = new Specific_SingleItem_Layout(this.View, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
+                    result = this.makeSpecificLayout(this.view, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
                     result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;
@@ -116,9 +116,14 @@ namespace VisiPlacement
                 return null;
             }
             // if there is no subLayout, for now we just return an empty size
-            result = new Specific_SingleItem_Layout(this.View, new Size(), LayoutScore.Zero, null, new Thickness());
+            result = this.makeSpecificLayout(this.View, new Size(), LayoutScore.Zero, null, new Thickness());
             this.prepareLayoutForQuery(result, query);
             return result;
+        }
+
+        protected Specific_SingleItem_Layout makeSpecificLayout(FrameworkElement view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
+        {
+            return new Specific_SingleItem_Layout(view, size, score, subLayout, border);
         }
 
         LayoutChoice_Set subLayout;
