@@ -1482,6 +1482,70 @@ namespace VisiPlacement
 
     }
 
+    public class Vertical_GridLayout_Builder
+    {
+        public Vertical_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
+        {
+            this.subLayouts.AddLast(subLayout);
+            return this;
+        }
+        public Vertical_GridLayout_Builder Uniform()
+        {
+            this.uniform = true;
+            return this;
+        }
+        public GridLayout Build()
+        {
+            BoundProperty_List rowHeights = new BoundProperty_List(this.subLayouts.Count);
+            if (this.uniform)
+            {
+                for (int i = 1; i < rowHeights.NumProperties; i++)
+                {
+                    rowHeights.BindIndices(0, i);
+                }
+            }
+            GridLayout grid = GridLayout.New(rowHeights, new BoundProperty_List(1), LayoutScore.Zero);
+            foreach (LayoutChoice_Set sublayout in this.subLayouts)
+            {
+                grid.AddLayout(sublayout);
+            }
+            return grid;
+        }
+
+        private LinkedList<LayoutChoice_Set> subLayouts = new LinkedList<LayoutChoice_Set>();
+        private bool uniform = false;
+    }
+
+    public class Horizontal_GridLayout_Builder
+    {
+        public Horizontal_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
+        {
+            this.subLayouts.AddLast(subLayout);
+            return this;
+        }
+        public GridLayout Build()
+        {
+            BoundProperty_List columnWidths = new BoundProperty_List(this.subLayouts.Count);
+            if (this.uniform)
+            {
+                for (int i = 1; i < columnWidths.NumProperties; i++)
+                {
+                    columnWidths.BindIndices(0, i);
+                }
+            }
+
+            GridLayout grid = GridLayout.New(new BoundProperty_List(1), columnWidths, LayoutScore.Zero);
+            foreach (LayoutChoice_Set sublayout in this.subLayouts)
+            {
+                grid.AddLayout(sublayout);
+            }
+            return grid;
+        }
+
+        private LinkedList<LayoutChoice_Set> subLayouts = new LinkedList<LayoutChoice_Set>();
+        private bool uniform = false;
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
