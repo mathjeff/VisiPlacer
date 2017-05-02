@@ -1476,7 +1476,7 @@ namespace VisiPlacement
         double pixelSize;   // for rounding error, we snap all values to a multiple of pixelSize
         int nextOpenRow;
         int nextOpenColumn;
-        double numComputations;
+        //double numComputations;
         GridView view;
 
 
