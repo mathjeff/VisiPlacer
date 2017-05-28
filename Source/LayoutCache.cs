@@ -77,6 +77,12 @@ namespace VisiPlacement
                 // if a less-restrictive query returned acceptable results, we can simply use those
                 if (query.Accepts(broadened.Response))
                   return this.prepareLayoutForQuery(broadened.Response.Clone(), query);
+                // if a less-restrictive query returned no results, then there will be no solution to our query either
+                if (broadened.Response == null)
+                {
+                    if (broadened.Query.MaxWidth >= query.MaxWidth && broadened.Query.MaxHeight >= query.MaxHeight && broadened.Query.MinScore.CompareTo(query.MinScore) <= 0)
+                        return null; // TODO should we cache the fact that we're returning null for this query (to avoid having to rebroaden in the next search)?
+                }
             }
             LayoutQuery_And_Response shrunken = this.FindExample(query);
             if (query.Debug)
@@ -166,17 +172,16 @@ namespace VisiPlacement
             }
 
 
-            if (result != null)
+            //if (result != null)
             {
+                QueryBlurrer generator = new QueryBlurrer(query);
                 // record that this layout is an option for larger queries, too
-                //Size layoutSize = new Size(result.Width, result.Height);
-                double blockWidth = 1;
-                double maxBlockSize = Math.Max(query.MaxWidth, query.MaxHeight) * this.GetBlockRatio();
-                while (blockWidth < maxBlockSize)
+                while (true)
                 {
-                    LayoutQuery largerQuery = query.Clone();
-                    largerQuery.MaxWidth = Math.Ceiling(query.MaxWidth / blockWidth) * blockWidth;
-                    largerQuery.MaxHeight = Math.Ceiling(query.MaxHeight / blockWidth) * blockWidth;
+                    LayoutQuery largerQuery = generator.Next();
+                    if (largerQuery == null)
+                        break;
+
                     LayoutQuery_And_Response previousData = null;
                     this.sampleQueries.TryGetValue(largerQuery, out previousData);
                     SpecificLayout previousResult = null;
@@ -194,10 +199,11 @@ namespace VisiPlacement
                         newData.Query = query.Clone();
                     // if the previous result was strictly better, then leave it as the result to use
                     double queryCount1 = numQueries;
-                    if (previousResult != null && (previousResult.Width <= result.Width && previousResult.Height <= result.Height && previousResult.Score.CompareTo(result.Score) >= 0))
+                    if (previousResult != null && (result == null ||
+                        (previousResult.Width <= result.Width && previousResult.Height <= result.Height && previousResult.Score.CompareTo(result.Score) >= 0)))
                         newData.Response = previousResult;
                     else
-                        newData.Response = newData.Query.PreferredLayout(result.Clone(), previousResult);
+                        newData.Response = newData.Query.PreferredLayout(result, previousResult);
                     double queryCount2 = numQueries;
                     if (newData.Query == previousQuery && newData.Response == previousResult)
                         break;
@@ -216,15 +222,10 @@ namespace VisiPlacement
 
                     this.sampleQueries[largerQuery] = newData;
 
-                    // move to the next size (skipping any duplicates along the way)
-                    if (largerQuery.MaxWidth == 0 || largerQuery.MaxHeight == 0)
-                        break;
-                    while (largerQuery.MaxWidth % blockWidth == 0 && largerQuery.MaxWidth % blockWidth == 0)
-                    {
-                        blockWidth *= this.GetBlockRatio();
-                    }
                 }
-                return this.prepareLayoutForQuery(result.Clone(), query);
+                if (result != null)
+                    result = result.Clone();
+                return this.prepareLayoutForQuery(result, query);
             }
             return null;
         }
@@ -281,172 +282,35 @@ namespace VisiPlacement
             }
             return fastResult;
         }
-        /*public override SpecificLayout GetBestLayout_Debugged(LayoutQuery query, SpecificLayout proposedSolution)
-        {
-            // check that the solution satisfies the query
-            base.GetBestLayout_Debugged(query, proposedSolution);
-
-            SpecificLayout fastResult = this.GetBestLayout(query.Clone());
-            SpecificLayout correctResult = this.layoutToManage.GetBestLayout_Debugged(query.Clone(), proposedSolution);
-            if (query.PreferredLayout(correctResult, fastResult) != correctResult)
-                System.Diagnostics.Debug.WriteLine("Error: layout cache returned incorrect result");
-            if (query.PreferredLayout(fastResult, correctResult) != fastResult)
-                System.Diagnostics.Debug.WriteLine("Error: layout cache returned incorrect result");
-
-            return this.prepareLayout(correctResult);
-        }*/
-        /*
-        private SpecificLayout Get_MinWidth_Layout(MinWidth_LayoutQuery query)
-        {
-            SpecificLayout result = null;
-            if (this.queryResults.TryGetValue(query, out result))
-            {
-                return result;
-            } 
-            LayoutQuery snapped = this.SnapToGridlines(query);
-            result = this.GetBestLayout_Internal(snapped);
-            if (query.Accepts(result))
-                return result;
-            return this.GetBestLayout_Internal(query);
-        }
-        private SpecificLayout Get_MinHeight_Layout(MinHeight_LayoutQuery query)
-        {
-            SpecificLayout result = null;
-            if (this.queryResults.TryGetValue(query, out result))
-            {
-                return result;
-            } 
-            LayoutQuery snapped = this.SnapToGridlines(query);
-            result = this.GetBestLayout_Internal(snapped);
-            if (query.Accepts(result))
-                return result;
-            return this.GetBestLayout_Internal(query);
-        }
-        private SpecificLayout Get_MaxScore_Layout(MaxScore_LayoutQuery query)
-        {
-            //return this.GetBestLayout_Internal(query);
-            SpecificLayout exactResult = null;
-            if (this.queryResults.TryGetValue(query, out exactResult))
-            {
-                return exactResult;
-            }
-            SpecificLayout guessedResult = null;
-            LayoutQuery snapped = this.SnapToGridlines(query);
-            guessedResult = this.GetBestLayout_Internal(snapped);
-            if (query.Accepts(guessedResult))
-                return guessedResult;
-            exactResult = this.GetBestLayout_Internal(query);
-            if (guessedResult != null && exactResult != null)
-            {
-                if (exactResult.Dimensions.Score.CompareTo(guessedResult.Dimensions.Score) > 0)
-                {
-                    if (!query.Accepts(guessedResult))
-                        System.Diagnostics.Debug.WriteLine("error evaluating augmented query");
-                    if (!query.Accepts(exactResult))
-                        System.Diagnostics.Debug.WriteLine("error evaluating basic query");
-                    System.Diagnostics.Debug.WriteLine("error");
-                }
-
-                if (exactResult.Dimensions.Score.CompareTo(guessedResult.Dimensions.Score) >= 0)
-                {
-                    if (!snapped.Accepts(exactResult))
-                    {
-                        System.Diagnostics.Debug.WriteLine("error");
-                    }
-                    //this.savedResults[snapped] = snapped.PreferredLayout(exactResult, guessedResult).Clone();
-                    // if the layout we found is just as good as the cached value, update the cache with the smaller layout
-                    // This makes the cache faster to use in the future
-                    this.queryResults[snapped] = exactResult.Clone();
-                    return exactResult;
-                }
-            }
-            return exactResult;
-        }
-        */
-
-        // Attemps to find an already known SpecificLayout that satisfied this query
-        /*private KeyValuePair<LayoutQuery, SpecificLayout> FindExample(LayoutQuery query)
-        {
-            if (query.MaxWidth <= 0 || query.MaxHeight < 0)
-                return null;
-            LayoutQuery constricted = query.Clone();
-            double blockSize;
-            double maxBlockSize = 1;
-            // shrink the query a little bit if its bounds are beyond the data we have
-            double width = Math.Min(this.maxObservedWidth, query.MaxWidth);
-            double height = Math.Min(this.maxObservedHeight, query.MaxHeight);
-
-            if (maxBlockSize < width)
-                maxBlockSize = width;
-            if (maxBlockSize < height)
-                maxBlockSize = height;
-
-            // search through the spots we would place them in
-            //for (blockSize = maxBlockSize * this.GetBlockRatio(); blockSize >= 1; blockSize /= this.GetBlockRatio())
-            for (blockSize = 1; blockSize < maxBlockSize * this.GetBlockRatio(); blockSize *= this.GetBlockRatio())
-            {
-                Size otherSize;
-                SpecificLayout otherLayout = null;
-                otherSize = new Size(Math.Ceiling(width / blockSize) * blockSize, Math.Ceiling(height / blockSize) * blockSize);
-                this.sampleLayouts.TryGetValue(otherSize, out otherLayout);
-                if (query.Accepts(otherLayout))
-                {
-                    // we found a layout that satisfies the requirements
-                    return otherLayout;
-                }
-                otherSize = new Size(Math.Floor(width / blockSize) * blockSize, Math.Floor(height / blockSize) * blockSize);
-                this.sampleLayouts.TryGetValue(otherSize, out otherLayout);
-                if (query.Accepts(otherLayout))
-                {
-                    // we found a layout that satisfies the requirements
-                    return otherLayout;
-                }
-            }
-            // no examples were found
-            return null;
-        }
-        */
-
-
 
         // Attempts to find a query having results that are accepted by this query
         private LayoutQuery_And_Response FindExample(LayoutQuery query)
         {
-            double maxBoxWidth;
-            LinkedList<LayoutQuery> queryTypes = new LinkedList<LayoutQuery>();
-            queryTypes.AddLast(query.Clone());
+            // make a bunch of query generators, with the type that we care about at the beginning of the list
+            LinkedList<QueryBlurrer> generators = new LinkedList<QueryBlurrer>();
+            generators.AddLast(new QueryBlurrer(query));
+            // add the other types to the end of the list
             if (!query.MaximizesScore())
-                queryTypes.AddLast(new MaxScore_LayoutQuery());
+                generators.AddLast(new QueryBlurrer(new MaxScore_LayoutQuery().CopyFrom(query)));
             if (!query.MinimizesHeight())
-                queryTypes.AddLast(new MinHeight_LayoutQuery());
+                generators.AddLast(new QueryBlurrer(new MinHeight_LayoutQuery().CopyFrom(query)));
             if (!query.MinimizesWidth())
-                queryTypes.AddLast(new MinWidth_LayoutQuery());
+                generators.AddLast(new QueryBlurrer(new MinWidth_LayoutQuery().CopyFrom(query)));
 
-            //LayoutQuery query2 = query.Clone();
-            // find the next power of this.GetBlockRatio() that is at least as big as the width and at least as big as the height
 
-            double maxWidthAllowed = 1;
-            if (!double.IsInfinity(query.MaxWidth) && maxWidthAllowed < query.MaxWidth)
-                maxWidthAllowed = query.MaxWidth;
-            if (!double.IsInfinity(query.MaxHeight) && maxWidthAllowed < query.MaxHeight)
-                maxWidthAllowed = query.MaxHeight;
-
-            for (maxBoxWidth = 1; maxBoxWidth < maxWidthAllowed; maxBoxWidth *= this.GetBlockRatio())
+            bool busy = true;
+            LayoutQuery_And_Response queryAndResponse;
+            while (busy)
             {
-            }
-            double currentBoxWidth;
-            for (currentBoxWidth = 1; currentBoxWidth <= maxBoxWidth; currentBoxWidth *= this.GetBlockRatio())
-            {
-                LayoutQuery_And_Response queryAndResponse;
-                bool queryIsPresent;
-
-                foreach (LayoutQuery query2 in queryTypes)
+                busy = false;
+                foreach (QueryBlurrer generator in generators)
                 {
-                    // snap the width and height to a box of the given size
-                    query2.MaxWidth = Math.Ceiling(query.MaxWidth / currentBoxWidth) * currentBoxWidth;
-                    query2.MaxHeight = Math.Ceiling(query.MaxHeight / currentBoxWidth) * currentBoxWidth;
+                    LayoutQuery query2 = generator.Next();
+                    if (query2 == null)
+                        continue;
+                    busy = true;
 
-                    queryIsPresent = this.sampleQueries.TryGetValue(query2, out queryAndResponse);
+                    bool queryIsPresent = this.sampleQueries.TryGetValue(query2, out queryAndResponse);
                     if (queryIsPresent)
                     {
                         // if there are no layouts that satisfy the relaxed query, then there's no reason to keep relaxing the query more
@@ -466,128 +330,80 @@ namespace VisiPlacement
         // Attempts to find a strictly larger query so we can get an upper bound on the required size (and if possible, we want a query whose response is accepted by the original)
         private LayoutQuery_And_Response Find_LargerQuery(LayoutQuery query)
         {
-            LayoutQuery query2 = query.Clone();
+            QueryBlurrer generator = new QueryBlurrer(query);
             LayoutQuery_And_Response bestResult = null;
-            // find the next power of this.GetBlockRatio() that is at least as big as the width and at least as big as the height
-
-            double maxInput = 1;
-            double maxBoxWidth = 1;
-            if (!double.IsInfinity(query.MaxWidth) && maxInput < query.MaxWidth)
-                maxInput = query.MaxWidth;
-            double maxBoxHeight = 1;
-            if (!double.IsInfinity(query.MaxHeight) && maxInput < query.MaxHeight)
-                maxInput = query.MaxHeight;
-            maxBoxWidth = maxBoxHeight = maxInput * 4;
-
-            double currentBoxWidth = 1;
-            double currentBoxHeight = 1;
-            // Search increasingly large boxes until either we find a relevant query or run out of time
             while (true)
             {
-              //for (currentBoxWidth = 1; currentBoxWidth <= maxBoxWidth; currentBoxWidth *= this.GetBlockRatio())
-              //{
+                LayoutQuery nearbyQuery = generator.Next();
+                if (nearbyQuery == null)
+                    break;
+
                 LayoutQuery_And_Response queryAndResponse;
                 bool queryIsPresent;
 
-                // snap the width and height to a box of the given size
-                query2.MaxWidth = Math.Ceiling(query.MaxWidth / currentBoxWidth) * currentBoxWidth;
-                query2.MaxHeight = Math.Ceiling(query.MaxHeight / currentBoxHeight) * currentBoxHeight;
-
-                queryIsPresent = this.sampleQueries.TryGetValue(query2, out queryAndResponse);
+                queryIsPresent = this.sampleQueries.TryGetValue(nearbyQuery, out queryAndResponse);
                 if (queryIsPresent)
                 {
-                    // if there are no layouts that satisfy the relaxed query, then there's no reason to keep relaxing the query more
-                    if (queryAndResponse.Response == null)
-                        return null;
-                    LayoutQuery alternateQuery = queryAndResponse.Query;
+                    LayoutQuery otherQuery = queryAndResponse.Query;
+                    SpecificLayout otherResult = queryAndResponse.Response;
                     // check whether the query we found will encompass strictly more things than the query we started with
-                    if (alternateQuery.MaxWidth >= query.MaxWidth && alternateQuery.MaxHeight >= query.MaxHeight && alternateQuery.MinScore.CompareTo(query.MinScore) <= 0)
+                    if (otherQuery.MaxWidth >= query.MaxWidth && otherQuery.MaxHeight >= query.MaxHeight && otherQuery.MinScore.CompareTo(query.MinScore) <= 0)
                     {
-                        //return queryAndResponse;
-                        if (query.Accepts(queryAndResponse.Response))
-                        {
-                            // We found a response that works, so just use it
+                        // if there are no layouts that satisfy the relaxed query, then there's no reason to keep relaxing the query more
+                        if (otherResult == null)
                             return queryAndResponse;
-                        }
-                        // We found a query that's slightly bigger than the original and for which we know the response, so we'll save it in case it's the best we can find
-                        if (bestResult == null || (query.PreferredLayout(queryAndResponse.Response, bestResult.Response) == queryAndResponse.Response))
-                            bestResult = queryAndResponse;
-                        
-                        // Now put some bounds on the search if the response uses too much screen space
-                        /*if (bestResult.Response.Width > query.MaxWidth)
-                        {
-                            // We've found a query for which the response is too wide, so stop increasing the width of our queries
-                            //currentBoxWidth /= this.GetBlockRatio();
-                            maxBoxWidth = currentBoxWidth;
-                        }
-                        if (bestResult.Response.Height > query.MaxHeight)
-                        {
-                            // We've found a query for which the response is too tall, so stop increasing the height of our queries
-                            //currentBoxHeight /= this.GetBlockRatio();
-                            maxBoxHeight = currentBoxHeight;
-                        }*/
+                    }
+
+                    // check whether the answer to the previous query must also be the answer to the current query
+                    bool encompassedInputs = true;
+                    // If we're looking for the min width or min height, then tightening the score means we can't necessarily use the other result as the best result
+                    if (!query.MaximizesScore() && otherQuery.MinScore.CompareTo(query.MinScore) > 0)
+                        encompassedInputs = false;
+                    if (!query.MinimizesWidth() && otherQuery.MaxWidth < query.MaxWidth)
+                        encompassedInputs = false;
+                    if (!query.MinimizesHeight() && otherQuery.MaxHeight < query.MaxHeight)
+                        encompassedInputs = false;
+                    if (encompassedInputs && query.Accepts(otherResult))
+                    {
+                        // This more-relaxed query has an answer that satisfies our tighter query, so we can use it
+                        return queryAndResponse;
                     }
                 }
-                /*if (currentBoxHeight * maxBoxWidth > currentBoxWidth * maxBoxHeight)
-                    currentBoxWidth *= this.GetBlockRatio();
-                else
-                    currentBoxHeight *= this.GetBlockRatio();*/
-                if (currentBoxHeight < maxBoxHeight)
-                    currentBoxHeight *= this.GetBlockRatio();
-                if (currentBoxWidth < maxBoxWidth)
-                    currentBoxWidth *= this.GetBlockRatio();
-                if (currentBoxWidth >= maxBoxWidth && currentBoxHeight >= maxBoxHeight)
-                {
-                    // nothing left to search
-                    break;
-                }
+
             }
             // return the most useful query+response that we found
             return bestResult;
         }
 
+    
+
         public override void On_ContentsChanged(bool mustRedraw)
         {
             this.Initialize();
-            //this.maxObservedWidth = this.maxObservedHeight = 0;
         }
 
-        private double GetBlockRatio()
-        {
-            return 2;
-        }
         
 #region Functions for for IEqualityComparer<LayoutQuery>
         public bool Equals(LayoutQuery query1, LayoutQuery query2)
         {
-            if (query1.MaxHeight != query2.MaxHeight)
-                return false;
-            if (query1.MaxWidth != query2.MaxWidth)
-                return false;
-            if (query1.MinScore.CompareTo(query2.MinScore) != 0)
-                return false;
-            if (query1.MinimizesHeight() != query2.MinimizesHeight())
-                return false;
-            if (query1.MinimizesWidth() != query2.MinimizesWidth())
-                return false;
-            if (query1.MaximizesScore() != query2.MaximizesScore())
-                return false;
-            return true;
+            return query1.Equals(query2);
         }
 
         public int GetHashCode(LayoutQuery query)
         {
-            double value = 1;
+            int value = 0;
             if (!double.IsInfinity(query.MaxWidth))
-                value *= Math.Floor(query.MaxWidth);
-            value += 50000;
+                value += (int)(query.MaxWidth * 100);
+            value *= 500;
             if (!double.IsInfinity(query.MaxHeight))
-                value *= Math.Floor(query.MaxHeight);
-            value += 50000;
-            double ratio = value / int.MaxValue;
-            double fractionPart = ratio - Math.Floor(ratio);
-            int remainder = (int)(fractionPart * int.MaxValue);
-            return remainder;
+                value += (int)(query.MaxHeight * 100);
+            value *= 500;
+            if (query.MinimizesHeight())
+                value += 1;
+            if (query.MinimizesWidth())
+                value += 2;
+            value += query.MinScore.GetHashCode();
+            return value;
         }
 #endregion
 
@@ -624,5 +440,73 @@ namespace VisiPlacement
         //public double maxObservedHeight;
         static int numComputations = 0;
         static int numQueries = 0;
+    }
+
+    // A QueryBlurrer lazily generates a List<LayoutQuery> in a manner such that nearby source LayoutQuery objects will eventually converge (for the purpose of doing a Dictionary lookup)
+    public class QueryBlurrer
+    {
+        public QueryBlurrer(LayoutQuery original)
+        {
+            this.index = 0;
+
+            double maxSize = 1;
+            if (original.MaxWidth > maxSize && !double.IsInfinity(original.MaxWidth))
+                maxSize = original.MaxWidth;
+            if (original.MaxHeight > maxSize && !double.IsInfinity(original.MaxHeight))
+                maxSize = original.MaxHeight;
+            this.maxIndex = (int)Math.Log(maxSize, 2) + 2;
+
+            this.original = original;
+        }
+
+        public LayoutQuery Next()
+        {
+            if (this.index >= maxIndex)
+                return null;
+
+            LayoutQuery result = this.original.Clone();
+            double blockSize = Math.Pow(2, this.index);
+            this.snap(result, blockSize);
+#if false
+            if (blockSize > 26)
+                result.MinScore = LayoutScore.Minimum;
+#else
+            int numComponents = this.original.MinScore.NumComponents;
+            int numComponentsToRemove = (int)Math.Round((double)numComponents * (double)this.index / (double)this.maxIndex);
+            result.MinScore = result.MinScore.ComponentRange(numComponentsToRemove, numComponents);
+#endif
+
+            this.index++;
+
+            // check for duplicates and skip them
+            if (this.previousResult != null)
+            {
+                if (result.Equals(this.previousResult))
+                    return this.Next();
+            }
+            this.previousResult = result;
+            return result;
+        }
+
+        private double GetBlockRatio()
+        {
+            return 2;
+        }
+
+        private void snap(LayoutQuery layoutQuery, double blockSize)
+        {
+            layoutQuery.MaxWidth = this.round(layoutQuery.MaxWidth, blockSize);
+            layoutQuery.MaxHeight = this.round(layoutQuery.MaxHeight, blockSize);
+        }
+        private double round(double input, double blockSize)
+        {
+            int offset = 1;
+            return Math.Ceiling((input + offset) / blockSize) * blockSize - offset;
+        }
+
+        private int index;
+        private int maxIndex;
+        private LayoutQuery original;
+        private LayoutQuery previousResult;
     }
 }

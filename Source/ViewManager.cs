@@ -72,7 +72,7 @@ namespace VisiPlacement
             int num_grid_postComputations = GridLayout.NumComputations;
             System.Diagnostics.Debug.WriteLine("Num grid computations = " + (num_grid_postComputations - num_grid_preComputations));
             TextLayout.NumMeasures = 0;
-
+            TextLayout.TextTime = new TimeSpan();
             
             Control control = focusedElement as Control;
             if (control != null)

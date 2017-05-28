@@ -57,15 +57,20 @@ namespace VisiPlacement
         public static int NumMeasures = 0;
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            // don't bother doing the layout if the required score is too high
+            if (query.MinScore.CompareTo(this.BestPossibleScore) > 0)
+                return null;
+
             TextLayout.NumMeasures++;
+            if (TextLayout.NumMeasures % 80 == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("num text measurements = " + TextLayout.NumMeasures);
+            }
             DateTime startTime = DateTime.Now;
             this.previousText = this.TextItem_Configurer.Text;
             //System.Diagnostics.Debug.WriteLine("avg num computations per query = " + (double)numComputations / (double)numQueries);
             numQueries++;
 
-            // don't bother doing the layout if the required score is too high
-            if (query.MinScore.CompareTo(this.BestPossibleScore) > 0)
-                return null;
 
 
             SpecificLayout result;

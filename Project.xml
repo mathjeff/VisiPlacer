@@ -3,5 +3,22 @@
   <name>VisiPlacer</name>
   <source><GitRepo/></source>
   <version><GitVersion/></version>
-  <dependencies><DependencyList/></dependencies>
+  <dependencies>
+    <DependencyList>
+      <item>
+        <name>StatList</name>
+        <version>afcefcccd8312cb355aa608d87ab2863d8ff3757</version>
+        <syncher>
+          <Git>
+            <origin>
+              <Url>
+                <server>https://github.com</server>
+                <path>mathjeff/StatList</path>
+              </Url>
+            </origin>
+          </Git>
+        </syncher>
+      </item>
+    </DependencyList>
+  </dependencies>
 </Project>

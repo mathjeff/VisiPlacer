@@ -957,7 +957,7 @@ namespace VisiPlacement
             //double maxHeight = layout.Get_GroupHeight(indexOf_propertyGroup_toShrink);
             List<int> indices = layout.Get_HeightGroup_AtIndex(indexOf_propertyGroup_toShrink);
             List<double> minHeights = new List<double>();
-            LayoutScore eachAllowedScoreDecrease = totalAllowedScoreDecrease.Times((double)1 / (double)(this.columnWidths.NumProperties * indices.Count));
+            LayoutScore eachAllowedScoreDecrease = totalAllowedScoreDecrease.Times((double)1 / (double)(this.NumColumns * indices.Count));
             foreach (int rowNumber in indices)
             {
                 int columnNumber;

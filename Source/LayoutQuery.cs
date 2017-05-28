@@ -54,13 +54,14 @@ namespace VisiPlacement
         // returns a stricter query that won't even be satisfied by this example
         public abstract void OptimizePastExample(SpecificLayout example);
         //public abstract void OptimizeUsingExample(LayoutDimensions example);
-        public void CopyFrom(LayoutQuery original)
+        public LayoutQuery CopyFrom(LayoutQuery original)
         {
             this.MaxWidth = original.MaxWidth;
             this.MaxHeight = original.MaxHeight;
             this.MinScore = original.MinScore;
             this.Debug = original.Debug;
             this.ProposedSolution_ForDebugging = original.ProposedSolution_ForDebugging;
+            return this;
         }
         public bool Accepts(SpecificLayout layout)
         {
@@ -163,6 +164,24 @@ namespace VisiPlacement
                 }
                 this.proposedSolution_forDebugging = proposedSolution;
             }
+        }
+        public bool Equals(LayoutQuery other)
+        {
+            LayoutQuery query1 = this;
+            LayoutQuery query2 = other;
+            if (query1.MaxHeight != query2.MaxHeight)
+                return false;
+            if (query1.MaxWidth != query2.MaxWidth)
+                return false;
+            if (query1.MinScore.CompareTo(query2.MinScore) != 0)
+                return false;
+            if (query1.MinimizesHeight() != query2.MinimizesHeight())
+                return false;
+            if (query1.MinimizesWidth() != query2.MinimizesWidth())
+                return false;
+            if (query1.MaximizesScore() != query2.MaximizesScore())
+                return false;
+            return true;
         }
         private double maxWidth, maxHeight;
         private LayoutScore minScore;
