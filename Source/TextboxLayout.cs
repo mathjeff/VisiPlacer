@@ -17,16 +17,10 @@ namespace VisiPlacement
             this.TextBox = textBox;
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
-            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
             layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 30));
+            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
 
             this.LayoutToManage = new LayoutUnion(layouts);
-
-            //this.TextBox.TextChanged += this.OnTextChange;
-            //this.Setup_PropertyChange_Listener("Text", this.TextBox, this.OnTextChange);
-
-            //DependencyPropertyDescriptor textDescriptor = DependencyPropertyDescriptor.FromProperty(TextBox.TextProperty, typeof(TextBlock));
-            //textDescriptor.AddValueChanged(textBox, new EventHandler(this.OnTextChange));
 
         }
 

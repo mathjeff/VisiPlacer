@@ -39,17 +39,12 @@ namespace VisiPlacement
             }
             else
             {
-                layouts.Add(this.makeLayout(10));
-                layouts.Add(this.makeLayout(16));
                 layouts.Add(this.makeLayout(30));
+                layouts.Add(this.makeLayout(16));
+                layouts.Add(this.makeLayout(10));
             }
                 
             this.LayoutToManage = new LayoutUnion(layouts);
-
-            //DependencyPropertyDescriptor textDescriptor = DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
-            //textDescriptor.AddValueChanged(textBlock, new EventHandler(this.OnTextChange));
-
-            //this.Setup_PropertyChange_Listener("Text", this.textBlock, this.OnTextChange);
         }
 
         private LayoutChoice_Set makeLayout(double fontsize)

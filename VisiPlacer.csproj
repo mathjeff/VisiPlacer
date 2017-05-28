@@ -127,6 +127,7 @@
     <Compile Include="Source\MenuLayoutBuilder.cs" />
     <Compile Include="Source\MinHeight_LayoutQuery.cs" />
     <Compile Include="Source\MinWidth_LayoutQuery.cs" />
+    <Compile Include="Source\Misc\InputScopeUtils.cs" />
     <Compile Include="Source\PixelatedLayout.cs" />
     <Compile Include="Source\ScoreShifted_View.cs" />
     <Compile Include="Source\SingleItem_Layout.cs" />

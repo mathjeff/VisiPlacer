@@ -270,7 +270,15 @@ namespace VisiPlacement
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            int value = 0;
+            foreach (ListItemStats<double, double> component in this.components.AllItems)
+            {
+                value = value * 100;
+                value = value + component.Key.GetHashCode();
+                value = value * 100;
+                value = value + component.Value.GetHashCode();
+            }
+            return value;
         }
 
         private void addComponent(double priority, double weight)
@@ -292,12 +300,30 @@ namespace VisiPlacement
         public override string ToString()
         {
             String result = "";
-            //ListItemStats<double, double> component;
             foreach (ListItemStats<double, double> component in this.components.AllItems)
             {
                 result += component.Key + ":" + component.Value + ",";
             }
             return result;
+        }
+
+        public int NumComponents
+        {
+            get
+            {
+                return this.components.NumItems;
+            }
+        }
+
+        public LayoutScore ComponentRange(int minIndexInclusive, int maxIndexExclusive)
+        {
+            LayoutScore range = new LayoutScore();
+            LinkedList<ListItemStats<double, double>> subComponents = this.components.ItemsBetweenIndices(minIndexInclusive, maxIndexExclusive);
+            foreach (ListItemStats<double, double> component in subComponents)
+            {
+                range.addComponent(component.Key, component.Value);
+            }
+            return range;
         }
 
         #region Required for IComparer<double>
@@ -324,8 +350,6 @@ namespace VisiPlacement
 
         #endregion
 
-        //public double Priority { get; set; }
-        //public double Weight { get; set; }
         private StatList<double, double> components;
     }
 }
