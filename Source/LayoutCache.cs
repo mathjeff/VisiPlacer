@@ -227,7 +227,6 @@ namespace VisiPlacement
                     result = result.Clone();
                 return this.prepareLayoutForQuery(result, query);
             }
-            return null;
         }
 
         private SpecificLayout Query_SubLayout(LayoutQuery query)
