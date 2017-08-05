@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
-using Windows.Graphics.Display;
+using Windows.Foundation;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI;
 
 namespace VisiPlacement
 {
@@ -53,7 +50,13 @@ namespace VisiPlacement
 
         public void DoLayout()
         {
-            object focusedElement = FocusManager.GetFocusedElement();
+            Control focusedElement = FocusManager.GetFocusedElement() as Control;
+            FocusState focusState = FocusState.Unfocused;
+            if (focusedElement != null)
+            {
+                focusState = focusedElement.FocusState;
+            }
+
             int num_grid_preComputations = GridLayout.NumComputations;
 
             DateTime startTime = DateTime.Now;
@@ -76,7 +79,7 @@ namespace VisiPlacement
             
             Control control = focusedElement as Control;
             if (control != null)
-                control.Focus();
+                control.Focus(focusState);
 
 
             
@@ -92,19 +95,6 @@ namespace VisiPlacement
 
             // figure out where the subviews are placed
             return this.specificLayout.DoLayout(bounds);
-
-            /*this.visibleLayouts.AddLast(bestLayout);
-
-            // update each subview
-            foreach (SubviewDimensions location in locations)
-            {
-                // determine whether this layout wants to just delegate to its child views without making a view of its own
-                FrameworkElement view = location.SubLayout.View;
-                view.InvalidateMeasure();
-                this.DoLayout(location.SubLayout, location.Size);
-            }
-            return bestLayout.View;
-            */
         }
 
         public override void On_ContentsChanged(bool mustRedraw)
@@ -236,18 +226,18 @@ namespace VisiPlacement
 
         public ViewManager ViewManager { get; set; }
 
-        protected override Size MeasureOverride(Size bounds)
+        protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size bounds)
         {
-            this.ViewManager.DoLayout(bounds);
+            this.ViewManager.DoLayout(new Size((int)bounds.Width, (int)bounds.Height));
 
             base.MeasureOverride(bounds);
             return bounds;
         }
         
-        protected override Size ArrangeOverride(Size finalSize)
+        protected override Windows.Foundation.Size ArrangeOverride(Windows.Foundation.Size finalSize)
         {
             FrameworkElement element = (FrameworkElement)this.Content;
-            Size tempSize = base.ArrangeOverride(finalSize);
+            Size tempSize = base.ArrangeOverride(new Size((int)finalSize.Width, (int)finalSize.Height));
             return finalSize;
         }
 

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace VisiPlacement
 {
-    class LayoutQuery_And_Response
+    public class LayoutQuery_And_Response
     {
         public LayoutQuery Query { get; set; }
         public SpecificLayout Response { get; set; }

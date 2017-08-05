@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Windows.Foundation;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
+using Windows.UI.Xaml;
 
 namespace VisiPlacement
 {
@@ -67,12 +68,15 @@ namespace VisiPlacement
             }
             set
             {
-                if (this.subLayout != null)
-                    this.subLayout.RemoveParent(this);
-                this.subLayout = value;
-                if (this.subLayout != null)
-                    this.subLayout.AddParent(this);
-                this.AnnounceChange(true);
+                if (value != this.subLayout)
+                {
+                    if (this.subLayout != null)
+                        this.subLayout.RemoveParent(this);
+                    this.subLayout = value;
+                    if (this.subLayout != null)
+                        this.subLayout.AddParent(this);
+                    this.AnnounceChange(true);
+                }
             }
         }
         public LayoutScore BonusScore { get; set; }
@@ -108,7 +112,7 @@ namespace VisiPlacement
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
-                    result = this.makeSpecificLayout(this.view, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
+                    result = this.makeSpecificLayout(this.view, new Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
                     result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;

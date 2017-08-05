@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Media;
+using Windows.UI.Xaml;
+using Windows.UI.Text;
+using Windows.UI.Xaml.Media;
+
 
 // for getting/setting properties of a TextBox or TextBlock
 namespace VisiPlacement

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
+using Windows.Foundation;
+using Windows.UI.Text;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace VisiPlacement
 {
@@ -347,6 +345,27 @@ namespace VisiPlacement
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         public Size FormatText(String text, double desiredWidth)
         {
+            //return Silverlight_FormatText(text, desiredWidth);
+            return this.WindowsUniversal_FormatText(text, desiredWidth);
+            //return this.Const_FormatText();
+        }
+        public Size Const_FormatText()
+        {
+            return new Windows.Foundation.Size(81, 14);
+        }
+        public Size WindowsUniversal_FormatText(string text, double desiredWidth)
+        {
+            TextBlock textBlock = this.getTextBlock();
+
+            // compute the size
+            textBlock.Text = text;
+            textBlock.TextWrapping = TextWrapping.WrapWholeWords;
+            textBlock.Measure(new Size(desiredWidth, double.MaxValue));
+            Size size = new Size(Math.Ceiling(textBlock.ActualWidth), Math.Ceiling(textBlock.ActualHeight));
+            return size;
+        }
+        public Size Silverlight_FormatText(String text, double desiredWidth)
+        {
             if (text == null || text == "")
                 return new Size();
 
@@ -359,7 +378,7 @@ namespace VisiPlacement
             foreach (string component in components)
             {
                 blockText = component + " "; // it does waste some room to always make room for the space, but it seems to mirror how Silverlight actually does the layout
-                Size blockSize = this.formatBlock(blockText);
+                Size blockSize = this.silverlight_formatBlock(blockText);
                 if (x + blockSize.Width > desiredWidth && x > 0)
                 {
                     // go to the next line
@@ -378,7 +397,7 @@ namespace VisiPlacement
             return size1;
         }
 
-        private Size formatBlock(String text)
+        private Size silverlight_formatBlock(String text)
         {
             Size size;
             // try to load from cache
@@ -395,27 +414,13 @@ namespace VisiPlacement
                     */
                 }
             }
-            if (textBlock == null)
-            {
-                // create a TextBlock and compute the value
-                TextBlock block = new TextBlock();
-
-                block.FontFamily = this.FontFamily;
-                block.FontStyle = this.FontStyle;
-                block.FontWeight = this.FontWeight;
-                block.FontStretch = this.FontStretch;
-                block.FontSize = this.FontSize;
-                if (!block.FontFamily.Equals(new FontFamily("Segoe WP")))
-                    System.Diagnostics.Debug.WriteLine("Invalid font family");
-                block.Padding = block.Margin = new Thickness();
-
-                // cache the TextBlock
-                textBlock = block;
-            }
+            TextBlock textBlock = this.getTextBlock();
 
             // compute the size
             textBlock.Text = text;
+            textBlock.Measure(new Size(double.MaxValue, double.MaxValue));
             size = new Size(textBlock.ActualWidth, textBlock.ActualHeight);
+            //System.Diagnostics.Debug.WriteLine("Measured '" + text + "' as " + size);
 
             // cache the size
             if (!this.sizeCache.TryGetValue(this.FontFamily, out dict2))
@@ -439,7 +444,6 @@ namespace VisiPlacement
             dict2[text] = size;
             return size;
         }
-
 
         public FontFamily FontFamily
         {

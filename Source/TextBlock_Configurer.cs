@@ -4,9 +4,11 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Media;
+using Windows.UI.Text;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Media;
 
 namespace VisiPlacement
 {
@@ -16,7 +18,8 @@ namespace VisiPlacement
         {
             this.TextBlock = TextBlock;
             TextBlock.TextWrapping = TextWrapping.Wrap;
-            TextBlock.FontFamily = new FontFamily("Segoe WP");
+            //TextBlock.FontFamily = new FontFamily("Segoe WP");
+            TextBlock.FontFamily = FontFamily.XamlAutoFontFamily;
             this.listener = new PropertyListener(TextBlock);
         }
 
@@ -76,13 +79,15 @@ namespace VisiPlacement
 
         private void Setup_PropertyChange_Listener(string propertyName, FrameworkElement element, PropertyChangedCallback callback, bool triggerOnProgrammaticUpdates)
         {
-            Binding b = new Binding(propertyName) { Source = element };
+            Binding b = new Binding();
+            b.Path = new PropertyPath(propertyName);
+            b.Source = element;
             PropertyMetadata metadata;
             if (triggerOnProgrammaticUpdates)
                 metadata = new PropertyMetadata(null);
             else
                 metadata = new PropertyMetadata(callback);
-            var prop = System.Windows.DependencyProperty.RegisterAttached(
+            var prop = DependencyProperty.RegisterAttached(
                 "ListenAttached" + propertyName,
                 typeof(object),
                 typeof(TextBlock),
@@ -112,12 +117,12 @@ namespace VisiPlacement
         {
             this.handlers.AddLast(handler);
         }
-        public object Convert(object item, Type targetType, object parameter, CultureInfo currentCulture)
+        public object Convert(object item, Type targetType, object parameter, String language)
         {
             this.triggerAll();
             return item;
         }
-        public object ConvertBack(object item, Type targetType, object parameter, CultureInfo currentCulture)
+        public object ConvertBack(object item, Type targetType, object parameter, String language)
         {
             return item;
         }
@@ -125,7 +130,7 @@ namespace VisiPlacement
         {
             foreach (PropertyChangedCallback handler in this.handlers)
             {
-                handler.Invoke(this.source, new DependencyPropertyChangedEventArgs());
+                handler.Invoke(this.source, null); // new DependencyPropertyChangedEventArgs());
             }
         }
         LinkedList<PropertyChangedCallback> handlers = new LinkedList<PropertyChangedCallback>();

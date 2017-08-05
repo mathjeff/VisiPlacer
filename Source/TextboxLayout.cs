@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using System.Windows;
-using System.ComponentModel;
-using System.Windows.Media;
-using System.Windows.Data;
+﻿using System.Collections.Generic;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Data;
 
 namespace VisiPlacement
 {
@@ -39,13 +34,14 @@ namespace VisiPlacement
 
         private void Setup_PropertyChange_Listener(string propertyName, FrameworkElement element, PropertyChangedCallback callback)
         {
-
-            Binding b = new Binding(propertyName) { Source = element };
-            var prop = System.Windows.DependencyProperty.RegisterAttached(
+            Binding b = new Binding();
+            b.Path = new PropertyPath(propertyName);
+            b.Source = element;
+            var prop = DependencyProperty.RegisterAttached(
                 "ListenAttached" + propertyName,
                 typeof(object),
                 typeof(TextBlock),
-                new System.Windows.PropertyMetadata(callback));
+                new PropertyMetadata(callback));
 
             element.SetBinding(prop, b);
         }

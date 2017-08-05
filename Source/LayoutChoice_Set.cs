@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+﻿using System.Collections.Generic;
+using Windows.UI.Xaml.Shapes;
 
 // A LayoutChoice_Set describes different layouts for a view's child views
 // The LayoutChoice_Set can be asked to choose the best layout (such as the highest-scoring layout) fitting inside a certain size
@@ -30,7 +27,7 @@ namespace VisiPlacement
 
 
         // declares that the given size is what has been chosen (note that the choice is computed based on space constraints including other outside views)
-        public void SetSize(Rect size)
+        public void SetSize(Rectangle size)
         {
         }
 

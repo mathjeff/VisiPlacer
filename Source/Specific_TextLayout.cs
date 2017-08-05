@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows;
-using System.Windows.Media;
 using System.Globalization;
+using Windows.UI.Xaml;
+using Windows.Foundation;
 
 // A Specific_TextLayout tells parameters (width, height, fontsize) of a piece of text (TextBlock or TextBox)
 namespace VisiPlacement

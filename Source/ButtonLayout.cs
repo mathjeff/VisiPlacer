@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using Windows.UI;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace VisiPlacement
 {
@@ -43,7 +44,7 @@ namespace VisiPlacement
             button.BorderThickness = outerBevelThickness;
 
             // Put the desired content directly inside the bevel without any extra margin
-            SingleItem_Layout contentLayout = new SingleItem_Layout(border, subLayout, innerBevelThickness, LayoutScore.Zero, false);
+            SingleItem_Layout contentLayout = new SingleItem_Layout(border, subLayout, outerBevelThickness, LayoutScore.Zero, false);
             // Put the inner bevel color directly inside the outer bevel color without any blank space
             this.SubLayout = new SingleItem_Layout(button, contentLayout, innerBevelThickness, LayoutScore.Zero, true);
 

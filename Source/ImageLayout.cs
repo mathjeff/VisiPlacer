@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
+using Windows.UI.Xaml;
+using Windows.Foundation;
 
 // Intended for displaying an image
 // Just computes score = width * height * constant and answers LayoutQueries accordingly
@@ -62,7 +59,7 @@ namespace VisiPlacement
             SpecificLayout layout = this.prepareLayoutForQuery(new Specific_SingleItem_Layout(this.view, new Size(width, height), this.ComputeScore(width, height), null, new Thickness()), layoutQuery);
             if (!layoutQuery.Accepts(layout))
             {
-                Console.WriteLine("Error; ImageLayout attempted to return an invalid layout result");
+                System.Diagnostics.Debug.WriteLine("Error; ImageLayout attempted to return an invalid layout result");
             }
             return layout;
         }

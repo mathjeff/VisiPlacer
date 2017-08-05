@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using VisiPlacement;
+﻿using System.Collections.Generic;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 
 // A MenuLayoutBuilder can build a menu that talks to a particular LayoutStack and pushes layouts onto it when the corresponding menu item is chosen
 namespace VisiPlacement
@@ -47,7 +43,7 @@ namespace VisiPlacement
             return button;
         }
 
-        void button_Click(object sender, System.Windows.RoutedEventArgs e)
+        void button_Click(object sender, RoutedEventArgs e)
         {
             // find the sender's name
             ContentControl button = sender as ContentControl;

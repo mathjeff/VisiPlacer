@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+﻿using System.Collections.Generic;
+using Windows.Foundation;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+
 
 // Unlike a general LayoutChoice_Set, A SpecificLayout can render reasonably quickly because
 // it is the result of having queried any child layouts about what scores they give for certain sizes

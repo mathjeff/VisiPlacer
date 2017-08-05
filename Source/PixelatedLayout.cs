@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
+using Windows.Foundation;
+using Windows.UI.Xaml;
 
 namespace VisiPlacement
 {
@@ -25,7 +26,7 @@ namespace VisiPlacement
             SpecificLayout internalLayout = this.layoutToManage.GetBestLayout(query.Clone());
             if (internalLayout != null) {
                 Size size = new Size(Math.Ceiling(internalLayout.Width / this.pixelWidth) * this.pixelWidth, Math.Ceiling(internalLayout.Height / this.pixelHeight) * this.pixelHeight);
-                Specific_SingleItem_Layout result = new Specific_SingleItem_Layout(null, size, internalLayout.Score, internalLayout, new System.Windows.Thickness(0));
+                Specific_SingleItem_Layout result = new Specific_SingleItem_Layout(null, size, internalLayout.Score, internalLayout, new Thickness(0));
                 return this.prepareLayoutForQuery(result, query);
             }
             return null;

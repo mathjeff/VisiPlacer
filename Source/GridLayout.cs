@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml;
+using Windows.Foundation;
+
 
 // the GridLayout will arrange the child elements in a grid pattern
 namespace VisiPlacement
@@ -829,7 +829,7 @@ namespace VisiPlacement
         {
             if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
             {
-                Console.WriteLine("Error: cannot improve score by shrinking");
+                System.Diagnostics.Debug.WriteLine("Error: cannot improve score by shrinking");
             }
 
             //layout = new SemiFixed_GridLayout(layout);
@@ -951,7 +951,7 @@ namespace VisiPlacement
         {
             if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
             {
-                Console.WriteLine("Error: cannot improve score by shrinking");
+                System.Diagnostics.Debug.WriteLine("Error: cannot improve score by shrinking");
             }
             //layout = new SemiFixed_GridLayout(layout);
             //double maxHeight = layout.Get_GroupHeight(indexOf_propertyGroup_toShrink);
@@ -1476,7 +1476,7 @@ namespace VisiPlacement
         double pixelSize;   // for rounding error, we snap all values to a multiple of pixelSize
         int nextOpenRow;
         int nextOpenColumn;
-        double numComputations;
+        //double numComputations;
         GridView view;
 
 
@@ -2009,7 +2009,7 @@ namespace VisiPlacement
                         query.MaxHeight = height;
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
                         this.specificSublayouts.AddLast(bestLayout);
-                        subview = bestLayout.DoLayout(new Size(width, height));
+                        subview = bestLayout.DoLayout(new Size((int)width, (int)height));
                     }
                     subviews[columnNumber, rowNumber] = subview;
 

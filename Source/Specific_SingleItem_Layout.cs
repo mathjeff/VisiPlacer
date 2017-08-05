@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml;
+using Windows.Foundation;
 
 // a Specific_SingleItem_Layout just has a view, a size, a subLayout, and a score
 namespace VisiPlacement
