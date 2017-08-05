@@ -29,6 +29,11 @@ namespace VisiPlacement
         public bool ChildFillsAvailableSpace { get; set; }
         public override FrameworkElement DoLayout(Size displaySize)
         {
+            if (this.View != null)
+            {
+                this.View.Width = displaySize.Width;
+                this.View.Height = displaySize.Height;
+            }
             if (this.subLayout != null)
             {
                 double outerWidth = displaySize.Width;
@@ -44,8 +49,6 @@ namespace VisiPlacement
                 FrameworkElement childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
                 if (this.View != null)
                 {
-                    this.View.Width = displaySize.Width;
-                    this.View.Height = displaySize.Height;
                     this.PutContentInView(this.View, childContent);
                     return this.View;
                 }

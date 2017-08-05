@@ -13,50 +13,77 @@ namespace VisiPlacement
             this.view = view;
             this.pixelSize = 1;
             this.scorePerPixel = new LayoutScore(scorePerPixel);
+            this.maxSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
+        }
+        public ImageLayout(FrameworkElement view, LayoutScore scorePerPixel, Size maxSize)
+        {
+            this.view = view;
+            this.pixelSize = 1;
+            this.scorePerPixel = new LayoutScore(scorePerPixel);
+            this.maxSize = maxSize;
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            LayoutScore score = this.ComputeScore(query.MaxWidth, query.MaxHeight);
+            double maxWidth = Math.Min(this.maxSize.Width, query.MaxWidth);
+            double maxHeight = Math.Min(this.maxSize.Height, query.MaxHeight);
+            LayoutScore score = this.ComputeScore(maxWidth, maxHeight);
             if (score.CompareTo(query.MinScore) < 0)
                 return null;
             double ratio = query.MinScore.DividedBy(score);
             if (query.MinimizesWidth())
             {
-                double width = Math.Ceiling(query.MaxWidth * ratio / this.pixelSize) * this.pixelSize;
-                if (this.ComputeScore(width, query.MaxHeight).CompareTo(query.MinScore) < 0)
+                double width = Math.Ceiling(maxWidth * ratio / this.pixelSize) * this.pixelSize;
+                if (width < 0)
+                {
+                    width = 0;
+                }
+                if (this.ComputeScore(width, maxHeight).CompareTo(query.MinScore) < 0)
                 {
                     // the score has some additional components that the division didn't catch, so we have to add another pixel
                     width += this.pixelSize;
                 }
-                if (width > query.MaxWidth)
+                if (width > maxWidth)
                 {
                     // We had to round up past the max height, so there is no solution
                     return null;
                 }
-
-                return this.MakeLayout(width, query.MaxHeight, query);
+                return this.MakeLayout(width, maxHeight, query);
             }
             if (query.MinimizesHeight())
             {
-                double height = Math.Ceiling(query.MaxHeight * ratio / this.pixelSize) * this.pixelSize;
-                if (this.ComputeScore(query.MaxWidth, height).CompareTo(query.MinScore) < 0)
+                double height = Math.Ceiling(maxHeight * ratio / this.pixelSize) * this.pixelSize;
+                if (height < 0)
+                {
+                    height = 0;
+                }
+                if (this.ComputeScore(maxWidth, height).CompareTo(query.MinScore) < 0)
                 {
                     // the score has some additional components that the division didn't catch, so we have to add another pixel
                     height += this.pixelSize;
                 }
-                if (height > query.MaxHeight)
+                if (height > maxHeight)
                 {
                     // We had to round up past the max height, so there is no solution
                     return null;
                 }
 
-                return this.MakeLayout(query.MaxWidth, height, query);
+                return this.MakeLayout(maxWidth, height, query);
             }
-            return MakeLayout(query.MaxWidth, query.MaxHeight, query);
+            return MakeLayout(maxWidth, maxHeight, query);
+        }
+        public double PixelSize
+        {
+            set
+            {
+                this.pixelSize = value;
+                this.AnnounceChange(false);
+            }
         }
         private SpecificLayout MakeLayout(double width, double height, LayoutQuery layoutQuery)
         {
-            SpecificLayout layout = this.prepareLayoutForQuery(new Specific_SingleItem_Layout(this.view, new Size(width, height), this.ComputeScore(width, height), null, new Thickness()), layoutQuery);
+            Specific_SingleItem_Layout specificLayout = new Specific_SingleItem_Layout(this.view, new Size(width, height), this.ComputeScore(width, height), null, new Thickness());
+            specificLayout.ChildFillsAvailableSpace = false;
+            SpecificLayout layout = this.prepareLayoutForQuery(specificLayout, layoutQuery);
             if (!layoutQuery.Accepts(layout))
             {
                 System.Diagnostics.Debug.WriteLine("Error; ImageLayout attempted to return an invalid layout result");
@@ -65,11 +92,12 @@ namespace VisiPlacement
         }
         private LayoutScore ComputeScore(double width, double height)
         {
-            return this.scorePerPixel.Times(width * height);
+            return this.scorePerPixel.Times(Math.Min(this.maxSize.Width, width) * Math.Min(this.maxSize.Height, height));
         }
 
         FrameworkElement view;
         private LayoutScore scorePerPixel;
         private double pixelSize;
+        private Size maxSize;
     }
 }
