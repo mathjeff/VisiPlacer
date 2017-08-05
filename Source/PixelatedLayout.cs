@@ -8,7 +8,7 @@ using Windows.UI.Xaml;
 
 namespace VisiPlacement
 {
-    class PixelatedLayout : LayoutChoice_Set
+    public class PixelatedLayout : LayoutChoice_Set
     {
         public PixelatedLayout(LayoutChoice_Set layoutToManage, double pixelSize)
         {
