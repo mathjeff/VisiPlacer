@@ -13,8 +13,9 @@ namespace VisiPlacement
             this.MinScore = LayoutScore.Minimum;
             this.maxWidth = double.PositiveInfinity;
             this.maxHeight = double.PositiveInfinity;
-            this.ID = nextID;
+            this.debugID = nextID;
             nextID++;
+
         }
         // returns whichever layout it likes better
         public abstract LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2);
@@ -59,7 +60,8 @@ namespace VisiPlacement
             this.MaxWidth = original.MaxWidth;
             this.MaxHeight = original.MaxHeight;
             this.MinScore = original.MinScore;
-            this.Debug = original.Debug;
+            if (original.Debug)
+                this.Debug = true;
             this.ProposedSolution_ForDebugging = original.ProposedSolution_ForDebugging;
             return this;
         }
@@ -105,8 +107,8 @@ namespace VisiPlacement
             set
             {
                 this.maxWidth = value;
-                //System.Diagnostics.Debug.WriteLine("max width = ");
-                //System.Diagnostics.Debug.WriteLine(this.maxWidth);
+                //ErrorReporter.ReportParadox("max width = ");
+                //ErrorReporter.ReportParadox(this.maxWidth);
             }
         }
         public double MaxHeight
@@ -118,8 +120,8 @@ namespace VisiPlacement
             set
             {
                 this.maxHeight = value;
-                //System.Diagnostics.Debug.WriteLine("max height = ");
-                //System.Diagnostics.Debug.WriteLine(this.maxHeight);
+                //ErrorReporter.ReportParadox("max height = ");
+                //ErrorReporter.ReportParadox(this.maxHeight);
             }
         }
         public LayoutScore MinScore
@@ -131,8 +133,8 @@ namespace VisiPlacement
             set
             {
                 this.minScore = value;
-                //System.Diagnostics.Debug.WriteLine("min score = ");
-                //System.Diagnostics.Debug.WriteLine(this.minScore);
+                //ErrorReporter.ReportParadox("min score = ");
+                //ErrorReporter.ReportParadox(this.minScore);
             }
         }
         public bool Debug { get; set; } // whether we want to do extra work for this query to ensure the results are correct
@@ -147,7 +149,7 @@ namespace VisiPlacement
                 SpecificLayout proposedSolution = value;
                 if ((value != null) && !this.Accepts(proposedSolution))
                 {
-                    System.Diagnostics.Debug.WriteLine("Error: attempted to provide an invalid debugging solution");
+                    ErrorReporter.ReportParadox("Error: attempted to provide an invalid debugging solution");
                     // go back and run the original query again
                     LayoutQuery debugQuery = proposedSolution.SourceQuery_ForDebugging;
                     if (debugQuery != null)
@@ -158,7 +160,7 @@ namespace VisiPlacement
                         {
                             LayoutChoice_Set parent = proposedSolution.GetAncestors().First();
                             SpecificLayout result = parent.GetBestLayout(debugQuery);
-                            System.Diagnostics.Debug.WriteLine(result);
+                            ErrorReporter.ReportParadox("result = " + result);
                         }
                     }
                 }
@@ -186,6 +188,6 @@ namespace VisiPlacement
         private double maxWidth, maxHeight;
         private LayoutScore minScore;
         private SpecificLayout proposedSolution_forDebugging;
-        private int ID;
+        public int debugID;
     }
 }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+﻿using System.Collections.Generic;
+using Xamarin.Forms;
 
 // Unlike a general LayoutChoice_Set, A SpecificLayout can render reasonably quickly because
 // it is the result of having queried any child layouts about what scores they give for certain sizes
@@ -14,7 +11,7 @@ namespace VisiPlacement
         {
             this.ancestors = new LinkedList<LayoutChoice_Set>();
         }
-        public abstract FrameworkElement View { get; }
+        public abstract View View { get; }
         public abstract double Width { get; }
         public abstract double Height { get; }
         public abstract LayoutScore Score { get; }
@@ -41,7 +38,7 @@ namespace VisiPlacement
                 return null;
             return this;
         }
-        public abstract FrameworkElement DoLayout(Size bounds);
+        public abstract View DoLayout(Size bounds);
         public void CopyFrom(SpecificLayout original)
         {
             base.CopyFrom(original);
@@ -61,6 +58,17 @@ namespace VisiPlacement
         {
             return this.ancestors;
         }
+        public IEnumerable<SpecificLayout> GetDescendents()
+        {
+            List<SpecificLayout> layouts = new List<SpecificLayout>();
+            layouts.Add(this);
+            foreach (SpecificLayout child in this.GetChildren())
+            {
+                layouts.AddRange(child.GetDescendents());
+            }
+            return layouts;
+        }
+        public abstract IEnumerable<SpecificLayout> GetChildren();
         // Sets the general layout that created this specific layout
         public void Set_SourceParent(LayoutChoice_Set parent)
         {
@@ -72,7 +80,7 @@ namespace VisiPlacement
 
         public virtual ViewManager Get_ViewManager()
         {
-            FrameworkElement view = this.View;
+            View view = this.View;
             while (true)
             {
                 ManageableView managedView = view as ManageableView;
@@ -80,7 +88,7 @@ namespace VisiPlacement
                 {
                     return managedView.ViewManager;
                 }
-                view = view.Parent as FrameworkElement;
+                view = view.Parent as ContentView;
                 if (view == null)
                     return null;
             }

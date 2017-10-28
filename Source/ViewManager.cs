@@ -1,29 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
-using Windows.Graphics.Display;
+using Xamarin.Forms;
 
 namespace VisiPlacement
 {
     public class ViewManager : LayoutChoice_Set
     {
-        public ViewManager(ContentControl parentView, LayoutChoice_Set layoutToManage)
+        public ViewManager(ContentView parentView, LayoutChoice_Set layoutToManage)
         {
-            //this.visibleLayouts = new LinkedList<SpecificLayout>();
             this.layoutToManage = layoutToManage;
             layoutToManage.AddParent(this);
 
             this.parentView = new ManageableView(this);
             parentView.Content = this.parentView;
-            this.displaySize = parentView.RenderSize;
+            this.displaySize = new Size(parentView.Width, parentView.Height);
 
-
+            //this.DoLayout(new Size(100, 100));
         }
         public void SetLayout(LayoutChoice_Set layoutToManage)
         {
@@ -53,12 +45,32 @@ namespace VisiPlacement
 
         public void DoLayout()
         {
-            object focusedElement = FocusManager.GetFocusedElement();
+            VisualElement focusedElement = null;
+
+            IEnumerable<SpecificLayout> previousLayouts;
+            if (this.specificLayout != null)
+            {
+                previousLayouts = this.specificLayout.GetDescendents();
+            }
+            else
+            {
+                previousLayouts = new LinkedList<SpecificLayout>();
+            }
+            List<View> focusedLayouts = new List<View>();
+            foreach (SpecificLayout layout in previousLayouts)
+            {
+                if (layout.View != null && layout.View.IsFocused)
+                {
+                    focusedLayouts.Add(layout.View);
+                }
+            }
+
+            //object focusedElement = FocusManager.GetFocusedElement();
             int num_grid_preComputations = GridLayout.NumComputations;
 
             DateTime startTime = DateTime.Now;
             this.Remove_VisualDescendents();
-            FrameworkElement newView = this.DoLayout(this.layoutToManage, this.displaySize);
+            View newView = this.DoLayout(this.layoutToManage, this.displaySize);
             this.Reset_ChangeAnnouncement();
             //newView.Width = this.parentView.Width = this.displaySize.Width;
             //newView.Height = this.parentView.Height = this.displaySize.Height;
@@ -73,17 +85,18 @@ namespace VisiPlacement
             System.Diagnostics.Debug.WriteLine("Num grid computations = " + (num_grid_postComputations - num_grid_preComputations));
             TextLayout.NumMeasures = 0;
             TextLayout.TextTime = new TimeSpan();
-            
-            Control control = focusedElement as Control;
-            if (control != null)
-                control.Focus();
 
-
-            
+            foreach (View view in focusedLayouts)
+            {
+                view.Focus();
+            }
+            //View control = focusedElement as View;
+            //if (control != null)
+            //    control.Focus();
 
         }
 
-        public FrameworkElement DoLayout(LayoutChoice_Set layout, Size bounds)
+        public View DoLayout(LayoutChoice_Set layout, Size bounds)
         {
             LayoutQuery query = new MaxScore_LayoutQuery();
             query.MaxWidth = bounds.Width;
@@ -93,24 +106,14 @@ namespace VisiPlacement
             // figure out where the subviews are placed
             return this.specificLayout.DoLayout(bounds);
 
-            /*this.visibleLayouts.AddLast(bestLayout);
-
-            // update each subview
-            foreach (SubviewDimensions location in locations)
-            {
-                // determine whether this layout wants to just delegate to its child views without making a view of its own
-                FrameworkElement view = location.SubLayout.View;
-                view.InvalidateMeasure();
-                this.DoLayout(location.SubLayout, location.Size);
-            }
-            return bestLayout.View;
-            */
         }
 
         public override void On_ContentsChanged(bool mustRedraw)
         {
             if (mustRedraw)
-                this.parentView.InvalidateMeasure();
+                this.parentView.Margin = new Thickness(1 - this.parentView.Margin.Left);
+            //if (mustRedraw)
+            //    this.parentView.ForceLayout();
         }
 
         // tests that the layout satisfies all of the queries consistently
@@ -219,37 +222,40 @@ namespace VisiPlacement
             return null;    // not relevant
         }
 
-        private ContentControl parentView;
+        private ContentView parentView;
         private LayoutChoice_Set layoutToManage;
         //private LinkedList<SpecificLayout> visibleLayouts;
         private Size displaySize;
         private SpecificLayout specificLayout;
     }
 
-    class ManageableView : ContentControl
+    public class ManageableView : ContentView
     {
         public ManageableView(ViewManager viewManager)
         {
-            this.Background = new SolidColorBrush(Colors.Green);
+            //this.BackgroundColor = Color.Green;
             this.ViewManager = viewManager;
         }
 
         public ViewManager ViewManager { get; set; }
 
-        protected override Size MeasureOverride(Size bounds)
+        protected override void OnSizeAllocated(double width, double height)
         {
+            base.OnSizeAllocated(width, height);
+            if (width > 0 && height > 0)
+            {
+                Size bounds = new Size(width, height);
+                this.ViewManager.DoLayout(bounds);
+            }
+        }
+
+        protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
+        {
+            Size bounds = new Size(widthConstraint, heightConstraint);
             this.ViewManager.DoLayout(bounds);
 
-            base.MeasureOverride(bounds);
-            return bounds;
+            return new SizeRequest(bounds);
         }
         
-        protected override Size ArrangeOverride(Size finalSize)
-        {
-            FrameworkElement element = (FrameworkElement)this.Content;
-            Size tempSize = base.ArrangeOverride(finalSize);
-            return finalSize;
-        }
-
     }
 }

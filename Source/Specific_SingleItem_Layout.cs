@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
+using Xamarin.Forms;
 
 // a Specific_SingleItem_Layout just has a view, a size, a subLayout, and a score
 namespace VisiPlacement
@@ -14,7 +11,7 @@ namespace VisiPlacement
         {
             this.Initialize();
         }
-        public Specific_SingleItem_Layout(FrameworkElement view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness borderThickness)
+        public Specific_SingleItem_Layout(View view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness borderThickness)
         {
             this.Initialize();
             this.view = view;
@@ -23,13 +20,17 @@ namespace VisiPlacement
             this.BorderThickness = borderThickness;
             this.subLayout = subLayout;
         }
+        public Specific_SingleItem_Layout(ContentView view, Size size, LayoutScore score, Thickness borderThickness)
+            : this(view, size, score, null, borderThickness)
+        {
+        }
         private void Initialize()
         {
             this.ChildFillsAvailableSpace = true;
         }
 
         public bool ChildFillsAvailableSpace { get; set; }
-        public override FrameworkElement DoLayout(Size displaySize)
+        public override View DoLayout(Size displaySize)
         {
             if (this.subLayout != null)
             {
@@ -43,11 +44,11 @@ namespace VisiPlacement
                 double subviewHeight = outerHeight - this.BorderThickness.Top - this.BorderThickness.Bottom;
 
                 SubviewDimensions dimensions = new SubviewDimensions(this.subLayout, new Size(subviewWidth, subviewHeight));
-                FrameworkElement childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
+                View childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
                 if (this.View != null)
                 {
-                    this.View.Width = displaySize.Width;
-                    this.View.Height = displaySize.Height;
+                    this.View.WidthRequest = displaySize.Width;
+                    this.View.HeightRequest = displaySize.Height;
                     this.PutContentInView(this.View, childContent);
                     return this.View;
                 }
@@ -56,23 +57,23 @@ namespace VisiPlacement
             return this.View;
             
         }
-        // Makes one FrameworkElement be a direct child visual child of another one
+        // Makes one View be a direct child visual child of another one
         // TODO: refactor this into a helper class for each case, for easier customization
-        private void PutContentInView(FrameworkElement parent, FrameworkElement child)
+        private void PutContentInView(View parent, View child)
         {
-            ContentControl parentAsContentControl = parent as ContentControl;
+            ContentView parentAsContentControl = parent as ContentView;
             if (parentAsContentControl != null)
             {
                 parentAsContentControl.Content = child;
                 return;
             }
-            Border parentAsBorder = parent as Border;
+            Frame parentAsBorder = parent as Frame;
             if (parentAsBorder != null)
             {
-                parentAsBorder.Child = child;
+                parentAsBorder.Content = child;
                 return;
             }
-            throw new ArgumentException("Unrecognized view type");
+            throw new ArgumentException("Unrecognized view type " + parent);
         }
         public override SpecificLayout Clone()
         {
@@ -112,7 +113,7 @@ namespace VisiPlacement
                 return this.score;
             }
         }
-        public override FrameworkElement View
+        public override View View
         {
             get
             {
@@ -128,14 +129,25 @@ namespace VisiPlacement
         {
             if (this.subLayout != null)
                 this.subLayout.Remove_VisualDescendents();
-            ContentControl content = this.view as ContentControl;
+            ContentView content = this.view as ContentView;
             if (content != null)
                 content.Content = null;
         }
 
+        public override IEnumerable<SpecificLayout> GetChildren()
+        {
+            LinkedList<SpecificLayout> children = new LinkedList<SpecificLayout>();
+            if (this.subLayout != null)
+            {
+                children.AddLast(subLayout);
+            }
+            return children;
+        }
+
+
         public Thickness BorderThickness { get; set; }
         private LayoutScore score;
-        private FrameworkElement view;
+        private View view;
         private SpecificLayout subLayout;
     }
 }

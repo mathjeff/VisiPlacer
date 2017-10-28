@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+﻿using Xamarin.Forms;
 
 // a subLayoutLocation tells where inside another view to place a child view
 namespace VisiPlacement

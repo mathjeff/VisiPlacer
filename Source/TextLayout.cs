@@ -1,16 +1,12 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
+using System.ComponentModel;
+using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    class TextLayout : LayoutChoice_Set
+    public class TextLayout : LayoutChoice_Set
     {
         public TextLayout(TextItem_Configurer textItem, double fontSize)
         {
@@ -18,7 +14,7 @@ namespace VisiPlacement
             this.FontSize = fontSize;
             this.ScoreIfEmpty = true;
             this.previousText = this.TextItem_Configurer.Text;
-            textItem.Add_TextChanged_Handler(new PropertyChangedCallback(this.On_TextChanged));
+            textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
 
         }
         protected TextItem_Configurer TextItem_Configurer { get; set; }
@@ -37,7 +33,7 @@ namespace VisiPlacement
             get
             {
                 String result = this.Text;
-                if (result == "" && this.ScoreIfEmpty)
+                if ((result == "" || result == null) && this.ScoreIfEmpty)
                     result = "A";
                 return result;
             }
@@ -45,10 +41,6 @@ namespace VisiPlacement
         private TextFormatter MakeTextFormatter()
         {
             TextFormatter formatter = TextFormatter.Default;
-            formatter.FontFamily = this.TextItem_Configurer.FontFamily;
-            formatter.FontStyle = this.TextItem_Configurer.FontStyle;
-            formatter.FontWeight = this.TextItem_Configurer.FontWeight;
-            formatter.FontStretch = this.TextItem_Configurer.FontStretch;
             formatter.FontSize = this.FontSize;
             return formatter;
         }
@@ -68,7 +60,7 @@ namespace VisiPlacement
             }
             DateTime startTime = DateTime.Now;
             this.previousText = this.TextItem_Configurer.Text;
-            //System.Diagnostics.Debug.WriteLine("avg num computations per query = " + (double)numComputations / (double)numQueries);
+            //ErrorReporter.ReportParadox("avg num computations per query = " + (double)numComputations / (double)numQueries);
             numQueries++;
 
 
@@ -191,7 +183,7 @@ namespace VisiPlacement
         private Specific_TextLayout ComputeDimensions(Size availableSize, string text)
         {
             numComputations++;
-            //System.Diagnostics.Debug.WriteLine("Text items: computations per query: " + AverageNumComputationsPerQuery);
+            //ErrorReporter.ReportParadox("Text items: computations per query: " + AverageNumComputationsPerQuery);
 
             TextFormatter textFormatter = this.MakeTextFormatter();
             Size desiredSize = textFormatter.FormatText(text, availableSize.Width);
@@ -216,9 +208,9 @@ namespace VisiPlacement
 
             // diagnostics
             if (this.LoggingEnabled)
-                System.Diagnostics.Debug.WriteLine("measuring: maxWidth = " + availableSize.Width.ToString() + " maxHeight = " + availableSize.Height.ToString());
+                ErrorReporter.ReportParadox("measuring: maxWidth = " + availableSize.Width.ToString() + " maxHeight = " + availableSize.Height.ToString());
             if (this.LoggingEnabled)
-                System.Diagnostics.Debug.WriteLine("measure: desired width = " + specificLayout.Width.ToString() + " desired height = " + specificLayout.Height.ToString());
+                ErrorReporter.ReportParadox("measure: desired width = " + specificLayout.Width.ToString() + " desired height = " + specificLayout.Height.ToString());
 
             return specificLayout;
         }
@@ -261,7 +253,7 @@ namespace VisiPlacement
                 this.bonusScore = value;
             }
         }
-        public void On_TextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public void On_TextChanged(object sender, PropertyChangedEventArgs e)
         {
             this.On_TextChanged();
         }
@@ -289,7 +281,9 @@ namespace VisiPlacement
                     }
                     else
                     {
-                        Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(this.TextItem_Configurer.View.RenderSize, this.previousText);
+                        View view = this.TextItem_Configurer.View;
+                        Size currentSize = new Size(view.Width, view.Height);
+                        Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, this.previousText);
                         if (!layoutForCurrentText.Cropped)
                         {
                             // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
@@ -387,135 +381,24 @@ namespace VisiPlacement
         {
             Size size;
             // try to load from cache
-            Dictionary<string, Size> dict2;
             if (this.sizeCache == null)
-                this.sizeCache = new Dictionary<FontFamily, Dictionary<string, Size>>();
-            else
+                this.sizeCache = new Dictionary<string, Size>();
+            if (!this.sizeCache.TryGetValue(text, out size))
             {
-                if (this.sizeCache.TryGetValue(this.FontFamily, out dict2))
-                {
-                    /*
-                    if (dict2.TryGetValue(text, out size))
-                        return size;
-                    */
-                }
+                size = this.computeSize(text);
+                this.sizeCache[text] = size;
             }
-            if (textBlock == null)
-            {
-                // create a TextBlock and compute the value
-                TextBlock block = new TextBlock();
-
-                block.FontFamily = this.FontFamily;
-                block.FontStyle = this.FontStyle;
-                block.FontWeight = this.FontWeight;
-                block.FontStretch = this.FontStretch;
-                block.FontSize = this.FontSize;
-                if (!block.FontFamily.Equals(new FontFamily("Segoe WP")))
-                    System.Diagnostics.Debug.WriteLine("Invalid font family");
-                block.Padding = block.Margin = new Thickness();
-
-                // cache the TextBlock
-                textBlock = block;
-            }
-
-            // compute the size
-            textBlock.Text = text;
-            size = new Size(textBlock.ActualWidth, textBlock.ActualHeight);
-
-            // cache the size
-            if (!this.sizeCache.TryGetValue(this.FontFamily, out dict2))
-                dict2 = this.sizeCache[this.FontFamily] = new Dictionary<string, Size>();
-
-
-            // confirm that the value matches
-            {
-                Size cachedSize;
-                if (this.sizeCache.TryGetValue(this.FontFamily, out dict2))
-                {
-                    if (dict2.TryGetValue(text, out cachedSize))
-                    {
-                        if (!(size.Equals(cachedSize)))
-                        {
-                            System.Diagnostics.Debug.WriteLine("Error: text rendering size has changed");
-                        }
-                    }
-                }
-            }
-            dict2[text] = size;
             return size;
         }
-
-
-        public FontFamily FontFamily
+        private Size computeSize(String text)
         {
-            get
-            {
-                return this.fontFamily;
-            }
-            set
-            {
-                if (!value.Equals(this.fontFamily))
-                {
-                    this.textBlock = null;
-                }
-                this.fontFamily = value;
-            }
+            SKPaint textBlock = this.getTextBlock();
+            double width = textBlock.MeasureText(text);
+            
+            // kind of hacky but effective
+            //double width = this.fontSize * text.Length / 2;
+            return new Size(width, this.fontSize);
         }
-        private FontFamily fontFamily;
-
-        public FontStyle FontStyle
-        {
-            get
-            {
-                return this.fontStyle;
-            }
-            set
-            {
-                if (!(value.Equals(this.fontStyle)))
-                {
-                    this.textBlock = null;
-                    this.sizeCache = null;
-                }
-                this.fontStyle = value;
-            }
-        }
-        private FontStyle fontStyle;
-
-        public FontWeight FontWeight
-        {
-            get
-            {
-                return this.fontWeight;
-            }
-            set
-            {
-                if (!(value.Equals(this.fontWeight)))
-                {
-                    this.textBlock = null;
-                    this.sizeCache = null;
-                }
-                this.fontWeight = value;
-            }
-        }
-        private FontWeight fontWeight;
-
-        public FontStretch FontStretch
-        {
-            get
-            {
-                return this.fontStretch;
-            }
-            set
-            {
-                if (!(value.Equals(this.fontStretch)))
-                {
-                    this.textBlock = null;
-                    this.sizeCache = null;
-                }
-                this.fontStretch = value;
-            }
-        }
-        private FontStretch fontStretch;
 
         public double FontSize
         {
@@ -537,18 +420,14 @@ namespace VisiPlacement
 
 
 
-        private Dictionary<FontFamily, Dictionary<String, Size>> sizeCache;
-        private TextBlock textBlock;
-        private TextBlock getTextBlock()
+        private Dictionary<String, Size> sizeCache;
+        private SKPaint textBlock;
+        private SKPaint getTextBlock()
         {
             if (this.textBlock == null)
             {
-                this.textBlock = new TextBlock();
-                this.textBlock.FontFamily = this.FontFamily;
-                this.textBlock.FontStyle = this.FontStyle;
-                this.textBlock.FontWeight = this.FontWeight;
-                this.textBlock.FontStretch = this.FontStretch;
-                this.textBlock.FontSize = this.FontSize;
+                this.textBlock = new SKPaint();
+                this.textBlock.TextSize = (float)this.FontSize;
             }
             return this.textBlock;
         }

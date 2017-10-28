@@ -297,6 +297,13 @@ namespace VisiPlacement
             }
         }
 
+        public string DebugSummary
+        {
+            get
+            {
+                return this.ToString();
+            }
+        }
         public override string ToString()
         {
             String result = "";

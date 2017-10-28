@@ -4,9 +4,9 @@ using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    public class TextboxLayout : LayoutCache
+    public class SinglelineTextboxLayout : LayoutCache
     {
-        public TextboxLayout(Editor textBox)
+        public SinglelineTextboxLayout(Entry textBox)
         {
             Effect effect = Effect.Resolve("VisiPlacement.TextBoxEffect");
             textBox.Effects.Add(effect);
@@ -14,12 +14,11 @@ namespace VisiPlacement
             textBox.Margin = new Thickness();
 
             this.TextBox = textBox;
-            textBox.BackgroundColor = Color.White;
             this.TextBox.Margin = new Thickness();
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
-            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 30));
-            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
+            layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 30));
+            layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 16));
 
             this.LayoutToManage = new LayoutUnion(layouts);
 
@@ -31,12 +30,12 @@ namespace VisiPlacement
         }
 
 
-        private Editor TextBox;
+        private Entry TextBox;
     }
-
-    public class TextBox_Configurer : TextItem_Configurer
+    
+    public class SinglelineTextboxConfigurer : TextItem_Configurer
     {
-        public TextBox_Configurer(Editor TextBox)
+        public SinglelineTextboxConfigurer(Entry TextBox)
         {
             this.TextBox = TextBox;
         }
@@ -78,6 +77,8 @@ namespace VisiPlacement
             this.TextBox.PropertyChanged += handler;
         }
 
-        private Editor TextBox;
+        private Entry TextBox;
     }
+
+
 }

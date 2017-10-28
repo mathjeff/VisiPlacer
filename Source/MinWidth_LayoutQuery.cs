@@ -29,9 +29,18 @@ namespace VisiPlacement
         public override LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2)
         {
             if (choice1 == null)
-                return choice2;
+            {
+                if (this.Accepts(choice2))
+                    return choice2;
+                return null;
+
+            }
             if (choice2 == null)
-                return choice1;
+            {
+                if (this.Accepts(choice1))
+                    return choice1;
+                return null;
+            }
             if (choice1.Width <= choice2.Width)
                 return choice1;
             return choice2;

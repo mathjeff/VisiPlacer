@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
+using Xamarin.Forms;
 
 // the GridLayout will arrange the child elements in a grid pattern
 namespace VisiPlacement
@@ -144,7 +141,7 @@ namespace VisiPlacement
             SemiFixed_GridLayout layout = this.GetBestLayout(query, new SemiFixed_GridLayout(this.elements, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
             if (layout != null && !query.Accepts(layout))
             {
-                System.Diagnostics.Debug.WriteLine("error");
+                ErrorReporter.ReportParadox("error");
             }
             if (query.MaximizesScore())
             {
@@ -155,7 +152,7 @@ namespace VisiPlacement
                 }
                 if (query.PreferredLayout(shrunken, layout) != shrunken)
                 {
-                    System.Diagnostics.Debug.WriteLine("error");
+                    ErrorReporter.ReportParadox("error");
                 }
 
                 layout = shrunken;
@@ -242,7 +239,7 @@ namespace VisiPlacement
 
                         if (currentSublayout == null)
                         {
-                            System.Diagnostics.Debug.WriteLine("error");
+                            ErrorReporter.ReportParadox("error");
                         }
                     }
                 }
@@ -342,7 +339,7 @@ namespace VisiPlacement
 
                         if (currentSublayout == null)
                         {
-                            System.Diagnostics.Debug.WriteLine("error");
+                            ErrorReporter.ReportParadox("error");
                         }
                     }
                 }
@@ -557,16 +554,16 @@ namespace VisiPlacement
                     {
                         if (semiFixedLayout.Width != query.MaxWidth)
                         {
-                            System.Diagnostics.Debug.WriteLine("rounding error: semiFixedLayout.GetRequiredWidth() (" + semiFixedLayout.Width.ToString() + ") != query.MaxWidth (" + query.MaxWidth.ToString() + ")");
-                            System.Diagnostics.Debug.WriteLine("rounding error is " + (semiFixedLayout.Width - query.MaxWidth));
+                            ErrorReporter.ReportParadox("rounding error: semiFixedLayout.GetRequiredWidth() (" + semiFixedLayout.Width.ToString() + ") != query.MaxWidth (" + query.MaxWidth.ToString() + ")");
+                            ErrorReporter.ReportParadox("rounding error is " + (semiFixedLayout.Width - query.MaxWidth));
                         }
                     }
                     else
                     {
                         if (semiFixedLayout.Height != query.MaxHeight)
                         {
-                            System.Diagnostics.Debug.WriteLine("rounding error: semiFixedLayout.GetRequiredHeight() (" + semiFixedLayout.Height.ToString() + ") != query.MaxHeight (" + query.MaxHeight.ToString() + ")");
-                            System.Diagnostics.Debug.WriteLine("rounding error is " + (semiFixedLayout.Height - query.MaxHeight));
+                            ErrorReporter.ReportParadox("rounding error: semiFixedLayout.GetRequiredHeight() (" + semiFixedLayout.Height.ToString() + ") != query.MaxHeight (" + query.MaxHeight.ToString() + ")");
+                            ErrorReporter.ReportParadox("rounding error is " + (semiFixedLayout.Height - query.MaxHeight));
                         }
                     }
                     return this.GetLayoutsToConsider(query, semiFixedLayout);
@@ -803,7 +800,7 @@ namespace VisiPlacement
             if (query.PreferredLayout(fastResult, proposedSolution) == fastResult)
                 return base.GetBestLayout(query);  // everything worked fine
 
-            System.Diagnostics.Debug.WriteLine("error");
+            ErrorReporter.ReportParadox("error");
             // now try to figure out what went wrong
 
             SemiFixed_GridLayout semiFixedLayout = new SemiFixed_GridLayout(this.elements, this.rowHeights, this.columnWidths, this.bonusScore, query.MinimizesWidth());
@@ -814,7 +811,7 @@ namespace VisiPlacement
             {
                 if (!this.CouldTransform(currentLayout, convertedSolution))
                 {
-                    System.Diagnostics.Debug.WriteLine("error: went from " + previousLayout + " to " + currentLayout + " without considering " + proposedSolution);
+                    ErrorReporter.ReportParadox("error: went from " + previousLayout + " to " + currentLayout + " without considering " + proposedSolution);
                 }
                 previousLayout = null;
             }
@@ -829,7 +826,7 @@ namespace VisiPlacement
         {
             if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
             {
-                Console.WriteLine("Error: cannot improve score by shrinking");
+                ErrorReporter.ReportParadox("Error: cannot improve score by shrinking");
             }
 
             //layout = new SemiFixed_GridLayout(layout);
@@ -893,7 +890,7 @@ namespace VisiPlacement
                         // problem: if
                         if (layout2 == null)
                         {
-                            System.Diagnostics.Debug.WriteLine("Error: min-width query did not find result from max-score query");
+                            ErrorReporter.ReportParadox("Error: min-width query did not find result from max-score query");
                             // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
                             LayoutQuery debugQuery1 = query.Clone();
                             debugQuery1.Debug = true;
@@ -905,11 +902,11 @@ namespace VisiPlacement
                             subLayout.GetBestLayout(debugQuery2.Clone());
                             debugQuery2.MinScore = LayoutScore.Minimum;
                             SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery2.Clone());
-                            System.Diagnostics.Debug.WriteLine("");
+                            ErrorReporter.ReportParadox("");
                         }
                         if (!query2.Accepts(layout2))
                         {
-                            System.Diagnostics.Debug.WriteLine("Error: min-width query received an invalid response");
+                            ErrorReporter.ReportParadox("Error: min-width query received an invalid response");
                         }
 
                         currentWidth = this.RoundWidthUp(layout2.Width);
@@ -931,7 +928,7 @@ namespace VisiPlacement
                 if (sourceQuery.Debug)
                 {
                     if (layout.Score.CompareTo(originalScore) != 0)
-                        System.Diagnostics.Debug.WriteLine("Error; ShrinkWidth caused a change in score");
+                        ErrorReporter.ReportParadox("Error; ShrinkWidth caused a change in score");
                 }
                 else
                 {
@@ -942,7 +939,7 @@ namespace VisiPlacement
             else
             {
                 if (layout.Score.CompareTo(originalScore.Minus(totalAllowedScoreDecrease)) < 0)
-                    System.Diagnostics.Debug.WriteLine("Error; ShrinkWidth decreased the score too much");
+                    ErrorReporter.ReportParadox("Error; ShrinkWidth decreased the score too much");
             }
         }
 
@@ -951,7 +948,7 @@ namespace VisiPlacement
         {
             if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
             {
-                Console.WriteLine("Error: cannot improve score by shrinking");
+                ErrorReporter.ReportParadox("Error: cannot improve score by shrinking");
             }
             //layout = new SemiFixed_GridLayout(layout);
             //double maxHeight = layout.Get_GroupHeight(indexOf_propertyGroup_toShrink);
@@ -1005,7 +1002,7 @@ namespace VisiPlacement
                         // problem: if
                         if (layout2 == null)
                         {
-                            System.Diagnostics.Debug.WriteLine("Error: min-height query did not find result from max-score query");
+                            ErrorReporter.ReportParadox("Error: min-height query did not find result from max-score query");
                             // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
                             LayoutQuery debugQuery1 = query.Clone();
                             debugQuery1.Debug = true;
@@ -1017,12 +1014,12 @@ namespace VisiPlacement
                             subLayout.GetBestLayout(debugQuery2.Clone());
                             debugQuery2.MinScore = LayoutScore.Minimum;
                             SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery2.Clone());
-                            System.Diagnostics.Debug.WriteLine("");
+                            ErrorReporter.ReportParadox("");
                         }
 
                         if (!query2.Accepts(layout2))
                         {
-                            System.Diagnostics.Debug.WriteLine("Error: min-height query received an invalid response");
+                            ErrorReporter.ReportParadox("Error: min-height query received an invalid response");
                         }
 
                         currentHeight = this.RoundHeightUp(layout2.Height);
@@ -1043,7 +1040,7 @@ namespace VisiPlacement
                 if (sourceQuery.Debug)
                 {
                     if (layout.Score.CompareTo(originalScore) != 0)
-                        System.Diagnostics.Debug.WriteLine("Error; ShrinkHeight caused a change in score");
+                        ErrorReporter.ReportParadox("Error; ShrinkHeight caused a change in score");
                 }
                 else
                 {
@@ -1054,182 +1051,11 @@ namespace VisiPlacement
             else
             {
                 if (layout.Score.CompareTo(originalScore.Minus(totalAllowedScoreDecrease)) < 0)
-                    System.Diagnostics.Debug.WriteLine("Error; ShrinkHeight decreased the score too much");
+                    ErrorReporter.ReportParadox("Error; ShrinkHeight decreased the score too much");
             }
         }
 
 
-        /*
-        // attempts to increase specified width until the total score of the entire layout is at least minScore
-        private SemiFixed_GridLayout IncreaseWidth(LayoutScore minScore, SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, double maxWidth)
-        {
-            layout = new SemiFixed_GridLayout(layout);
-            List<int> indices = layout.ColumnWidths.GetGroupAtIndex(indexOf_propertyGroup_toShrink);
-
-            // count the number of views being resized, for the purpose of computing how much some scores must increase
-            double numViewsBeingResized = 0;
-            foreach (int columnNumber in indices)
-            {
-                int rowNumber;
-                for (rowNumber = 0; rowNumber < this.NumRows; rowNumber++)
-                {
-                    IView view = this.elements[columnNumber, rowNumber];
-                    if (view != null)
-                        numViewsBeingResized++;
-                }
-            }
-
-            while (true)
-            {
-                double bestWidth = double.PositiveInfinity;
-                // Given N views that must contribute to an increase S in score, we know that at least one of them must contribute at least S/N
-                // So, we ask each of them to increase by at least S/N, look for the smallest increase, and repeat
-                LayoutScore scoreGap = minScore.Minus(layout.Score);
-                LayoutScore minImprovement = scoreGap.Times(1 / numViewsBeingResized);
-
-                // iterate over each relevant subview
-                foreach (int columnNumber in indices)
-                {
-                    int rowNumber;
-                    for (rowNumber = 0; rowNumber < this.NumRows; rowNumber++)
-                    {
-                        IView view = this.elements[columnNumber, rowNumber];
-                        if (view != null)
-                        {
-                            double columnWeight = layout.ColumnWidths.GetFraction(columnNumber);
-
-                            // ask the view for the highest-scoring size for its current bounds
-                            LayoutQuery query = new MaxScore_LayoutQuery();
-                            query.MaxWidth = this.GetUsableColumnWidth(columnNumber, layout);
-                            query.MaxHeight = this.GetUsableRowHeight(rowNumber, layout);
-                            SpecificLayout bestLayout = view.Layout.GetBestLayout(query.Clone());
-                            //LayoutDimensions dimensions = bestLayout.Dimensions;
-
-
-                            // figure out how much bigger the view must get in order to increase its score appropriately
-                            LayoutQuery query2 = new MinWidth_LayoutQuery();
-                            query2.MaxHeight = query.MaxHeight;
-                            query2.MinScore = bestLayout.Score.Plus(minImprovement);
-
-                            // ask the view for the the answer
-                            SpecificLayout layout2 = view.Layout.GetBestLayout(query2.Clone());
-
-                            if (layout2 != null)
-                            {
-                                // compute coordinates
-                                double columnWidth = this.RoundWidthUp(layout2.Width);
-                                double currentWidth = columnWidth / columnWeight;
-                                //currentWidth = Math.Ceiling(currentWidth / pixelSize) * pixelSize;
-
-                                // keep track of the largest amount we might have to rescale the values by
-                                if (currentWidth < bestWidth)
-                                {
-                                    bestWidth = currentWidth;
-                                }
-                            }
-                        }
-                    }
-                }
-                // if no view could increase enough, then there are no solutions
-                if (double.IsPositiveInfinity(bestWidth))
-                    return null;
-                // if no view could increase enough, then there are no solutions
-                if (bestWidth > maxWidth)
-                    return null;
-                // If at least one view could increase its score enough, increase the width of this column and repeat
-                layout.ColumnWidths.Set_GroupTotal(indexOf_propertyGroup_toShrink, bestWidth);
-                // if we've finally achieved our goal, then return that information
-                if (layout.Score.CompareTo(minScore) >= 0)
-                    return layout;
-            }
-        }
-
-        // attempts to increase specified width until the total score of the entire layout is at least minScore
-        private SemiFixed_GridLayout IncreaseHeight(LayoutScore minScore, SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, double maxHeight)
-        {
-            layout = new SemiFixed_GridLayout(layout);
-            List<int> indices = layout.RowHeights.GetGroupAtIndex(indexOf_propertyGroup_toShrink);
-
-            // count the number of views being resized, for the purpose of computing how much some scores must increase
-            double numViewsBeingResized = 0;
-            foreach (int rowNumber in indices)
-            {
-                int columnNumber;
-                for (columnNumber = 0; columnNumber < this.NumColumns; columnNumber++)
-                {
-                    IView view = this.elements[columnNumber, rowNumber];
-                    if (view != null)
-                        numViewsBeingResized++;
-                }
-            }
-
-            while (true)
-            {
-                double bestHeight = double.PositiveInfinity;
-                // Given N views that must contribute to an increase S in score, we know that at least one of them must contribute at least S/N
-                // So, we ask each of them to increase by at least S/N, look for the smallest increase, and repeat
-                LayoutScore scoreGap = minScore.Minus(layout.Score);
-                LayoutScore minImprovement = scoreGap.Times(1 / numViewsBeingResized);
-
-                // iterate over each relevant subview
-                foreach (int rowNumber in indices)
-                {
-                    int columnNumber;
-                    for (columnNumber = 0; columnNumber < this.NumColumns; columnNumber++)
-                    {
-                        IView view = this.elements[columnNumber, rowNumber];
-                        if (view != null)
-                        {
-                            double rowWeight = layout.RowHeights.GetFraction(rowNumber);
-
-                            // ask the view for the highest-scoring size for its current bounds
-                            LayoutQuery query = new MaxScore_LayoutQuery();
-                            query.MaxWidth = this.GetUsableColumnWidth(columnNumber, layout);
-                            query.MaxHeight = this.GetUsableRowHeight(rowNumber, layout);
-                            SpecificLayout bestLayout = view.Layout.GetBestLayout(query.Clone());
-                            //LayoutDimensions dimensions = bestLayout.Dimensions;
-
-
-                            // figure out how much bigger the view must get in order to increase its score appropriately
-                            LayoutQuery query2 = new MinHeight_LayoutQuery();
-                            query2.MaxWidth = query.MaxWidth;
-                            query2.MinScore = bestLayout.Score.Plus(minImprovement);
-
-                            // ask the view for the the answer
-                            SpecificLayout layout2 = view.Layout.GetBestLayout(query2.Clone());
-
-                            if (layout2 != null)
-                            {
-                                // compute coordinates
-                                double rowHeight = this.RoundHeightUp(layout2.Height);
-                                double currentHeight = rowHeight / rowWeight;
-                                //currentHeight = Math.Ceiling(currentHeight / pixelSize) * pixelSize;
-
-                                // keep track of the largest amount we might have to rescale the values by
-                                if (currentHeight < bestHeight)
-                                {
-                                    bestHeight = currentHeight;
-                                }
-                            }
-                        }
-                    }
-                }
-                // if no view could increase enough, then there are no solutions
-                if (double.IsPositiveInfinity(bestHeight))
-                    return null;
-                // if no view could increase enough, then there are no solutions
-                if (bestHeight > maxHeight)
-                    return null;
-                // If at least one view could increase its score enough, the we increase the width of this column and repeat
-                layout.RowHeights.Set_GroupTotal(indexOf_propertyGroup_toShrink, bestHeight);
-                // if we've finally achieved our goal, then return that information
-                if (layout.Score.CompareTo(minScore) >= 0)
-                    return layout;
-            }
-        }
-
-
-        */
         private double GetUsableColumnWidth(int columnIndex, SemiFixed_GridLayout layout)
         {
             //return layout.ColumnWidths.GetValue(columnIndex);
@@ -1329,7 +1155,7 @@ namespace VisiPlacement
                             query.MaxHeight = requiredHeight;
                             SpecificLayout recheckedLayout = currentLayout.GetBestLayout(query);
                             if (query.PreferredLayout(subLayout, recheckedLayout) != subLayout)
-                                System.Diagnostics.Debug.WriteLine("Error; sublayout cannot re-find its own response");
+                                ErrorReporter.ReportParadox("Error; sublayout cannot re-find its own response");
 
                         }
                         // update out how large the rows and columns need to be, using this new information
@@ -1372,7 +1198,7 @@ namespace VisiPlacement
                     newScore = layout.Score;
                     if (newScore.CompareTo(previousScore) < 0)
                     {
-                        System.Diagnostics.Debug.WriteLine("Rounding error appears to be taking place in a sublayout");
+                        ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                         if (!enableDebugging)
                             this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
                         MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
@@ -1402,7 +1228,7 @@ namespace VisiPlacement
                     newScore = layout.Score;
                     if (newScore.CompareTo(previousScore) < 0)
                     {
-                        System.Diagnostics.Debug.WriteLine("Rounding error appears to be taking place in a sublayout");
+                        ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                         if (!enableDebugging)
                             this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
                         MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
@@ -1423,17 +1249,17 @@ namespace VisiPlacement
             for (i = 0; i < layout.GetNumHeightProperties(); i++)
             {
                 if (layout.GetHeightCoordinate(i) < requiredRowHeights[i])
-                    System.Diagnostics.Debug.WriteLine("Rounding error");
+                    ErrorReporter.ReportParadox("Rounding error");
             }
             for (i = 0; i < layout.GetNumWidthProperties(); i++)
             {
                 if (layout.GetWidthCoordinate(i) < requiredColumnWidths[i])
-                    System.Diagnostics.Debug.WriteLine("Rounding error");
+                    ErrorReporter.ReportParadox("Rounding error");
             }
             newScore = layout.Score;
             if (newScore.CompareTo(previousScore) < 0)
             {
-                System.Diagnostics.Debug.WriteLine("Rounding error appears to be taking place in a sublayout");
+                ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                 if (!enableDebugging)
                     this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
                 MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
@@ -1745,7 +1571,7 @@ namespace VisiPlacement
                     remainder -= error;
                 error = (subtraction + remainder) - total;
                 if (error > 0)
-                    System.Diagnostics.Debug.WriteLine("Rounding Error!");
+                    ErrorReporter.ReportParadox("Rounding Error!");
             }
             if (Double.IsNaN(remainder))
                 throw new InvalidOperationException();
@@ -2017,7 +1843,7 @@ namespace VisiPlacement
                 return this.nextDimensionToSet;
             }
         }
-        public override FrameworkElement DoLayout(Size bounds)
+        public override View DoLayout(Size bounds)
         {
             int rowNumber, columnNumber;
             double unscaledX, unscaledY;    // paying a lot of attention to rounding;
@@ -2040,7 +1866,7 @@ namespace VisiPlacement
             y = unscaledY = 0;
             List<double> columnWidths = new List<double>();
             List<double> rowHeights = new List<double>();
-            FrameworkElement[,] subviews = new FrameworkElement[this.columnWidths.NumProperties, this.rowHeights.NumProperties];
+            View[,] subviews = new View[this.columnWidths.NumProperties, this.rowHeights.NumProperties];
             for (rowNumber = 0; rowNumber < this.rowHeights.NumProperties; rowNumber++)
             {
                 // compute the coordinates in the unscaled coordinate system
@@ -2065,7 +1891,7 @@ namespace VisiPlacement
 
 
                     LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
-                    FrameworkElement subview = null;
+                    View subview = null;
                     if (subLayout != null)
                     {
                         MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
@@ -2089,7 +1915,7 @@ namespace VisiPlacement
             return this.View;
         }
 
-        public override FrameworkElement View
+        public override View View
         {
             get { return this.GridView; }
         }
@@ -2124,6 +1950,12 @@ namespace VisiPlacement
             }
             this.specificSublayouts.Clear();
         }
+
+        public override IEnumerable<SpecificLayout> GetChildren()
+        {
+            return this.specificSublayouts;
+        }
+
 
         LayoutChoice_Set[,] elements;
         int nextDimensionToSet;

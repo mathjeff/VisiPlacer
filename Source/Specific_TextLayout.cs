@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using System.Windows;
-using System.Windows.Media;
-using System.Globalization;
+using Xamarin.Forms;
 
-// A Specific_TextLayout tells parameters (width, height, fontsize) of a piece of text (TextBlock or TextBox)
+// A Specific_TextLayout tells parameters (width, height, fontsize) of a piece of text (Label or TextBox)
 namespace VisiPlacement
 {
     public class Specific_TextLayout : SpecificLayout
@@ -50,14 +45,14 @@ namespace VisiPlacement
                 return this.score;
             }
         }
-        public override FrameworkElement View
+        public override View View
         {
             get { return this.textItem.View; }
         }
         public bool Cropped { get; set; }
         public String TextForDebugging { get; set; }
 
-        public override FrameworkElement DoLayout(Size displaySize)
+        public override View DoLayout(Size displaySize)
         {
             if (displaySize.Width != this.textItem.Width)
                 this.textItem.Width = displaySize.Width;
@@ -90,11 +85,17 @@ namespace VisiPlacement
             return clone;
         }
 
+        public override IEnumerable<SpecificLayout> GetChildren()
+        {
+            return new LinkedList<SpecificLayout>();
+        }
+
         private TextItem_Configurer textItem;
         private double fontSize;
         private double width;
         private double height;
         private LayoutScore score;
+        private bool wasSelected;
 
     }
 

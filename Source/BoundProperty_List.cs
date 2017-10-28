@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace VisiPlacement
 {
@@ -92,7 +91,7 @@ namespace VisiPlacement
                 this.values[propertyIndex] = newValue;
                 if (newValue < minValues[i])
                 {
-                    System.Diagnostics.Debug.WriteLine("rounding error in BoundProperyList::SetMinValues");
+                    ErrorReporter.ReportParadox("rounding error in BoundProperyList::SetMinValues");
                 }
             }
 
@@ -115,7 +114,7 @@ namespace VisiPlacement
             }
             if (values[propertyIndex] != value)
             {
-                System.Diagnostics.Debug.WriteLine("rounding error!");
+                ErrorReporter.ReportParadox("rounding error!");
             }
         }
 
@@ -131,16 +130,16 @@ namespace VisiPlacement
             /*
             if (indices.Count == 18 && Math.Abs(totalValue / 18 - 15.96) < 0.01)
             {
-                System.Diagnostics.Debug.WriteLine("now");
+                ErrorReporter.ReportParadox("now");
                 double oneRow = 15.96;
                 double multipliedTotal = oneRow * 18;
                 if (multipliedTotal < totalValue)
                 {
-                    System.Diagnostics.Debug.WriteLine("15.96 * 18 < totalValue");
+                    ErrorReporter.ReportParadox("15.96 * 18 < totalValue");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("15.96 * 18 >= totalValue");
+                    ErrorReporter.ReportParadox("15.96 * 18 >= totalValue");
                 }
                 double summedTotal = 0;
                 for (int i = 0; i < 18; i++)
@@ -149,11 +148,11 @@ namespace VisiPlacement
                 }
                 if (summedTotal < totalValue)
                 {
-                    System.Diagnostics.Debug.WriteLine("15.96 * 18 < totalValue");
+                    ErrorReporter.ReportParadox("15.96 * 18 < totalValue");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("15.96 * 18 >= totalValue");
+                    ErrorReporter.ReportParadox("15.96 * 18 >= totalValue");
                 }
 
             }
@@ -222,7 +221,7 @@ namespace VisiPlacement
 
             if (this.Get_GroupTotal(groupIndex) != totalValue)
             {
-                System.Diagnostics.Debug.WriteLine("rounding error!");
+                ErrorReporter.ReportParadox("rounding error!");
             }
         }
         public double Get_GroupTotal(int groupIndex)

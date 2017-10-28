@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows;
+using Xamarin.Forms;
 
 // A LayoutChoice_Set describes different layouts for a view's child views
 // The LayoutChoice_Set can be asked to choose the best layout (such as the highest-scoring layout) fitting inside a certain size
@@ -12,11 +12,16 @@ namespace VisiPlacement
 {
     public abstract class LayoutChoice_Set
     {
+        static int nextDebugId = 0;
+
         public LayoutChoice_Set()
         {
             this.changedSinceLatestQuery = true;
             this.changedSinceLastRender = true;
             this.parents = new HashSet<LayoutChoice_Set>();
+
+            this.DebugId = nextDebugId;
+            nextDebugId++;
         }
         public virtual void CopyFrom(LayoutChoice_Set original)
         {
@@ -27,12 +32,6 @@ namespace VisiPlacement
 
         // asks for the best dimensions that this set allows
         public abstract SpecificLayout GetBestLayout(LayoutQuery query);
-
-
-        // declares that the given size is what has been chosen (note that the choice is computed based on space constraints including other outside views)
-        public void SetSize(Rect size)
-        {
-        }
 
 
         // Given a SpecificLayout, sets any necessary properties to make it suitable to return to the caller of GetBestLayout(LayoutQuery)
@@ -47,8 +46,12 @@ namespace VisiPlacement
                 {
                     if (!query.Accepts(query.ProposedSolution_ForDebugging))
                     {
-                        System.Diagnostics.Debug.WriteLine("Error: the proposed solution was not valid");
+                        ErrorReporter.ReportParadox("Error: the proposed solution was not valid");
                     }
+                }
+                if (layout != null && !query.Accepts(layout))
+                {
+                    ErrorReporter.ReportParadox("Error: the returned layout was not valid");
                 }
             }
 
@@ -63,9 +66,9 @@ namespace VisiPlacement
                         numMatches++;
                 }
                 if (numMatches == 0)
-                    System.Diagnostics.Debug.WriteLine("Error: the returned layout did not come from this layout");
+                    ErrorReporter.ReportParadox("Error: the returned layout did not come from this layout");
                 if (numMatches > 1)
-                    System.Diagnostics.Debug.WriteLine("Error: the returned layout contained multiple ancestors matching this one");
+                    ErrorReporter.ReportParadox("Error: the returned layout contained multiple ancestors matching this one");
 
                 layout.SourceQuery_ForDebugging = query.Clone();
             }
@@ -108,6 +111,8 @@ namespace VisiPlacement
         public virtual void On_ContentsChanged(bool mustRedraw)
         {
         }
+
+        public int DebugId;
 
         protected bool Get_ChangedSinceLastRender()
         {

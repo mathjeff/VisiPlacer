@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Media;
+using Xamarin.Forms;
 
 // Allows the user to enter a duration
 namespace VisiPlacement
@@ -13,7 +8,7 @@ namespace VisiPlacement
     {
         public DurationEntryView()
         {
-            this.textBox = new TextBox();
+            this.textBox = new Editor();
             this.textBox.TextChanged += this.TextBox_TextChanged;
             GridLayout grid = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero);
             grid.AddLayout(new TextboxLayout(this.textBox));
@@ -46,11 +41,11 @@ namespace VisiPlacement
 
         private void appearValid()
         {
-            this.textBox.Background = new SolidColorBrush(Colors.White);
+            this.textBox.BackgroundColor = Color.White;
         }
         private void appearInvalid()
         {
-            this.textBox.Background = new SolidColorBrush(Colors.Red);
+            this.textBox.BackgroundColor = Color.Red;
         }
 
         private bool Parse(out TimeSpan result)
@@ -73,6 +68,6 @@ namespace VisiPlacement
             this.updateColor();
         }
 
-        private TextBox textBox;
+        private Editor textBox;
     }
 }

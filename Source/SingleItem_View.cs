@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+﻿using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    class SingleItem_View : ContentControl
+    public class SingleItem_View : ContentView
     {
         public SingleItem_View()
         {
             this.Margin = new Thickness();
             this.Padding = new Thickness();
         }
-        //protected override void OnChildDesiredSizeChanged(FrameworkElement child)
-        protected override void OnContentChanged(object oldContent, object newContent)
+        protected override void OnChildAdded(Element child)
+        {
+            this.InvalidateMeasure();
+        }
+        protected override void OnChildRemoved(Element child)
         {
             this.InvalidateMeasure();
         }

@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
+﻿using Xamarin.Forms;
 
 namespace VisiPlacement
 {
+    // a layout that contains one sublayout within it
     public class SingleItem_Layout : LayoutChoice_Set
     {
         public SingleItem_Layout()
         {
             this.Initialize();
             this.BonusScore = LayoutScore.Zero;
-            //this.View = new SingleItem_View();
         }
-        public SingleItem_Layout(FrameworkElement view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore)
+        public SingleItem_Layout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore)
         {
             this.Initialize();
             this.View = view;
@@ -23,7 +18,7 @@ namespace VisiPlacement
             this.BorderThickness = borderThickness;
             this.BonusScore = bonusScore;
         }
-        public SingleItem_Layout(FrameworkElement view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore, bool fillAvailableSpace)
+        public SingleItem_Layout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore, bool fillAvailableSpace)
         {
             this.Initialize();
             this.View = view;
@@ -41,8 +36,8 @@ namespace VisiPlacement
             this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
             base.CopyFrom(original);
         }
-        private FrameworkElement view;
-        public FrameworkElement View
+        private ContentView view;
+        public ContentView View
         {
             get
             {
@@ -108,7 +103,7 @@ namespace VisiPlacement
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
-                    result = this.makeSpecificLayout(this.view, new System.Windows.Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
+                    result = this.makeSpecificLayout(this.view, new Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
                     result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;
@@ -121,7 +116,7 @@ namespace VisiPlacement
             return result;
         }
 
-        protected Specific_SingleItem_Layout makeSpecificLayout(FrameworkElement view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
+        protected Specific_SingleItem_Layout makeSpecificLayout(ContentView view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
         {
             return new Specific_SingleItem_Layout(view, size, score, subLayout, border);
         }

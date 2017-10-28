@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+using Xamarin.Forms;
 
 // a LayoutCache acts like the layout provided to it, but faster by saving results
 namespace VisiPlacement
@@ -16,10 +14,10 @@ namespace VisiPlacement
         public LayoutCache(LayoutChoice_Set layoutToManage)
         {
             if (layoutToManage == null)
-                System.Diagnostics.Debug.WriteLine("Warning: creating a LayoutCache with nothing in it");
+                ErrorReporter.ReportParadox("Warning: creating a LayoutCache with nothing in it");
             this.Initialize();
             if (layoutToManage is LayoutCache)
-                System.Diagnostics.Debug.WriteLine("Warning: creating a LayoutCache that simply manages another LayoutCache");
+                ErrorReporter.ReportParadox("Warning: creating a LayoutCache that simply manages another LayoutCache");
             this.LayoutToManage = layoutToManage;
         }
         private void Initialize()
@@ -37,7 +35,7 @@ namespace VisiPlacement
                 if (this.layoutToManage != null)
                     this.layoutToManage.AddParent(this);
                 else
-                    System.Diagnostics.Debug.WriteLine("Warning: creating a LayoutCache with nothing in it");
+                    ErrorReporter.ReportParadox("Warning: creating a LayoutCache with nothing in it");
 
                 this.AnnounceChange(true);
             }
@@ -47,7 +45,7 @@ namespace VisiPlacement
             double shifted = value * 300;
             if (shifted - Math.Floor(shifted) != 0)
             {
-                System.Diagnostics.Debug.WriteLine("rounding error");
+                ErrorReporter.ReportParadox("rounding error");
             }
         }
         public SpecificLayout GetBestLayout_Quickly(LayoutQuery query)
@@ -72,7 +70,10 @@ namespace VisiPlacement
                     debugQuery.Debug = true;
                     SpecificLayout correct_subLayout = this.Query_SubLayout(debugQuery);
                     if (broadened.Query.PreferredLayout(broadened.Response, correct_subLayout) != broadened.Response)
-                        System.Diagnostics.Debug.WriteLine("Error; incorrect result for broadened query");
+                    {
+                        ErrorReporter.ReportParadox("Error; incorrect result for broadened query");
+                        this.Find_LargerQuery(query);
+                    }
                 }
                 // if a less-restrictive query returned acceptable results, we can simply use those
                 if (query.Accepts(broadened.Response))
@@ -93,7 +94,7 @@ namespace VisiPlacement
                     debugQuery.Debug = true;
                     SpecificLayout correct_subLayout = this.Query_SubLayout(debugQuery);
                     if (shrunken.Query.PreferredLayout(shrunken.Response, correct_subLayout) != shrunken.Response)
-                        System.Diagnostics.Debug.WriteLine("Error; incorrect result for shrunken query");
+                        ErrorReporter.ReportParadox("Error; incorrect result for shrunken query");
                 }
             }
 
@@ -154,14 +155,14 @@ namespace VisiPlacement
             {
                 if (shrunken != null && query.Accepts(shrunken.Response))
                 {
-                    System.Diagnostics.Debug.WriteLine("Error: cache contains an acceptable value for the current query, but the layout claims there are none");
+                    ErrorReporter.ReportParadox("Error: cache contains an acceptable value for the current query, but the layout claims there are none");
                     result = shrunken.Response;
                 }
             }
 
             // record that this is the exact answer to this query
             if (this.queryResults.ContainsKey(query))
-                System.Diagnostics.Debug.WriteLine("Error, layoutCache repeated a query that was already present ");
+                ErrorReporter.ReportParadox("Error, layoutCache repeated a query that was already present ");
             this.queryResults[query.Clone()] = result;
             
             if (query.Debug)
@@ -192,34 +193,69 @@ namespace VisiPlacement
                         previousQuery = previousData.Query;
                     }
                     LayoutQuery_And_Response newData = new LayoutQuery_And_Response();
-                    // if the previous query was strictly larger, then leave it as the query to use
+                    bool oldQueryIsBetter = false;
+                    bool oldResultsAreBetter = false;
+
                     if (previousQuery != null && (previousQuery.MaxWidth >= query.MaxWidth && previousQuery.MaxHeight >= query.MaxHeight && previousQuery.MinScore.CompareTo(query.MinScore) <= 0))
+                    {
+                        // the previous query was bigger so leave it
+                        oldQueryIsBetter = true;
+                        oldResultsAreBetter = true;
+
+                        // if the new response is better, it can stay
+                        if (result != null && previousResult != null)
+                        {
+                            if (result.Width <= previousResult.Width && result.Height <= previousResult.Height && result.Score.CompareTo(previousResult.Score) >= 0)
+                            {
+                                oldResultsAreBetter = false;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        // if the previous result was better, then leave it
+                        if (result != null && previousResult != null)
+                        {
+                            if (previousResult.Width <= result.Width && previousResult.Height <= result.Height && previousResult.Score.CompareTo(result.Score) >= 0)
+                                oldResultsAreBetter = true;
+                        }
+                    }
+
+                    // if the previous query was strictly larger, then leave it as the query to use
+                    if (oldQueryIsBetter)
                         newData.Query = previousQuery;
                     else
                         newData.Query = query.Clone();
-                    // if the previous result was strictly better, then leave it as the result to use
-                    double queryCount1 = numQueries;
-                    if (previousResult != null && (result == null ||
-                        (previousResult.Width <= result.Width && previousResult.Height <= result.Height && previousResult.Score.CompareTo(result.Score) >= 0)))
+
+                    if (oldResultsAreBetter)
+                    {
                         newData.Response = previousResult;
+                    }
                     else
-                        newData.Response = newData.Query.PreferredLayout(result, previousResult);
+                    {
+                        newData.Response = result;
+                    }
+
+
+
                     double queryCount2 = numQueries;
                     if (newData.Query == previousQuery && newData.Response == previousResult)
                         break;
 
-                    if (query.Debug)
+                    if (query.Debug || newData.Query.Debug)
                     {
                         LayoutQuery debugQuery = newData.Query.Clone();
                         debugQuery.Debug = true;
                         SpecificLayout correct_subLayout = this.Query_SubLayout(debugQuery);
                         if (newData.Query.PreferredLayout(newData.Response, correct_subLayout) != newData.Response)
-                            System.Diagnostics.Debug.WriteLine("Error; LayoutCache attempting to insert an answer that is not good enough into sampleQueries");
+                            ErrorReporter.ReportParadox("Error; LayoutCache attempting to insert an answer that is not good enough into sampleQueries");
                         if (newData.Query.PreferredLayout(correct_subLayout, newData.Response) != correct_subLayout)
-                            System.Diagnostics.Debug.WriteLine("Error; LayoutCache attempting to insert an answer that is too good into sampleQueries");
+                            ErrorReporter.ReportParadox("Error; LayoutCache attempting to insert an answer that is too good into sampleQueries");
 
+                        if (newData.Response != null && !newData.Query.Accepts(newData.Response))
+                            ErrorReporter.ReportParadox("Error; inserting an incorrect answer into sampleQueries");
                     }
-
                     this.sampleQueries[largerQuery] = newData;
 
                 }
@@ -250,17 +286,17 @@ namespace VisiPlacement
                 SpecificLayout correctResult = this.Query_SubLayout(query.Clone());
                 if (correctResult != null && !query.Accepts(correctResult))
                 {
-                    System.Diagnostics.Debug.WriteLine("Error: LayoutCache was given an incorrect response by its sublayout");
+                    ErrorReporter.ReportParadox("Error: LayoutCache was given an incorrect response by its sublayout");
                 }
                 bool correct = true;
                 if (query.PreferredLayout(correctResult, fastResult) != correctResult)
                 {
-                    System.Diagnostics.Debug.WriteLine("Error: layout cache returned incorrect (superior) result");
+                    ErrorReporter.ReportParadox("Error: layout cache returned incorrect (superior) result");
                     correct = false;
                 }
                 if (query.PreferredLayout(fastResult, correctResult) != fastResult)
                 {
-                    System.Diagnostics.Debug.WriteLine("Error: layout cache returned incorrect (inferior) result");
+                    ErrorReporter.ReportParadox("Error: layout cache returned incorrect (inferior) result");
                     correct = false;
                 }
                 if (!correct)
@@ -369,6 +405,13 @@ namespace VisiPlacement
                     }
                 }
 
+            }
+            if (query.Debug)
+            {
+                if (bestResult != null && bestResult.Response != null && !bestResult.Query.Accepts(bestResult.Response))
+                {
+                    ErrorReporter.ReportParadox("Query does not accept its recorded answer");
+                }
             }
             // return the most useful query+response that we found
             return bestResult;

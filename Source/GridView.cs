@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using System.Windows;
+﻿using System.Collections.Generic;
+using Xamarin.Forms;
 
 namespace VisiPlacement
 {
@@ -12,8 +8,11 @@ namespace VisiPlacement
         public GridView()
         {
             this.Margin = new Thickness();
+            this.Padding = new Thickness();
+            this.RowSpacing = 0;
+            this.ColumnSpacing = 0;
         }
-        public void PutView(FrameworkElement view, int columnNumber, int rowNumber)
+        public void PutView(View view, int columnNumber, int rowNumber)
         {
             if (view != null)
             {
@@ -26,15 +25,15 @@ namespace VisiPlacement
         }
 
         // provides new views to use
-        public void SetChildren(FrameworkElement[,] newChildren)
+        public void SetChildren(View[,] newChildren)
         {
             int rowNumber, columnNumber;
             for (columnNumber = 0; columnNumber < newChildren.GetLength(0); columnNumber++)
             {
                 for (rowNumber = 0; rowNumber < newChildren.GetLength(1); rowNumber++)
                 {
-                    FrameworkElement newChild = newChildren[columnNumber, rowNumber];
-                    FrameworkElement oldChild;
+                    View newChild = newChildren[columnNumber, rowNumber];
+                    View oldChild;
                     if (this.children == null)
                         oldChild = null;
                     else
@@ -77,7 +76,7 @@ namespace VisiPlacement
                 this.ColumnDefinitions.Add(columnDefinition);
             }
         }
-        FrameworkElement[,] children;
+        View[,] children;
 
         public void Remove_VisualDescendents()
         {

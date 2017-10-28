@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using VisiPlacement;
+﻿using System.Collections.Generic;
+using Xamarin.Forms;
 
 // A MenuLayoutBuilder can build a menu that talks to a particular LayoutStack and pushes layouts onto it when the corresponding menu item is chosen
 namespace VisiPlacement
@@ -19,7 +14,7 @@ namespace VisiPlacement
         {
             // record the 
             this.layoutNames.AddLast(name);
-            ContentControl button = this.MakeButton(name, layout);
+            Button button = this.MakeButton(name, layout);
             return this;
         }
 
@@ -39,23 +34,28 @@ namespace VisiPlacement
         {
             Button button = new Button();
             this.buttonsByName[name] = button;
-            button.Click += this.button_Click;
-            ButtonLayout buttonLayout = new ButtonLayout(button, new TextblockLayout(name));
+            button.Clicked += button_Click;
+            ButtonLayout buttonLayout = new ButtonLayout(button, name);
             this.buttonLayouts_by_button[button] = buttonLayout;
             //SingleItem_Layout layout = new SingleItem_Layout(null, buttonLayout, new System.Windows.Thickness(), LayoutScore.Zero);
             this.buttonDestinations[buttonLayout] = target;
             return button;
         }
 
-        void button_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void button_Click(object sender, System.EventArgs e)
         {
             // find the sender's name
-            ContentControl button = sender as ContentControl;
-            // find where the sender wants to go
-            LayoutChoice_Set sourceLayout = this.buttonLayouts_by_button[button];
-            LayoutChoice_Set destination = this.buttonDestinations[sourceLayout];
-            // update the view
-            this.layoutStack.AddLayout(destination);
+            Button button = sender as Button;
+            
+            if (button != null)
+            {
+                button = (Button)sender;
+                // find where the sender wants to go
+                LayoutChoice_Set sourceLayout = this.buttonLayouts_by_button[button];
+                LayoutChoice_Set destination = this.buttonDestinations[sourceLayout];
+                // update the view
+                this.layoutStack.AddLayout(destination);
+            }
         }
 
         private LayoutChoice_Set GetDestinationLayout(string name)
@@ -70,8 +70,8 @@ namespace VisiPlacement
 
 
         LinkedList<string> layoutNames = new LinkedList<string>();
-        Dictionary<string, ContentControl> buttonsByName = new Dictionary<string, ContentControl>();
-        Dictionary<ContentControl, LayoutChoice_Set> buttonLayouts_by_button = new Dictionary<ContentControl, LayoutChoice_Set>();
+        Dictionary<string, Button> buttonsByName = new Dictionary<string, Button>();
+        Dictionary<Button, LayoutChoice_Set> buttonLayouts_by_button = new Dictionary<Button, LayoutChoice_Set>();
         Dictionary<LayoutChoice_Set, LayoutChoice_Set> buttonDestinations = new Dictionary<LayoutChoice_Set, LayoutChoice_Set>();
         LayoutStack layoutStack;
 

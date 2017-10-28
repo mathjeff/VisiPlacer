@@ -14,6 +14,12 @@ namespace VisiPlacement
         {
             this.CopyFrom(original);
         }
+        public LayoutDimensions(double width, double height, LayoutScore score)
+        {
+            this.Width = width;
+            this.Height = height;
+            this.Score = score;
+        }
         protected virtual void CopyFrom(LayoutDimensions original)
         {
             this.Width = original.Width;

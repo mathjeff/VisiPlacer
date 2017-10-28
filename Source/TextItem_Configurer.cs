@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Media;
+using Xamarin.Forms;
 
-// for getting/setting properties of a TextBox or TextBlock
+// for getting/setting properties of a TextBox or Label
 namespace VisiPlacement
 {
     public interface TextItem_Configurer
@@ -13,14 +9,8 @@ namespace VisiPlacement
         double Width { get; set; }
         double Height { get; set; }
         double FontSize { get; set; }
-        FontFamily FontFamily { get; set; }
-        FontStyle FontStyle { get; set; }
-        FontWeight FontWeight { get; set; }
-        FontStretch FontStretch { get; set; }
-        FrameworkElement View { get; }
         String Text { get; set; }
-        void Add_TextChanged_Handler(PropertyChangedCallback handler);
-        //void Add_LostFocus_Handler(RoutedEventHandler handler);
-        //TextItem_Configurer Clone();
+        View View { get; }
+        void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler);
     }
 }

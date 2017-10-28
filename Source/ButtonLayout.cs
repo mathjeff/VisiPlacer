@@ -1,52 +1,113 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+﻿using Xamarin.Forms;
 
 namespace VisiPlacement
 {
     public class ButtonLayout : SingleItem_Layout
     {
-        public ButtonLayout(ContentControl button, LayoutChoice_Set subLayout)
+        public ButtonLayout(Button button)
+        // : base(new ButtonText_Configurer(button), 12)
         {
-            this.Initialize(button, subLayout);
+            this.Initialize(button);
         }
 
-        public ButtonLayout(ContentControl button, string content)
+        public ButtonLayout(Button button, string content)
+        // : base(new ButtonText_Configurer(button), 12)
         {
-            TextBlock block = new TextBlock();
-            block.Text = content;
-            this.Initialize(button, new TextblockLayout(block));
+            button.Text = content;
+            this.Initialize(button);
         }
 
-        private void Initialize(ContentControl button, LayoutChoice_Set subLayout)
+        private void Initialize(Button button)
         {
-            // add a small border, so that it's easy to see where the buttons end
-            Thickness buttonPadding = new Thickness(1);
-            this.BorderThickness = buttonPadding;
-
-            // The color of the inside of the bevel
-            Thickness innerBevelThickness = new Thickness(2);
-            Border border = new Border();
-            border.BorderThickness = innerBevelThickness;
-            border.BorderBrush = new SolidColorBrush(Colors.Gray);
-            border.Padding = new Thickness();
-            border.Margin = new Thickness();
-
-            Thickness outerBevelThickness = new Thickness(2);
             button.Margin = new Thickness();
-            button.Padding = new Thickness();
-            button.BorderThickness = outerBevelThickness;
+            button.BorderRadius = 0;
 
-            // Put the desired content directly inside the bevel without any extra margin
-            SingleItem_Layout contentLayout = new SingleItem_Layout(border, subLayout, innerBevelThickness, LayoutScore.Zero, false);
-            // Put the inner bevel color directly inside the outer bevel color without any blank space
-            this.SubLayout = new SingleItem_Layout(button, contentLayout, innerBevelThickness, LayoutScore.Zero, true);
+            LayoutChoice_Set buttonLayout = new TextLayout(new ButtonText_Configurer(button), 12);
+
+            // add a small border, so that it's easy to see where the buttons end
+            Thickness innerBevelThickness = new Thickness(2);
+            ContentView insideBevel = new ContentView();
+            insideBevel.Padding = innerBevelThickness;
+            insideBevel.BackgroundColor = Color.LightGray;
+            SingleItem_Layout middleLayout = new SingleItem_Layout(insideBevel, buttonLayout, innerBevelThickness, LayoutScore.Zero, false);
+
+
+            // add a bevel to the border
+            Thickness outerBevelThickness = new Thickness(2);
+            ContentView outsideBevel = new ContentView();
+            outsideBevel.Padding = outerBevelThickness;
+            outsideBevel.BackgroundColor = Color.Gray;
+            SingleItem_Layout outsideLayout = new SingleItem_Layout(outsideBevel, middleLayout, outerBevelThickness, LayoutScore.Zero, false);
+            this.SubLayout = outsideLayout;
 
         }
+
+    }
+
+    public class ButtonText_Configurer : TextItem_Configurer
+    {
+        public ButtonText_Configurer(Button button)
+        {
+            this.button = button;
+        }
+
+        public double Width
+        {
+
+            get
+            {
+                return this.button.WidthRequest;
+            }
+            set
+            {
+                this.button.WidthRequest = value;
+            }
+        }
+        public double Height
+        {
+            get
+            {
+                return this.button.HeightRequest;
+            }
+            set
+            {
+                this.button.HeightRequest = value;
+            }
+        }
+        public double FontSize
+        {
+            get
+            {
+                return this.button.FontSize;
+            }
+            set
+            {
+                this.button.FontSize = value;
+            }
+        }
+        public string Text
+        {
+            get
+            {
+                return this.button.Text;
+            }
+            set
+            {
+                this.button.Text = value;
+            }
+        }
+        public View View
+        {
+            get
+            {
+                return this.button;
+            }
+        }
+        public void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler)
+        {
+            this.button.PropertyChanged += handler;
+        }
+        public Button button;
+
     }
 }
