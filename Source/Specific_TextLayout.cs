@@ -95,8 +95,6 @@ namespace VisiPlacement
         private double width;
         private double height;
         private LayoutScore score;
-        private bool wasSelected;
-
     }
 
 }

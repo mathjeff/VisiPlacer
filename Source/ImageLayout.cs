@@ -55,7 +55,7 @@ namespace VisiPlacement
         }
         private SpecificLayout MakeLayout(double width, double height, LayoutQuery layoutQuery)
         {
-            SpecificLayout layout = this.prepareLayoutForQuery(new Specific_SingleItem_Layout(this.view, new Size(width, height), this.ComputeScore(width, height), null, new Thickness()), layoutQuery);
+            SpecificLayout layout = this.prepareLayoutForQuery(new Specific_LeafLayout(this.view, new LayoutDimensions(width, height, this.ComputeScore(width, height))), layoutQuery);
             if (!layoutQuery.Accepts(layout))
             {
                 ErrorReporter.ReportParadox("Error; ImageLayout attempted to return an invalid layout result");
