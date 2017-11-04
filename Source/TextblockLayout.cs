@@ -33,7 +33,7 @@ namespace VisiPlacement
             textBlock.Margin = new Thickness(0);
             this.textBlock = textBlock;
 
-            List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
+            this.layouts = new List<TextLayout>();
             if (fontsize > 0)
             {
                 layouts.Add(this.makeLayout(fontsize));
@@ -48,17 +48,27 @@ namespace VisiPlacement
             this.LayoutToManage = new LayoutUnion(layouts);
         }
 
-        private LayoutChoice_Set makeLayout(double fontsize)
+        public bool ScoreIfEmpty
+        {
+            set
+            {
+                foreach (TextLayout layout in this.layouts)
+                {
+                    layout.ScoreIfEmpty = value;
+                }
+            }
+        }
+
+        private TextLayout makeLayout(double fontsize)
         {
             TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock);
             TextLayout layout = new TextLayout(configurer, fontsize);
-            layout.ScoreIfEmpty = false; // no points for an empty text block
+            layout.ScoreIfEmpty = false;
             return layout;
         }
 
-
-
         private Label textBlock;
+        private List<TextLayout> layouts;
     }
 
     // The TextBlock_Configurer is an implementation detail that facilitates sharing code between TextblockLayout and TextboxLayout
