@@ -25,6 +25,10 @@ namespace VisiPlacement
         }
         private void Initialize(Label textBlock, double fontsize)
         {
+            Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
+            textBlock.Effects.Add(effect);
+
+
             textBlock.Margin = new Thickness(0);
             this.textBlock = textBlock;
 

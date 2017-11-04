@@ -35,6 +35,13 @@ namespace VisiPlacement
                 this.specificLayout.Remove_VisualDescendents();
         }
 
+        public void UpdateSize(Size size)
+        {
+            if (size.Width != this.displaySize.Width || size.Height != this.displaySize.Height)
+            {
+                this.DoLayout(size);
+            }
+        }
         public void DoLayout(Size size)
         {
             if (Double.IsInfinity(size.Width) || Double.IsInfinity(size.Height))
@@ -45,8 +52,6 @@ namespace VisiPlacement
 
         public void DoLayout()
         {
-            VisualElement focusedElement = null;
-
             IEnumerable<SpecificLayout> previousLayouts;
             if (this.specificLayout != null)
             {
@@ -111,9 +116,24 @@ namespace VisiPlacement
         public override void On_ContentsChanged(bool mustRedraw)
         {
             if (mustRedraw)
-                this.parentView.Margin = new Thickness(1 - this.parentView.Margin.Left);
-            //if (mustRedraw)
-            //    this.parentView.ForceLayout();
+            {
+                this.forceRelayout();
+            }
+        }
+
+        private void forceRelayout()
+        {
+            // for some reason, this.parentView.ForceLayout doesn't work
+            this.even = !this.even;
+            if (this.even)
+            {
+                this.parentView.VerticalOptions = LayoutOptions.CenterAndExpand;
+            }
+            else
+            {
+                this.parentView.VerticalOptions = LayoutOptions.Center;
+            }
+
         }
 
         // tests that the layout satisfies all of the queries consistently
@@ -227,6 +247,7 @@ namespace VisiPlacement
         //private LinkedList<SpecificLayout> visibleLayouts;
         private Size displaySize;
         private SpecificLayout specificLayout;
+        private bool even;
     }
 
     public class ManageableView : ContentView
@@ -245,7 +266,7 @@ namespace VisiPlacement
             if (width > 0 && height > 0)
             {
                 Size bounds = new Size(width, height);
-                this.ViewManager.DoLayout(bounds);
+                this.ViewManager.UpdateSize(bounds);
             }
         }
 

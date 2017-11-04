@@ -349,35 +349,67 @@ namespace VisiPlacement
             if (text == null || text == "")
                 return new Size();
 
-            double maxWidth = 0;
-            double totalHeight = 0;
-            double x = 0;
-            double currentHeight = 0;
             string[] components = text.Split(' ');
-            string blockText;
-            foreach (string component in components)
+            string currentLine_text = "";
+            List<string> lines = new List<string>();
+            double maxWidth = 0;
+            double currentHeight = 0;
+            double currentWidth = 0;
+            double totalHeight = 0;
+            double maxLineHeight = 0;
+            for (int i = 0; i < components.Length; i++)
             {
-                blockText = component + " "; // it does waste some room to always make room for the space, but it seems to mirror how Silverlight actually does the layout
-                Size blockSize = this.formatBlock(blockText);
-                if (x + blockSize.Width > desiredWidth && x > 0)
+                string component = components[i];
+
+                string proposedLine = currentLine_text;
+                if (proposedLine != "")
+                    proposedLine = proposedLine + " ";
+                proposedLine = proposedLine + component;
+
+                Size blockSize = this.getBlockSize(proposedLine);
+                bool tooLong = (blockSize.Width > desiredWidth && currentLine_text != "");
+                bool end = (i == components.Length - 1);
+                if (tooLong)
                 {
                     // go to the next line
+                    lines.Add(currentLine_text);
+                    maxLineHeight = Math.Max(currentHeight, maxLineHeight);
                     totalHeight += currentHeight;
                     currentHeight = 0;
-                    maxWidth = Math.Max(maxWidth, x);
-                    x = 0;
+                    maxWidth = Math.Max(currentWidth, maxWidth);
+                    currentWidth = 0;
+                    currentLine_text = "";
+                    i--;
                 }
-                // add this word to the end of the current line
-                currentHeight = Math.Max(currentHeight, blockSize.Height);
-                x += blockSize.Width;
+                else
+                {
+                    if (end)
+                    {
+                        // go to the next line
+                        lines.Add(proposedLine);
+                        maxLineHeight = Math.Max(currentHeight, blockSize.Height);
+                        totalHeight += blockSize.Height;
+                        maxWidth = Math.Max(blockSize.Width, maxWidth);
+                    }
+                    else
+                    {
+                        // extend the current line
+                        currentHeight = blockSize.Height;
+                        currentWidth = blockSize.Width;
+                        currentLine_text = proposedLine;
+                    }
+                }
             }
-            maxWidth = Math.Max(x, maxWidth);
-            totalHeight += currentHeight;
-            Size size1 = new Size(maxWidth, totalHeight);
-            return size1;
+
+
+
+            string finalText = string.Join("\n", lines);
+            Label label = new Label();
+            Size finalSize = new Size(maxWidth, maxLineHeight * lines.Count);
+            return finalSize;
         }
 
-        private Size formatBlock(String text)
+        private Size getBlockSize(String text)
         {
             Size size;
             // try to load from cache
@@ -390,14 +422,13 @@ namespace VisiPlacement
             }
             return size;
         }
+
+        // computes the size required by a TextBlock that plans to display this text
         private Size computeSize(String text)
         {
-            SKPaint textBlock = this.getTextBlock();
-            double width = textBlock.MeasureText(text);
-            
-            // kind of hacky but effective
-            //double width = this.fontSize * text.Length / 2;
-            return new Size(width, this.fontSize);
+            // Get enough width for the given text, and enough height to accomodate the line spacing
+            double width = this.computeGlyphSize(text).Width;
+            return new Size(width, this.fontLineHeight);
         }
 
         public double FontSize
@@ -416,21 +447,40 @@ namespace VisiPlacement
                 this.fontSize = value;
             }
         }
-        private double fontSize;
 
-
-
-        private Dictionary<String, Size> sizeCache;
-        private SKPaint textBlock;
         private SKPaint getTextBlock()
         {
             if (this.textBlock == null)
             {
                 this.textBlock = new SKPaint();
+                Label label = new Label();
                 this.textBlock.TextSize = (float)this.FontSize;
+                this.textBlock.Typeface = SKTypeface.FromFamilyName(label.FontFamily);
+
+                // leave enough height for the characters for the highest ("M") and lowest ("g") characters
+                SKFontMetrics metrics = new SKFontMetrics();
+                textBlock.GetFontMetrics(out metrics);
+                this.fontLineHeight = metrics.Descent - metrics.Ascent;
             }
             return this.textBlock;
         }
+
+        // computes the size of the letters in the given string, and doesn't add any extra margins
+        private Size computeGlyphSize(String text)
+        {
+            SKPaint textBlock = this.getTextBlock();
+            SKRect bounds = new SKRect();
+            double width = textBlock.MeasureText(text, ref bounds);
+
+            return new Size(bounds.Width, bounds.Height);
+        }
+
+
+        private double fontSize;
+        private double fontLineHeight;
+        private Dictionary<String, Size> sizeCache;
+        private SKPaint textBlock;
+
     }
 
 

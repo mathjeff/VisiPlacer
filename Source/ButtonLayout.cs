@@ -24,8 +24,10 @@ namespace VisiPlacement
 
             LayoutChoice_Set buttonLayout = new TextLayout(new ButtonText_Configurer(button), 12);
 
+            double bevelThickness = 2;
+
             // add a small border, so that it's easy to see where the buttons end
-            Thickness innerBevelThickness = new Thickness(2);
+            Thickness innerBevelThickness = new Thickness(bevelThickness);
             ContentView insideBevel = new ContentView();
             insideBevel.Padding = innerBevelThickness;
             insideBevel.BackgroundColor = Color.LightGray;
@@ -33,7 +35,7 @@ namespace VisiPlacement
 
 
             // add a bevel to the border
-            Thickness outerBevelThickness = new Thickness(2);
+            Thickness outerBevelThickness = new Thickness(bevelThickness);
             ContentView outsideBevel = new ContentView();
             outsideBevel.Padding = outerBevelThickness;
             outsideBevel.BackgroundColor = Color.Gray;
@@ -89,7 +91,10 @@ namespace VisiPlacement
         {
             get
             {
-                return this.button.Text;
+                string text = this.button.Text;
+                if (text == null)
+                    return null;
+                return text.ToUpper();
             }
             set
             {

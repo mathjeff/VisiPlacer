@@ -8,7 +8,7 @@ namespace VisiPlacement
     {
         public TextboxLayout(Editor textBox)
         {
-            Effect effect = Effect.Resolve("VisiPlacement.TextBoxEffect");
+            Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBox.Effects.Add(effect);
 
             textBox.Margin = new Thickness();
