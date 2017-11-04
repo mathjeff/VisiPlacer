@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xamarin.Forms;
+﻿using System.Collections.Generic;
 
-// A LayoutChoice_Set describes different layouts for a view's child views
-// The LayoutChoice_Set can be asked to choose the best layout (such as the highest-scoring layout) fitting inside a certain size
-// The base LayoutChoice_Set is the generic version that potentially must do intensive queries to child views before answering
-// The SpecificLayout is the precomputed version that is the result of these calucations and knows where to put the child views
+// A LayoutChoice_Set describes different layouts for a view's child views.
+// The LayoutChoice_Set can be asked to choose the best layout (such as the highest-scoring layout) fitting inside a certain size.
+// The base LayoutChoice_Set is the generic version that potentially must do intensive queries to child layouts before answering.
+// The SpecificLayout is the precomputed version that is the result of these calucations and knows where to put the child views.
 namespace VisiPlacement
 {
     public abstract class LayoutChoice_Set
@@ -122,8 +118,6 @@ namespace VisiPlacement
         private bool changedSinceLatestQuery; // for caching
         private bool changedSinceLastRender; // for caching
 
-        //public LayoutChoice_Set Parent { get; set; }
-        //private List<LayoutChoice_Set> ancestors;
         private HashSet<LayoutChoice_Set> parents;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Xamarin.Forms;
 
+// a LeafLayout is a LayoutChoiceSet that just wishes to be a certain size and has no children
 namespace VisiPlacement
 {
     public class LeafLayout : LayoutChoice_Set

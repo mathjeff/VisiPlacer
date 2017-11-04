@@ -4,11 +4,12 @@ using Xamarin.Forms;
 // Allows the user to enter a duration
 namespace VisiPlacement
 {
-    public class DurationEntryView : SingleItem_Layout
+    public class DurationEntryView : ContainerLayout
     {
         public DurationEntryView()
         {
             this.textBox = new Editor();
+            this.textBox.Keyboard = Keyboard.Numeric;
             this.textBox.TextChanged += this.TextBox_TextChanged;
             GridLayout grid = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero);
             grid.AddLayout(new TextboxLayout(this.textBox));

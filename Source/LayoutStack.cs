@@ -9,7 +9,7 @@ using Xamarin.Forms;
 // A LayoutStack is a stack of layouts that shows the top one at a time and supports going back
 namespace VisiPlacement
 {
-    public class LayoutStack : SingleItem_Layout
+    public class LayoutStack : ContainerLayout
     {
         public LayoutStack()
         {

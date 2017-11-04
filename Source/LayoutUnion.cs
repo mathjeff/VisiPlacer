@@ -98,15 +98,6 @@ namespace VisiPlacement
                         query.ProposedSolution_ForDebugging = null;
                 }
             }
-            // re-order the list
-            /*foreach (LayoutChoice_Set layout in good_sourceLayouts)
-            {
-                this.layoutOptions.Remove(layout);
-            }
-            foreach (LayoutChoice_Set layout in good_sourceLayouts)
-            {
-                this.layoutOptions.AddLast(layout);
-            }*/
             query.ProposedSolution_ForDebugging = debugResult;
             return this.prepareLayoutForQuery(best_specificLayout, query);
         }

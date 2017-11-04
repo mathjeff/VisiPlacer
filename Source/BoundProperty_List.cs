@@ -125,61 +125,15 @@ namespace VisiPlacement
             List<int> indices = this.indicesByGroup[groupIndex];
             double remainingValue = totalValue;
             double remainingWeight = totalWeight;
-            // this is done in a strange way to better deal with rounding error
-
-            /*
-            if (indices.Count == 18 && Math.Abs(totalValue / 18 - 15.96) < 0.01)
-            {
-                ErrorReporter.ReportParadox("now");
-                double oneRow = 15.96;
-                double multipliedTotal = oneRow * 18;
-                if (multipliedTotal < totalValue)
-                {
-                    ErrorReporter.ReportParadox("15.96 * 18 < totalValue");
-                }
-                else
-                {
-                    ErrorReporter.ReportParadox("15.96 * 18 >= totalValue");
-                }
-                double summedTotal = 0;
-                for (int i = 0; i < 18; i++)
-                {
-                    summedTotal += oneRow;
-                }
-                if (summedTotal < totalValue)
-                {
-                    ErrorReporter.ReportParadox("15.96 * 18 < totalValue");
-                }
-                else
-                {
-                    ErrorReporter.ReportParadox("15.96 * 18 >= totalValue");
-                }
-
-            }
-            */
             foreach (int index in indices)
             {
                 double currentWeight = scales[index];
-                /*double a = (totalValue - cumulativeValue);
-                double b = a * currentWeight;
-                double c = (totalWeight - cumulativeWeight);
-                double currentValue = b / c;
-                */
-
-                //double currentValue = (totalValue - cumulativeValue) * currentWeight / (totalWeight - cumulativeWeight);
                 double currentValue = totalValue * currentWeight / totalWeight;
-
-                //Decimal d;
 
                 if (double.IsInfinity(totalValue))
                     currentValue = double.PositiveInfinity;
                 this.values[index] = currentValue;
 
-                //cumulativeValue += currentValue;
-                //cumulativeWeight += currentWeight;
-                //remainingValue -= currentValue;
-                //remainingWeight -= currentWeight;
-                //values[index] = scales[index] * groupRatio;
             }
 
             if (!double.IsInfinity(totalValue))
@@ -270,11 +224,6 @@ namespace VisiPlacement
         {
             double total = 0;
             int i;
-            /*for (i = 0; i < this.NumProperties; i++)
-            {
-                total += this.values[i];
-            }
-            */
             // The reason for adding these values in this order is to ensure that the rounding error is exactly zero when we update the total value of a group
             for (i = 0; i < this.NumGroups; i++)
             {

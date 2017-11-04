@@ -12,7 +12,6 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, LayoutChoice_Set layout)
         {
-            // record the 
             this.layoutNames.AddLast(name);
             Button button = this.MakeButton(name, layout);
             return this;
@@ -26,7 +25,6 @@ namespace VisiPlacement
                 LayoutChoice_Set subLayout = this.Get_ButtonLayout_By_Name(name);
                 layout.AddLayout(subLayout);
             }
-            //this.layoutStack.AddLayout(layout);
             return layout;
         }
 
@@ -37,7 +35,7 @@ namespace VisiPlacement
             button.Clicked += button_Click;
             ButtonLayout buttonLayout = new ButtonLayout(button, name);
             this.buttonLayouts_by_button[button] = buttonLayout;
-            //SingleItem_Layout layout = new SingleItem_Layout(null, buttonLayout, new System.Windows.Thickness(), LayoutScore.Zero);
+            //ContainerLayout layout = new ContainerLayout(null, buttonLayout, new System.Windows.Thickness(), LayoutScore.Zero);
             this.buttonDestinations[buttonLayout] = target;
             return button;
         }

@@ -3,14 +3,14 @@
 namespace VisiPlacement
 {
     // a layout that contains one sublayout within it
-    public class SingleItem_Layout : LayoutChoice_Set
+    public class ContainerLayout : LayoutChoice_Set
     {
-        public SingleItem_Layout()
+        public ContainerLayout()
         {
             this.Initialize();
             this.BonusScore = LayoutScore.Zero;
         }
-        public SingleItem_Layout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore)
+        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore)
         {
             this.Initialize();
             this.View = view;
@@ -18,7 +18,7 @@ namespace VisiPlacement
             this.BorderThickness = borderThickness;
             this.BonusScore = bonusScore;
         }
-        public SingleItem_Layout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore, bool fillAvailableSpace)
+        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, LayoutScore bonusScore, bool fillAvailableSpace)
         {
             this.Initialize();
             this.View = view;
@@ -31,7 +31,7 @@ namespace VisiPlacement
         {
             this.ChildFillsAvailableSpace = true;
         }
-        public void CopyFrom(SingleItem_Layout original)
+        public void CopyFrom(ContainerLayout original)
         {
             this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
             base.CopyFrom(original);
@@ -44,7 +44,7 @@ namespace VisiPlacement
                 if (this.view == null)
                 {
                     if (!this.BorderThickness.Equals(new Thickness(0)))
-                        this.view = new SingleItem_View();
+                        this.view = new ContainerView();
                 }
                 return this.view;
             }
@@ -72,12 +72,12 @@ namespace VisiPlacement
         }
         public LayoutScore BonusScore { get; set; }
 
-        // TODO: split SingleItem_Layout into more classes having different handling of BorderThickness: one that crops with a small penalty, and one that fails if cropped
+        // TODO: split ContainerLayout into more classes having different handling of BorderThickness: one that crops with a small penalty, and one that fails if cropped
         public Thickness BorderThickness { get; set; }
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            Specific_SingleItem_Layout result;
+            Specific_ContainerLayout result;
 
             // Determine whether there's room for the border
             LayoutQuery subQuery = query.Clone();
@@ -116,9 +116,9 @@ namespace VisiPlacement
             return result;
         }
 
-        protected Specific_SingleItem_Layout makeSpecificLayout(ContentView view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
+        protected Specific_ContainerLayout makeSpecificLayout(ContentView view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
         {
-            return new Specific_SingleItem_Layout(view, size, score, subLayout, border);
+            return new Specific_ContainerLayout(view, size, score, subLayout, border);
         }
 
         LayoutChoice_Set subLayout;

@@ -145,11 +145,6 @@ namespace VisiPlacement
             if (result != null)
             {
                 result = result.Clone();
-                /*if (this.maxObservedWidth < result.Width)
-                    this.maxObservedWidth = result.Width;
-                if (this.maxObservedHeight < result.Height)
-                    this.maxObservedHeight = result.Height;
-                */
             }
             else
             {
@@ -173,96 +168,91 @@ namespace VisiPlacement
             }
 
 
-            //if (result != null)
+            QueryBlurrer generator = new QueryBlurrer(query);
+            // record that this layout is an option for larger queries, too
+            while (true)
             {
-                QueryBlurrer generator = new QueryBlurrer(query);
-                // record that this layout is an option for larger queries, too
-                while (true)
+                LayoutQuery largerQuery = generator.Next();
+                if (largerQuery == null)
+                    break;
+
+                LayoutQuery_And_Response previousData = null;
+                this.sampleQueries.TryGetValue(largerQuery, out previousData);
+                SpecificLayout previousResult = null;
+                LayoutQuery previousQuery = null;
+                if (previousData != null)
                 {
-                    LayoutQuery largerQuery = generator.Next();
-                    if (largerQuery == null)
-                        break;
+                    previousResult = previousData.Response;
+                    previousQuery = previousData.Query;
+                }
+                LayoutQuery_And_Response newData = new LayoutQuery_And_Response();
+                bool oldQueryIsBetter = false;
+                bool oldResultsAreBetter = false;
 
-                    LayoutQuery_And_Response previousData = null;
-                    this.sampleQueries.TryGetValue(largerQuery, out previousData);
-                    SpecificLayout previousResult = null;
-                    LayoutQuery previousQuery = null;
-                    if (previousData != null)
+                if (previousQuery != null && (previousQuery.MaxWidth >= query.MaxWidth && previousQuery.MaxHeight >= query.MaxHeight && previousQuery.MinScore.CompareTo(query.MinScore) <= 0))
+                {
+                    // the previous query was bigger so leave it
+                    oldQueryIsBetter = true;
+                    oldResultsAreBetter = true;
+
+                    // if the new response is better, it can stay
+                    if (result != null && previousResult != null)
                     {
-                        previousResult = previousData.Response;
-                        previousQuery = previousData.Query;
-                    }
-                    LayoutQuery_And_Response newData = new LayoutQuery_And_Response();
-                    bool oldQueryIsBetter = false;
-                    bool oldResultsAreBetter = false;
-
-                    if (previousQuery != null && (previousQuery.MaxWidth >= query.MaxWidth && previousQuery.MaxHeight >= query.MaxHeight && previousQuery.MinScore.CompareTo(query.MinScore) <= 0))
-                    {
-                        // the previous query was bigger so leave it
-                        oldQueryIsBetter = true;
-                        oldResultsAreBetter = true;
-
-                        // if the new response is better, it can stay
-                        if (result != null && previousResult != null)
+                        if (result.Width <= previousResult.Width && result.Height <= previousResult.Height && result.Score.CompareTo(previousResult.Score) >= 0)
                         {
-                            if (result.Width <= previousResult.Width && result.Height <= previousResult.Height && result.Score.CompareTo(previousResult.Score) >= 0)
-                            {
-                                oldResultsAreBetter = false;
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        // if the previous result was better, then leave it
-                        if (result != null && previousResult != null)
-                        {
-                            if (previousResult.Width <= result.Width && previousResult.Height <= result.Height && previousResult.Score.CompareTo(result.Score) >= 0)
-                                oldResultsAreBetter = true;
+                            oldResultsAreBetter = false;
                         }
                     }
-
-                    // if the previous query was strictly larger, then leave it as the query to use
-                    if (oldQueryIsBetter)
-                        newData.Query = previousQuery;
-                    else
-                        newData.Query = query.Clone();
-
-                    if (oldResultsAreBetter)
-                    {
-                        newData.Response = previousResult;
-                    }
-                    else
-                    {
-                        newData.Response = result;
-                    }
-
-
-
-                    double queryCount2 = numQueries;
-                    if (newData.Query == previousQuery && newData.Response == previousResult)
-                        break;
-
-                    if (query.Debug || newData.Query.Debug)
-                    {
-                        LayoutQuery debugQuery = newData.Query.Clone();
-                        debugQuery.Debug = true;
-                        SpecificLayout correct_subLayout = this.Query_SubLayout(debugQuery);
-                        if (newData.Query.PreferredLayout(newData.Response, correct_subLayout) != newData.Response)
-                            ErrorReporter.ReportParadox("Error; LayoutCache attempting to insert an answer that is not good enough into sampleQueries");
-                        if (newData.Query.PreferredLayout(correct_subLayout, newData.Response) != correct_subLayout)
-                            ErrorReporter.ReportParadox("Error; LayoutCache attempting to insert an answer that is too good into sampleQueries");
-
-                        if (newData.Response != null && !newData.Query.Accepts(newData.Response))
-                            ErrorReporter.ReportParadox("Error; inserting an incorrect answer into sampleQueries");
-                    }
-                    this.sampleQueries[largerQuery] = newData;
 
                 }
-                if (result != null)
-                    result = result.Clone();
-                return this.prepareLayoutForQuery(result, query);
+                else
+                {
+                    // if the previous result was better, then leave it
+                    if (result != null && previousResult != null)
+                    {
+                        if (previousResult.Width <= result.Width && previousResult.Height <= result.Height && previousResult.Score.CompareTo(result.Score) >= 0)
+                            oldResultsAreBetter = true;
+                    }
+                }
+
+                // if the previous query was strictly larger, then leave it as the query to use
+                if (oldQueryIsBetter)
+                    newData.Query = previousQuery;
+                else
+                    newData.Query = query.Clone();
+
+                if (oldResultsAreBetter)
+                {
+                    newData.Response = previousResult;
+                }
+                else
+                {
+                    newData.Response = result;
+                }
+
+                double queryCount2 = numQueries;
+                if (newData.Query == previousQuery && newData.Response == previousResult)
+                    break;
+
+                if (query.Debug || newData.Query.Debug)
+                {
+                    LayoutQuery debugQuery = newData.Query.Clone();
+                    debugQuery.Debug = true;
+                    SpecificLayout correct_subLayout = this.Query_SubLayout(debugQuery);
+                    if (newData.Query.PreferredLayout(newData.Response, correct_subLayout) != newData.Response)
+                        ErrorReporter.ReportParadox("Error; LayoutCache attempting to insert an answer that is not good enough into sampleQueries");
+                    if (newData.Query.PreferredLayout(correct_subLayout, newData.Response) != correct_subLayout)
+                        ErrorReporter.ReportParadox("Error; LayoutCache attempting to insert an answer that is too good into sampleQueries");
+
+                    if (newData.Response != null && !newData.Query.Accepts(newData.Response))
+                        ErrorReporter.ReportParadox("Error; inserting an incorrect answer into sampleQueries");
+                }
+                this.sampleQueries[largerQuery] = newData;
+
             }
+            if (result != null)
+                result = result.Clone();
+            return this.prepareLayoutForQuery(result, query);
         }
 
         private SpecificLayout Query_SubLayout(LayoutQuery query)

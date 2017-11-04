@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Xamarin.Forms;
 
+// A TextboxLayout is what callers should make if they want to display editable text
 namespace VisiPlacement
 {
     public class TextboxLayout : LayoutCache
@@ -34,6 +35,8 @@ namespace VisiPlacement
         private Editor TextBox;
     }
 
+    // The TextBox_Configurer is an implementation detail that facilitates sharing code between TextblockLayout and TextboxLayout
+    // The TextBox_Configurer probably isn't interesting to external callers
     public class TextBox_Configurer : TextItem_Configurer
     {
         public TextBox_Configurer(Editor TextBox)

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Xamarin.Forms;
 
+// The TextLayout exists to consolidate some code between TextblockLayout and TextboxLayout
+// Most callers should use one of those classes instead
 namespace VisiPlacement
 {
     public class TextLayout : LayoutChoice_Set

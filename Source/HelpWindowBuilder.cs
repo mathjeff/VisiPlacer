@@ -20,22 +20,12 @@ namespace VisiPlacement
 
         public LayoutChoice_Set Build()
         {
-#if false
-            String fullMessage = "";
-            foreach (string message in this.messages)
-            {
-                fullMessage += message + Environment.NewLine + Environment.NewLine;
-            }
-            TextblockLayout layout = new TextblockLayout(fullMessage);
-            return layout;
-#else
             GridLayout layout = GridLayout.New(BoundProperty_List.Uniform(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
             foreach (string message in this.messages)
             {
                 layout.AddLayout(new TextblockLayout(message, 20));
             }
             return layout;
-#endif
         }
 
         private LinkedList<string> messages = new LinkedList<string>();

@@ -53,12 +53,10 @@ namespace VisiPlacement
             }
             this.InvalidateMeasure();
             this.children = newChildren;
-
         }
 
         public void SetDimensions(IEnumerable<double> columnWidths, IEnumerable<double> rowHeights)
         {
-
             this.RowDefinitions.Clear();
 
             foreach (double rowHeight in rowHeights)
@@ -90,10 +88,5 @@ namespace VisiPlacement
                 }
             }
         }
-
-        /*protected override void OnChildDesiredSizeChanged(UIElement child)
-        {
-            this.InvalidateMeasure();
-        }*/
     }
 }

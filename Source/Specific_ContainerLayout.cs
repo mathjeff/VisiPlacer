@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 
-// a Specific_SingleItem_Layout just has a view, a size, a subLayout, and a score
+// a Specific_ContainerLayout just has a view, a size, a subLayout, and a score
 namespace VisiPlacement
 {
-    public class Specific_SingleItem_Layout : SpecificLayout
+    public class Specific_ContainerLayout : SpecificLayout
     {
-        public Specific_SingleItem_Layout()
+        public Specific_ContainerLayout()
         {
             this.Initialize();
         }
-        public Specific_SingleItem_Layout(View view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness borderThickness)
+        public Specific_ContainerLayout(View view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness borderThickness)
         {
             this.Initialize();
             this.view = view;
@@ -20,7 +20,7 @@ namespace VisiPlacement
             this.BorderThickness = borderThickness;
             this.subLayout = subLayout;
         }
-        public Specific_SingleItem_Layout(ContentView view, Size size, LayoutScore score, Thickness borderThickness)
+        public Specific_ContainerLayout(ContentView view, Size size, LayoutScore score, Thickness borderThickness)
             : this(view, size, score, null, borderThickness)
         {
         }
@@ -43,7 +43,6 @@ namespace VisiPlacement
                 double subviewWidth = outerWidth - this.BorderThickness.Left - this.BorderThickness.Right;
                 double subviewHeight = outerHeight - this.BorderThickness.Top - this.BorderThickness.Bottom;
 
-                SubviewDimensions dimensions = new SubviewDimensions(this.subLayout, new Size(subviewWidth, subviewHeight));
                 View childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
                 if (this.View != null)
                 {
@@ -77,11 +76,11 @@ namespace VisiPlacement
         }
         public override SpecificLayout Clone()
         {
-            Specific_SingleItem_Layout clone = new Specific_SingleItem_Layout();
+            Specific_ContainerLayout clone = new Specific_ContainerLayout();
             clone.CopyFrom(this);
             return clone;
         }
-        public void CopyFrom(Specific_SingleItem_Layout original)
+        public void CopyFrom(Specific_ContainerLayout original)
         {
             base.CopyFrom(original);
             this.view = original.view;
@@ -120,7 +119,7 @@ namespace VisiPlacement
                 if (this.view == null)
                 {
                     if (!this.BorderThickness.Equals(new Thickness(0)))
-                        this.view = new SingleItem_View();
+                        this.view = new ContainerView();
                 }
                 return this.view;
             }

@@ -60,19 +60,17 @@
     <Compile Include="Source\MinWidth_LayoutQuery.cs" />
     <Compile Include="Source\PixelatedLayout.cs" />
     <Compile Include="Source\ScoreShifted_View.cs" />
-    <Compile Include="Source\SingleItem_Layout.cs" />
-    <Compile Include="Source\SingleItem_View.cs" />
+    <Compile Include="Source\ContainerLayout.cs" />
+    <Compile Include="Source\ContainerView.cs" />
     <Compile Include="Source\SinglelineTextboxLayout.cs" />
     <Compile Include="Source\SpecificLayout.cs" />
-    <Compile Include="Source\Specific_SingleItem_Layout.cs" />
+    <Compile Include="Source\Specific_ContainerLayout.cs" />
     <Compile Include="Source\Specific_TextLayout.cs" />
-    <Compile Include="Source\SubviewLocation.cs" />
     <Compile Include="Source\TextblockLayout.cs" />
     <Compile Include="Source\TextboxLayout.cs" />
     <Compile Include="Source\TextItem_Configurer.cs" />
     <Compile Include="Source\TextLayout.cs" />
     <Compile Include="Source\ViewManager.cs" />
-    <Compile Include="Source\VisiPlacer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SkiaSharp, Version=1.59.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
@@ -96,6 +94,9 @@
       <Project>{67f9d3a8-f71e-4428-913f-c37ae82cdb24}</Project>
       <Name>Statlist</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Forms.2.3.4.247\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.3.4.247\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />

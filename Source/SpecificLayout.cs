@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Xamarin.Forms;
 
-// Unlike a general LayoutChoice_Set, A SpecificLayout can render reasonably quickly because
-// it is the result of having queried any child layouts about what scores they give for certain sizes
+// A SpecificLayout is the result of LayoutChoice_Set.GetBestLayout()
+// A SpecificLayout tells the computed dimensions of a view, which makes it suitable to cache.
 namespace VisiPlacement
 {
     public abstract class SpecificLayout : LayoutChoice_Set
@@ -25,7 +25,6 @@ namespace VisiPlacement
                 dimensions.Score = this.Score;
                 return dimensions;
             }
-
         }
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
@@ -48,8 +47,6 @@ namespace VisiPlacement
         public abstract SpecificLayout Clone();
         public LayoutQuery SourceQuery_ForDebugging { get; set; }   // the query that generated this SpecificLayout
 
-        // for directly modifying what will show onscreen
-        //public abstract void Set_SubviewLocations(IEnumerable<SubviewDimensions> locations);
         public abstract void Remove_VisualDescendents();
 
         // returns a list of general LayoutChoice_Sets where the first item created/found this item, and the second item found the first, etc
@@ -75,9 +72,6 @@ namespace VisiPlacement
             this.ancestors.AddLast(parent);
         }
         
-        // the layout that actually contains this particular layout
-        //public SpecificLayout VisualParent { get; set; }
-
         public virtual ViewManager Get_ViewManager()
         {
             View view = this.View;

@@ -2,16 +2,14 @@
 
 namespace VisiPlacement
 {
-    public class ButtonLayout : SingleItem_Layout
+    public class ButtonLayout : ContainerLayout
     {
         public ButtonLayout(Button button)
-        // : base(new ButtonText_Configurer(button), 12)
         {
             this.Initialize(button);
         }
 
         public ButtonLayout(Button button, string content)
-        // : base(new ButtonText_Configurer(button), 12)
         {
             button.Text = content;
             this.Initialize(button);
@@ -31,7 +29,7 @@ namespace VisiPlacement
             ContentView insideBevel = new ContentView();
             insideBevel.Padding = innerBevelThickness;
             insideBevel.BackgroundColor = Color.LightGray;
-            SingleItem_Layout middleLayout = new SingleItem_Layout(insideBevel, buttonLayout, innerBevelThickness, LayoutScore.Zero, false);
+            ContainerLayout middleLayout = new ContainerLayout(insideBevel, buttonLayout, innerBevelThickness, LayoutScore.Zero, false);
 
 
             // add a bevel to the border
@@ -39,7 +37,7 @@ namespace VisiPlacement
             ContentView outsideBevel = new ContentView();
             outsideBevel.Padding = outerBevelThickness;
             outsideBevel.BackgroundColor = Color.Gray;
-            SingleItem_Layout outsideLayout = new SingleItem_Layout(outsideBevel, middleLayout, outerBevelThickness, LayoutScore.Zero, false);
+            ContainerLayout outsideLayout = new ContainerLayout(outsideBevel, middleLayout, outerBevelThickness, LayoutScore.Zero, false);
             this.SubLayout = outsideLayout;
 
         }
@@ -55,7 +53,6 @@ namespace VisiPlacement
 
         public double Width
         {
-
             get
             {
                 return this.button.WidthRequest;

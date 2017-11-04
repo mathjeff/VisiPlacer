@@ -2,9 +2,9 @@
 
 namespace VisiPlacement
 {
-    public class SingleItem_View : ContentView
+    public class ContainerView : ContentView
     {
-        public SingleItem_View()
+        public ContainerView()
         {
             this.Margin = new Thickness();
             this.Padding = new Thickness();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
 namespace VisiPlacement
 {
@@ -107,8 +104,6 @@ namespace VisiPlacement
             set
             {
                 this.maxWidth = value;
-                //ErrorReporter.ReportParadox("max width = ");
-                //ErrorReporter.ReportParadox(this.maxWidth);
             }
         }
         public double MaxHeight
@@ -120,8 +115,6 @@ namespace VisiPlacement
             set
             {
                 this.maxHeight = value;
-                //ErrorReporter.ReportParadox("max height = ");
-                //ErrorReporter.ReportParadox(this.maxHeight);
             }
         }
         public LayoutScore MinScore
@@ -133,8 +126,6 @@ namespace VisiPlacement
             set
             {
                 this.minScore = value;
-                //ErrorReporter.ReportParadox("min score = ");
-                //ErrorReporter.ReportParadox(this.minScore);
             }
         }
         public bool Debug { get; set; } // whether we want to do extra work for this query to ensure the results are correct

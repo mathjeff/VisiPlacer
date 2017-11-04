@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Xamarin.Forms;
 
+// A TextblockLayout is what callers should make if they want to display uneditable text
 namespace VisiPlacement
 {
     public class TextblockLayout : LayoutCache
@@ -60,12 +61,13 @@ namespace VisiPlacement
         private Label textBlock;
     }
 
+    // The TextBlock_Configurer is an implementation detail that facilitates sharing code between TextblockLayout and TextboxLayout
+    // The TextBlock_Configurer probably isn't interesting to external callers
     class TextBlock_Configurer : TextItem_Configurer
     {
         public TextBlock_Configurer(Label Label)
         {
             this.Label = Label;
-            //this.Label.BackgroundColor = Color.Green;
         }
 
         public double Width

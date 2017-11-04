@@ -6,25 +6,25 @@ namespace VisiPlacement
 {
     public class ViewManager : LayoutChoice_Set
     {
-        public ViewManager(ContentView parentView, LayoutChoice_Set layoutToManage)
+        // A ViewManager queries its child LayoutChoice_Set and puts the result into its parent View as needed.
+        // That is, the ViewManager is what triggers the querying of layouts in the first place.
+        public ViewManager(ContentView parentView, LayoutChoice_Set childLayout)
         {
-            this.layoutToManage = layoutToManage;
-            layoutToManage.AddParent(this);
+            this.childLayout = childLayout;
+            childLayout.AddParent(this);
 
             this.parentView = new ManageableView(this);
             parentView.Content = this.parentView;
             this.displaySize = new Size(parentView.Width, parentView.Height);
-
-            //this.DoLayout(new Size(100, 100));
         }
-        public void SetLayout(LayoutChoice_Set layoutToManage)
+        public void SetLayout(LayoutChoice_Set childLayout)
         {
-            if (this.layoutToManage != null)
-                this.layoutToManage.RemoveParent(this);
-            this.layoutToManage = layoutToManage;
-            if (this.layoutToManage != null)
+            if (this.childLayout != null)
+                this.childLayout.RemoveParent(this);
+            this.childLayout = childLayout;
+            if (this.childLayout != null)
             {
-                layoutToManage.AddParent(this);
+                childLayout.AddParent(this);
                 this.DoLayout();
             }
         }
@@ -70,18 +70,13 @@ namespace VisiPlacement
                 }
             }
 
-            //object focusedElement = FocusManager.GetFocusedElement();
             int num_grid_preComputations = GridLayout.NumComputations;
 
             DateTime startTime = DateTime.Now;
             this.Remove_VisualDescendents();
-            View newView = this.DoLayout(this.layoutToManage, this.displaySize);
+            View newView = this.DoLayout(this.childLayout, this.displaySize);
             this.Reset_ChangeAnnouncement();
-            //newView.Width = this.parentView.Width = this.displaySize.Width;
-            //newView.Height = this.parentView.Height = this.displaySize.Height;
             this.parentView.Content = newView;
-            //this.parentView.InvalidateMeasure();
-            //newView.InvalidateMeasure();
             DateTime endTime = DateTime.Now;
             TimeSpan duration = endTime.Subtract(startTime);
             System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
@@ -95,10 +90,6 @@ namespace VisiPlacement
             {
                 view.Focus();
             }
-            //View control = focusedElement as View;
-            //if (control != null)
-            //    control.Focus();
-
         }
 
         public View DoLayout(LayoutChoice_Set layout, Size bounds)
@@ -243,18 +234,17 @@ namespace VisiPlacement
         }
 
         private ContentView parentView;
-        private LayoutChoice_Set layoutToManage;
-        //private LinkedList<SpecificLayout> visibleLayouts;
+        private LayoutChoice_Set childLayout;
         private Size displaySize;
         private SpecificLayout specificLayout;
         private bool even;
     }
 
+    // The ManageableView listens for changes in its dimensions and informs its ViewManager
     public class ManageableView : ContentView
     {
         public ManageableView(ViewManager viewManager)
         {
-            //this.BackgroundColor = Color.Green;
             this.ViewManager = viewManager;
         }
 
@@ -277,6 +267,5 @@ namespace VisiPlacement
 
             return new SizeRequest(bounds);
         }
-        
     }
 }
