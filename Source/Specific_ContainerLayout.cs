@@ -40,10 +40,10 @@ namespace VisiPlacement
                 double outerHeight = displaySize.Height;
                 if (this.Size.Height < outerHeight && !this.ChildFillsAvailableSpace)
                     outerHeight = this.Size.Height;
-                double subviewWidth = outerWidth - this.BorderThickness.Left - this.BorderThickness.Right;
-                double subviewHeight = outerHeight - this.BorderThickness.Top - this.BorderThickness.Bottom;
 
-                View childContent = this.subLayout.DoLayout(new Size(subviewWidth, subviewHeight));
+                Size childSize = this.chooseSize(new Size(outerWidth, outerHeight));
+
+                View childContent = this.subLayout.DoLayout(childSize);
                 if (this.View != null)
                 {
                     this.View.WidthRequest = displaySize.Width;
@@ -54,11 +54,17 @@ namespace VisiPlacement
                 return childContent;
             }
             return this.View;
-            
         }
+        protected virtual Size chooseSize(Size availableSize)
+        {
+            double subviewWidth = availableSize.Width - this.BorderThickness.Left - this.BorderThickness.Right;
+            double subviewHeight = availableSize.Height - this.BorderThickness.Top - this.BorderThickness.Bottom;
+            return new Size(subviewWidth, subviewHeight);
+        }
+
         // Makes one View be a direct child visual child of another one
         // TODO: refactor this into a helper class for each case, for easier customization
-        private void PutContentInView(View parent, View child)
+        protected void PutContentInView(View parent, View child)
         {
             ContentView parentAsContentControl = parent as ContentView;
             if (parentAsContentControl != null)
@@ -70,6 +76,12 @@ namespace VisiPlacement
             if (parentAsBorder != null)
             {
                 parentAsBorder.Content = child;
+                return;
+            }
+            ScrollView parentAsScrollView = parent as ScrollView;
+            if (parentAsScrollView != null)
+            {
+                parentAsScrollView.Content = child;
                 return;
             }
             throw new ArgumentException("Unrecognized view type " + parent);
@@ -141,6 +153,13 @@ namespace VisiPlacement
                 children.AddLast(subLayout);
             }
             return children;
+        }
+        public SpecificLayout SubLayout
+        {
+            get
+            {
+                return this.subLayout;
+            }
         }
 
 

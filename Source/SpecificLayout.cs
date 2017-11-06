@@ -33,9 +33,13 @@ namespace VisiPlacement
                 return null;
             if (query.MaxHeight < this.Height)
                 return null;
-            if (query.MinScore.CompareTo(this.Score) > 0)
+            if (!this.isScoreAtLeast(query))
                 return null;
             return this;
+        }
+        protected virtual bool isScoreAtLeast(LayoutQuery query)
+        {
+            return this.Score.CompareTo(query.MinScore) >= 0;
         }
         public abstract View DoLayout(Size bounds);
         public void CopyFrom(SpecificLayout original)

@@ -50,8 +50,12 @@ namespace VisiPlacement
         // returns a stricter query given that this example is one of the options
         public abstract void OptimizeUsingExample(SpecificLayout example);
         // returns a stricter query that won't even be satisfied by this example
-        public abstract void OptimizePastExample(SpecificLayout example);
-        //public abstract void OptimizeUsingExample(LayoutDimensions example);
+        public void OptimizePastExample(SpecificLayout example)
+        {
+            this.OptimizePastDimensions(example.Dimensions);
+        }
+        // returns a stricter query that won't even be satisfied by this example
+        public abstract void OptimizePastDimensions(LayoutDimensions dimensions);
         public LayoutQuery CopyFrom(LayoutQuery original)
         {
             this.MaxWidth = original.MaxWidth;
@@ -93,6 +97,17 @@ namespace VisiPlacement
         public virtual bool MaximizesScore()
         {
             return false;
+        }
+
+        public bool SameType(LayoutQuery other)
+        {
+            if (this.MinimizesWidth() != other.MinimizesWidth())
+                return false;
+            if (this.MinimizesHeight() != other.MinimizesHeight())
+                return false;
+            if (this.MaximizesScore() != other.MaximizesScore())
+                return false;
+            return true;
         }
         
         public double MaxWidth 

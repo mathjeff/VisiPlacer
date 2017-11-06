@@ -19,7 +19,7 @@ namespace VisiPlacement
             if (this.MaxHeight > example.Height)
                 this.MaxHeight = example.Height;
         }
-        public override void OptimizePastExample(SpecificLayout example)
+        public override void OptimizePastDimensions(LayoutDimensions example)
         {
             double newHeight = example.Height * 0.9999999999;
             if (this.MaxHeight > newHeight)

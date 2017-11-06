@@ -19,7 +19,7 @@ namespace VisiPlacement
             if (this.MinScore.CompareTo(example.Score) < 0)
                 this.MinScore = example.Score;
         }
-        public override void OptimizePastExample(SpecificLayout example)
+        public override void OptimizePastDimensions(LayoutDimensions example)
         {
             LayoutScore minScore = example.Score.Plus(new LayoutScore(-double.MaxValue, 1));
             if (this.MinScore.CompareTo(example.Score) < 0)

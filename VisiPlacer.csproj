@@ -62,6 +62,7 @@
     <Compile Include="Source\ScoreShifted_View.cs" />
     <Compile Include="Source\ContainerLayout.cs" />
     <Compile Include="Source\ContainerView.cs" />
+    <Compile Include="Source\ScrollLayout.cs" />
     <Compile Include="Source\SinglelineTextboxLayout.cs" />
     <Compile Include="Source\SpecificLayout.cs" />
     <Compile Include="Source\Specific_ContainerLayout.cs" />
