@@ -923,6 +923,11 @@ namespace VisiPlacement
             this.subLayouts.AddLast(subLayout);
             return this;
         }
+        public Horizontal_GridLayout_Builder Uniform()
+        {
+            this.uniform = true;
+            return this;
+        }
         public GridLayout Build()
         {
             BoundProperty_List columnWidths = new BoundProperty_List(this.subLayouts.Count);

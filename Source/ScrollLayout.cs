@@ -135,9 +135,16 @@ namespace VisiPlacement
             SpecificLayout subLayout = maxScoring.SubLayout;
 
             double numWindows = Math.Ceiling(subLayout.Score.DividedBy(query.MinScore));
+            double windowHeight;
             if (numWindows == 0)
-                ErrorReporter.ReportParadox("numWindows == 0 (first try) in ScrollLayout.getMinHeightLayout");
-            double windowHeight = subLayout.Height / numWindows;
+            {
+                // the only way this should happen is if query.MinScore is a negative number much larger in magnitude than subLayout.Score
+                windowHeight = 0;
+            }
+            else
+            {
+                windowHeight = subLayout.Height / numWindows;
+            }
 
 
 
@@ -146,8 +153,11 @@ namespace VisiPlacement
                 return result;
             // there was some rounding error in the score division; increase the window size by decreasing the window count and use that
             numWindows--;
-            if (numWindows == 0)
-                ErrorReporter.ReportParadox("numWindows == 0 (second try) in ScrollLayout.getMinHeightLayout");
+            if (numWindows < 1)
+            {
+                ErrorReporter.ReportParadox("numWindows == " + numWindows + " (second try) in ScrollLayout.getMinHeightLayout");
+                numWindows = 0;
+            }
             windowHeight = subLayout.Height / numWindows;
             result = new Specific_ScrollLayout(this.view, new Size(maxScoring.Width, windowHeight), subLayout.Score.Times(1.0 / numWindows), subLayout);
             if (!query.Accepts(result))

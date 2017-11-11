@@ -15,12 +15,18 @@ namespace VisiPlacement
             this.Initialize(button);
         }
 
-        private void Initialize(Button button)
+        public ButtonLayout(Button button, string content, double fontSize)
+        {
+            button.Text = content;
+            this.Initialize(button, fontSize);
+        }
+
+        private void Initialize(Button button, double fontSize = 12)
         {
             button.Margin = new Thickness();
             button.BorderRadius = 0;
 
-            LayoutChoice_Set buttonLayout = new TextLayout(new ButtonText_Configurer(button), 12);
+            LayoutChoice_Set buttonLayout = new TextLayout(new ButtonText_Configurer(button), fontSize);
 
             double bevelThickness = 2;
 
