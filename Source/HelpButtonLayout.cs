@@ -6,7 +6,7 @@ namespace VisiPlacement
     {
         public HelpButtonLayout(LayoutChoice_Set detailLayout, LayoutStack layoutStack)
         {
-            this.initialize("help", detailLayout, layoutStack);
+            this.initialize("Help", detailLayout, layoutStack);
         }
 
         public HelpButtonLayout(string message, LayoutChoice_Set detailLayout, LayoutStack layoutStack)

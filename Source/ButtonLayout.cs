@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using System.Collections.Generic;
+using Xamarin.Forms;
 
 namespace VisiPlacement
 {
@@ -15,25 +16,39 @@ namespace VisiPlacement
             this.Initialize(button);
         }
 
-        public ButtonLayout(Button button, string content, double fontSize, double bevelWidth = 2)
+        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true)
         {
             button.Text = content;
-            this.Initialize(button, fontSize, false);
+            this.Initialize(button, fontSize, includeBevel);
         }
 
 
         public static ButtonLayout WithoutBevel(Button button)
         {
-            return new ButtonLayout(button, button.Text, 12, 0);
+            return new ButtonLayout(button, button.Text, -1, false);
         }
 
-        private void Initialize(Button button, double fontSize = 12, bool includeBevel = true)
+        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true)
         {
             button.Margin = new Thickness();
             button.BorderRadius = 0;
             button.TextColor = Color.LightGray;
 
-            LayoutChoice_Set buttonLayout = new TextLayout(new ButtonText_Configurer(button), fontSize);
+            ButtonText_Configurer buttonConfigurer = new ButtonText_Configurer(button);
+            LayoutChoice_Set buttonLayout;
+            if (fontSize > 0)
+            {
+                buttonLayout = new TextLayout(new ButtonText_Configurer(button), fontSize);
+            }
+            else
+            {
+                List<LayoutChoice_Set> options = new List<LayoutChoice_Set>();
+                options.Add(new TextLayout(buttonConfigurer, 30));
+                options.Add(new TextLayout(buttonConfigurer, 16));
+                options.Add(new TextLayout(buttonConfigurer, 12));
+                LayoutUnion layoutUnion = new LayoutUnion(options);
+                buttonLayout = layoutUnion;
+            }
 
             // add a view behind the button to change its normal background color without changing its color when selected
             ContentView buttonBackground = new ContentView();
@@ -119,7 +134,7 @@ namespace VisiPlacement
                 string text = this.button.Text;
                 if (text == null)
                     return null;
-                return text.ToUpper();
+                return text;
             }
             set
             {

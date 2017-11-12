@@ -35,7 +35,6 @@ namespace VisiPlacement
             button.Clicked += button_Click;
             ButtonLayout buttonLayout = new ButtonLayout(button, name);
             this.buttonLayouts_by_button[button] = buttonLayout;
-            //ContainerLayout layout = new ContainerLayout(null, buttonLayout, new System.Windows.Thickness(), LayoutScore.Zero);
             this.buttonDestinations[buttonLayout] = target;
             return button;
         }
