@@ -15,7 +15,7 @@ namespace VisiPlacement
             textBox.Margin = new Thickness();
 
             this.TextBox = textBox;
-            textBox.BackgroundColor = Color.White;
+            textBox.BackgroundColor = Color.LightGray;
             this.TextBox.Margin = new Thickness();
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();

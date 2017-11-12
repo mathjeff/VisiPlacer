@@ -42,7 +42,7 @@ namespace VisiPlacement
 
         private void appearValid()
         {
-            this.textBox.BackgroundColor = Color.White;
+            this.textBox.BackgroundColor = Color.LightGray;
         }
         private void appearInvalid()
         {

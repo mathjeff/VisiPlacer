@@ -28,9 +28,8 @@ namespace VisiPlacement
         {
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
-
-
             textBlock.Margin = new Thickness(0);
+            textBlock.TextColor = Color.LightGray;
             this.textBlock = textBlock;
 
             this.layouts = new List<TextLayout>();
