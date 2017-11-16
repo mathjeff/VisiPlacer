@@ -498,7 +498,7 @@ namespace VisiPlacement
                             }
                         }
 
-                        actualScoreDecrease = actualScoreDecrease.Plus(layout2.Score.Minus(bestLayout.Score));
+                        actualScoreDecrease = actualScoreDecrease.Plus(bestLayout.Score.Minus(layout2.Score));
                     }
                 }
                 minWidths.Add(maxRequiredWidth);
@@ -509,8 +509,8 @@ namespace VisiPlacement
             {
                 if (sourceQuery.Debug)
                 {
-                    if (layout.Score.CompareTo(originalScore) != 0)
-                        ErrorReporter.ReportParadox("Error; ShrinkWidth caused a change in score");
+                    if (layout.Score.CompareTo(originalScore.Minus(actualScoreDecrease)) != 0)
+                        ErrorReporter.ReportParadox("Error; ShrinkWidth decreased the score too much");
                 }
                 else
                 {
@@ -623,8 +623,8 @@ namespace VisiPlacement
             {
                 if (sourceQuery.Debug)
                 {
-                    if (layout.Score.CompareTo(originalScore) != 0)
-                        ErrorReporter.ReportParadox("Error; ShrinkHeight caused a change in score");
+                    if (layout.Score.CompareTo(originalScore.Minus(actualScoreDecrease)) != 0)
+                        ErrorReporter.ReportParadox("Error; ShrinkHeight decreased the score too much");
                 }
                 else
                 {
