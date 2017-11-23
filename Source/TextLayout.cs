@@ -430,7 +430,7 @@ namespace VisiPlacement
         {
             // Get enough width for the given text, and enough height to accomodate the line spacing
             double width = this.computeGlyphSize(text).Width;
-            return new Size(width, this.fontLineHeight);
+            return new Size(width + this.leftMargin, this.fontLineHeight);
         }
 
         public double FontSize
@@ -463,6 +463,9 @@ namespace VisiPlacement
                 SKFontMetrics metrics = new SKFontMetrics();
                 textBlock.GetFontMetrics(out metrics);
                 this.fontLineHeight = metrics.Descent - metrics.Ascent;
+                SKRect bounds = new SKRect();
+                this.textBlock.MeasureText("M", ref bounds);
+                this.leftMargin = bounds.Left;
             }
             return this.textBlock;
         }
@@ -474,12 +477,14 @@ namespace VisiPlacement
             SKRect bounds = new SKRect();
             double width = textBlock.MeasureText(text, ref bounds);
 
-            return new Size(bounds.Left + bounds.Width, bounds.Height);
+            return new Size(bounds.Width, bounds.Height);
+            
         }
 
 
         private double fontSize;
         private double fontLineHeight;
+        private double leftMargin;
         private Dictionary<String, Size> sizeCache;
         private SKPaint textBlock;
 
