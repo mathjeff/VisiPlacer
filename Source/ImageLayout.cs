@@ -15,6 +15,14 @@ namespace VisiPlacement
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            if (query.MaxWidth <= 0 || query.MaxHeight <= 0)
+            {
+                double width = 0;
+                double height = 0;
+                if (this.ComputeScore(width, height).CompareTo(query.MinScore) < 0)
+                    return null;
+                return this.MakeLayout(width, height, query);
+            }
             LayoutScore score = this.ComputeScore(query.MaxWidth, query.MaxHeight);
             if (score.CompareTo(query.MinScore) < 0)
                 return null;

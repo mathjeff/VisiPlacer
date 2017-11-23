@@ -474,7 +474,7 @@ namespace VisiPlacement
             SKRect bounds = new SKRect();
             double width = textBlock.MeasureText(text, ref bounds);
 
-            return new Size(bounds.Width, bounds.Height);
+            return new Size(bounds.Left + bounds.Width, bounds.Height);
         }
 
 

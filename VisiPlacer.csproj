@@ -69,6 +69,7 @@
     <Compile Include="Source\Specific_TextLayout.cs" />
     <Compile Include="Source\TextblockLayout.cs" />
     <Compile Include="Source\TextboxLayout.cs" />
+    <Compile Include="Source\TextDiagnosticLayout.cs" />
     <Compile Include="Source\TextItem_Configurer.cs" />
     <Compile Include="Source\TextLayout.cs" />
     <Compile Include="Source\ViewManager.cs" />
