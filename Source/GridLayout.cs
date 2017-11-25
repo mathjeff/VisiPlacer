@@ -12,15 +12,18 @@ namespace VisiPlacement
 
         public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore)
         {
-            if (Math.Min(rowHeights.NumGroups, columnWidths.NumGroups) == 1 && (Math.Max(rowHeights.NumGroups, columnWidths.NumGroups) > 2))
+            if (Math.Min(rowHeights.NumGroups, columnWidths.NumGroups) <= 1)
             {
-                // we should instead make a smaller grid with additional grids inside it, to better enable caching
-                if (rowHeights.NumGroups == rowHeights.NumProperties && columnWidths.NumGroups == columnWidths.NumProperties)
+                if (Math.Max(rowHeights.NumGroups, columnWidths.NumGroups) > 2)
                 {
-                    // we do support composition from smaller grids in this case
-                    return new CompositeGridLayout(rowHeights.NumGroups, columnWidths.NumGroups, bonusScore);
+                    // we should instead make a smaller grid with additional grids inside it, to better enable caching
+                    if (rowHeights.NumGroups == rowHeights.NumProperties && columnWidths.NumGroups == columnWidths.NumProperties)
+                    {
+                        // we do support composition from smaller grids in this case
+                        return new CompositeGridLayout(rowHeights.NumGroups, columnWidths.NumGroups, bonusScore);
+                    }
+                    // don't yet support automatically making a smaller grid in this case
                 }
-                // don't yet support automatically making a smaller grid in this case
             }
             // can't compose from smaller grids
             return new GridLayout(rowHeights, columnWidths, bonusScore);

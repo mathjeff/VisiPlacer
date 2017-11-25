@@ -20,10 +20,11 @@ namespace VisiPlacement
 
         public LayoutChoice_Set Build()
         {
-            GridLayout layout = GridLayout.New(BoundProperty_List.Uniform(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
+            GridLayout layout = GridLayout.New(new BoundProperty_List(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
             foreach (string message in this.messages)
             {
-                layout.AddLayout(new TextblockLayout(message, 20));
+                string section = "    " + message;
+                layout.AddLayout(new LayoutUnion(new TextblockLayout(section, 20), new TextblockLayout(section, 10)));
             }
             return layout;
         }
