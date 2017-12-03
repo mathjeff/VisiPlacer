@@ -62,6 +62,8 @@ namespace VisiPlacement
             }
             set
             {
+                if (value == this.subLayout)
+                    return;
                 if (this.subLayout != null)
                     this.subLayout.RemoveParent(this);
                 this.subLayout = value;
