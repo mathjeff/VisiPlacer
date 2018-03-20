@@ -35,13 +35,14 @@ namespace VisiPlacement
                 this.specificLayout.Remove_VisualDescendents();
         }
 
-        public void UpdateSize(Size size)
+        public void DoLayoutIfOutOfDate(Size size)
         {
             if (size.Width != this.displaySize.Width || size.Height != this.displaySize.Height)
-            {
+                this.needsRelayout = true;
+            if (this.needsRelayout)
                 this.DoLayout(size);
-            }
         }
+
         public void DoLayout(Size size)
         {
             if (Double.IsInfinity(size.Width) || Double.IsInfinity(size.Height))
@@ -50,7 +51,7 @@ namespace VisiPlacement
             this.DoLayout();
         }
 
-        public void DoLayout()
+        private void DoLayout()
         {
             IEnumerable<SpecificLayout> previousLayouts;
             if (this.specificLayout != null)
@@ -90,9 +91,10 @@ namespace VisiPlacement
             {
                 view.Focus();
             }
+            this.needsRelayout = false;
         }
 
-        public View DoLayout(LayoutChoice_Set layout, Size bounds)
+        private View DoLayout(LayoutChoice_Set layout, Size bounds)
         {
             LayoutQuery query = new MaxScore_LayoutQuery();
             query.MaxWidth = bounds.Width;
@@ -114,6 +116,7 @@ namespace VisiPlacement
 
         private void forceRelayout()
         {
+            // tell the framework to reinvoke the layout
             // for some reason, this.parentView.ForceLayout doesn't work
             this.even = !this.even;
             if (this.even)
@@ -124,6 +127,9 @@ namespace VisiPlacement
             {
                 this.parentView.VerticalOptions = LayoutOptions.Center;
             }
+
+            // update our own note that layout is needed
+            this.needsRelayout = true;
 
         }
 
@@ -238,6 +244,7 @@ namespace VisiPlacement
         private Size displaySize;
         private SpecificLayout specificLayout;
         private bool even;
+        private bool needsRelayout = true;
     }
 
     // The ManageableView listens for changes in its dimensions and informs its ViewManager
@@ -256,14 +263,14 @@ namespace VisiPlacement
             if (width > 0 && height > 0)
             {
                 Size bounds = new Size(width, height);
-                this.ViewManager.UpdateSize(bounds);
+                this.ViewManager.DoLayoutIfOutOfDate(bounds);
             }
         }
 
         protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
         {
             Size bounds = new Size(widthConstraint, heightConstraint);
-            this.ViewManager.DoLayout(bounds);
+            this.ViewManager.DoLayoutIfOutOfDate(bounds);
 
             return new SizeRequest(bounds);
         }
