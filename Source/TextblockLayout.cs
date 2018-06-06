@@ -18,9 +18,10 @@ namespace VisiPlacement
             textBlock.Text = text;
             this.Initialize(textBlock, fontsize);
         }
-        public TextblockLayout(string text, TextAlignment textAlignment)
+        public TextblockLayout(string text, TextAlignment horizontalTextAlignment)
         {
             Label textBlock = new Label();
+            textBlock.HorizontalTextAlignment = horizontalTextAlignment;
             textBlock.Text = text;
             this.Initialize(textBlock, -1);
         }
