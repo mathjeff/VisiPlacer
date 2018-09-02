@@ -38,6 +38,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\BoundProperty_List.cs" />
     <Compile Include="Source\ButtonLayout.cs" />
+    <Compile Include="Source\CheckBox.cs" />
     <Compile Include="Source\DurationEntryView.cs" />
     <Compile Include="Source\ErrorReporter.cs" />
     <Compile Include="Source\GridLayout.cs" />

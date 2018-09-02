@@ -81,6 +81,8 @@ namespace VisiPlacement
                 this.SubLayout = spacingLayout;
             } else
             {
+                button.TextColor = Color.Black;
+                button.BackgroundColor = Color.LightGray;
                 this.SubLayout = backgroundLayout;
             }
         }
