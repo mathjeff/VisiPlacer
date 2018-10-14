@@ -24,9 +24,9 @@ namespace VisiPlacement
             foreach (string message in this.messages)
             {
                 string section = "    " + message;
-                layout.AddLayout(new LayoutUnion(new TextblockLayout(section, 20), new TextblockLayout(section, 10)));
+                layout.AddLayout(new TextblockLayout(section, 20));
             }
-            return layout;
+            return new LayoutUnion(layout, ScrollLayout.New(layout));
         }
 
         private LinkedList<string> messages = new LinkedList<string>();
