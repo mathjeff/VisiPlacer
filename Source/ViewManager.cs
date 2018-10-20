@@ -53,6 +53,8 @@ namespace VisiPlacement
 
         private void DoLayout()
         {
+            this.needsRelayout = false;
+
             IEnumerable<SpecificLayout> previousLayouts;
             if (this.specificLayout != null)
             {
@@ -74,7 +76,7 @@ namespace VisiPlacement
             int num_grid_preComputations = GridLayout.NumComputations;
 
             DateTime startTime = DateTime.Now;
-            this.Remove_VisualDescendents();
+            //this.Remove_VisualDescendents();
             View newView = this.DoLayout(this.childLayout, this.displaySize);
             this.Reset_ChangeAnnouncement();
             this.parentView.Content = newView;
@@ -91,19 +93,69 @@ namespace VisiPlacement
             {
                 view.Focus();
             }
-            this.needsRelayout = false;
         }
 
         private View DoLayout(LayoutChoice_Set layout, Size bounds)
         {
+            Dictionary<View, SpecificLayout> preParents = this.findAncestors(this.specificLayout);
+
             LayoutQuery query = new MaxScore_LayoutQuery();
             query.MaxWidth = bounds.Width;
             query.MaxHeight = bounds.Height;
             this.specificLayout = layout.GetBestLayout(query);
 
+            Dictionary<View, SpecificLayout> postParents = this.findAncestors(this.specificLayout);
+
+            foreach (View view in preParents.Keys)
+            {
+                SpecificLayout preLayout = preParents[view];
+                SpecificLayout postLayout = this.DictionaryGet(postParents, view);
+
+                if (preLayout != null)
+                {
+                    if (postLayout == null || preLayout.View != postLayout.View)
+                    {
+                        // The parent of <view> has changed.
+                        // Disconnect the previous parent's children.
+                        // TODO: only disconnect this specific child (<view>).
+                        preLayout.Remove_VisualDescendents();
+                    }
+                }
+            }
+
             // figure out where the subviews are placed
             return this.specificLayout.DoLayout(bounds);
+        }
 
+        private SpecificLayout DictionaryGet(Dictionary<View, SpecificLayout> dictionary, View value)
+        {
+            if (dictionary.ContainsKey(value))
+                return dictionary[value];
+            return null;
+        }
+
+        // returns a Dictionary that maps each view in the tree to its closest containing ancestor
+        private Dictionary<View, SpecificLayout> findAncestors(SpecificLayout layout)
+        {
+            Dictionary<View, SpecificLayout> parents = new Dictionary<View, SpecificLayout>();
+            if (layout != null)
+                this.addAllParents(layout.GetChildren(), layout, parents);
+            return parents;
+        }
+        private void addAllParents(IEnumerable<SpecificLayout> candidates, SpecificLayout parentView_layout, Dictionary<View, SpecificLayout> accumulator)
+        {
+            foreach (SpecificLayout childLayout in candidates)
+            {
+                if (childLayout.View != null)
+                {
+                    accumulator[childLayout.View] = parentView_layout;
+                    this.addAllParents(childLayout.GetChildren(), childLayout, accumulator);
+                }
+                else
+                {
+                    this.addAllParents(childLayout.GetChildren(), parentView_layout, accumulator);
+                }
+            }
         }
 
         public override void On_ContentsChanged(bool mustRedraw)

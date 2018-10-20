@@ -1335,11 +1335,16 @@ namespace VisiPlacement
         }
         public override View DoLayout(Size bounds)
         {
+            return this.DoLayout_Impl(bounds, false);
+        }
+        private View DoLayout_Impl(Size bounds, bool dryRun)
+        {
             int rowNumber, columnNumber;
             double unscaledX, unscaledY;    // paying a lot of attention to rounding;
             double nextUnscaledX, nextUnscaledY;
             double unscaledHeight, unscaledWidth;
             double x, y, nextX, nextY;
+            this.specificSublayouts = new LinkedList<SpecificLayout>();
 
             // the actual provided size might be slightly more than we asked for, so rescale accordingly
             double horizontalScale, desiredWidth, verticalScale, desiredHeight;
@@ -1399,9 +1404,12 @@ namespace VisiPlacement
                 unscaledY = nextUnscaledY;
                 y = nextY;
             }
-            // Now that the computation is done, update the GridView
-            this.GridView.SetDimensions(columnWidths, rowHeights);
-            this.GridView.SetChildren(subviews);
+            if (!dryRun)
+            {
+                // Now that the computation is done, update the GridView
+                this.GridView.SetDimensions(columnWidths, rowHeights);
+                this.GridView.SetChildren(subviews);
+            }
             return this.View;
         }
 
@@ -1443,6 +1451,10 @@ namespace VisiPlacement
 
         public override IEnumerable<SpecificLayout> GetChildren()
         {
+            if (this.specificSublayouts == null)
+            {
+                this.DoLayout_Impl(new Size(this.columnWidths.GetTotalValue(), this.rowHeights.GetTotalValue()), true);
+            }
             return this.specificSublayouts;
         }
 
@@ -1456,7 +1468,7 @@ namespace VisiPlacement
         bool setWidthBeforeHeight;
         GridView view;
         LayoutScore score;
-        LinkedList<SpecificLayout> specificSublayouts = new LinkedList<SpecificLayout>();
+        LinkedList<SpecificLayout> specificSublayouts;
     }
 
     // A CompositeGridLayout just has a few GridLayouts inside it, which results in better (more-granular) caching than just one grid with everything
