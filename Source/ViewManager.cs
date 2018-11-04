@@ -109,10 +109,9 @@ namespace VisiPlacement
             foreach (View view in preParents.Keys)
             {
                 SpecificLayout preLayout = preParents[view];
-                SpecificLayout postLayout = this.DictionaryGet(postParents, view);
-
                 if (preLayout != null)
                 {
+                    SpecificLayout postLayout = this.DictionaryGet(postParents, view);
                     if (postLayout == null || preLayout.View != postLayout.View)
                     {
                         // The parent of <view> has changed.

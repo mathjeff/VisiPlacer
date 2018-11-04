@@ -27,6 +27,8 @@ namespace VisiPlacement
         // provides new views to use
         public void SetChildren(View[,] newChildren)
         {
+            // Remove removed children, then add new children
+            // This is done in two passes in case a child moved to another location
             int rowNumber, columnNumber;
             for (columnNumber = 0; columnNumber < newChildren.GetLength(0); columnNumber++)
             {
@@ -42,6 +44,22 @@ namespace VisiPlacement
                     {
                         if (oldChild != null)
                             this.Children.Remove(oldChild);
+                    }
+                }
+            }
+            // add new children
+            for (columnNumber = 0; columnNumber < newChildren.GetLength(0); columnNumber++)
+            {
+                for (rowNumber = 0; rowNumber < newChildren.GetLength(1); rowNumber++)
+                {
+                    View newChild = newChildren[columnNumber, rowNumber];
+                    View oldChild;
+                    if (this.children == null)
+                        oldChild = null;
+                    else
+                        oldChild = this.children[columnNumber, rowNumber];
+                    if (newChild != oldChild)
+                    {
                         if (newChild != null)
                         {
                             this.Children.Add(newChild);
@@ -80,11 +98,14 @@ namespace VisiPlacement
         {
             this.Children.Clear();
             int rowNumber, columnNumber;
-            for (columnNumber = 0; columnNumber < this.children.GetLength(0); columnNumber++)
+            if (this.children != null)
             {
-                for (rowNumber = 0; rowNumber < this.children.GetLength(1); rowNumber++)
+                for (columnNumber = 0; columnNumber < this.children.GetLength(0); columnNumber++)
                 {
-                    this.children[columnNumber, rowNumber] = null;
+                    for (rowNumber = 0; rowNumber < this.children.GetLength(1); rowNumber++)
+                    {
+                        this.children[columnNumber, rowNumber] = null;
+                    }
                 }
             }
         }
