@@ -82,7 +82,7 @@ namespace VisiPlacement
         }
 
         // Call this when the layout changes and can no longer be cached
-        public void AnnounceChange(bool mustRedraw)
+        public virtual void AnnounceChange(bool mustRedraw)
         {
             if (this.changedSinceLatestQuery && !mustRedraw)
                 return;

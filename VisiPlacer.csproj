@@ -47,6 +47,7 @@
     <Compile Include="Source\LayoutCache.cs" />
     <Compile Include="Source\LayoutChoice_Set.cs" />
     <Compile Include="Source\LayoutDimensions.cs" />
+    <Compile Include="Source\LayoutDuration_Layout.cs" />
     <Compile Include="Source\LayoutQuery.cs" />
     <Compile Include="Source\LayoutQuery_And_Response.cs" />
     <Compile Include="Source\LayoutScore.cs" />

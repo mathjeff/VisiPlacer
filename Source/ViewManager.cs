@@ -6,6 +6,9 @@ namespace VisiPlacement
 {
     public class ViewManager : LayoutChoice_Set
     {
+        public event LayoutCompletedHandler LayoutCompleted;
+        public delegate void LayoutCompletedHandler(ViewManager_LayoutStats layoutStats);
+
         // A ViewManager queries its child LayoutChoice_Set and puts the result into its parent View as needed.
         // That is, the ViewManager is what triggers the querying of layouts in the first place.
         public ViewManager(ContentView parentView, LayoutChoice_Set childLayout)
@@ -13,8 +16,8 @@ namespace VisiPlacement
             this.childLayout = childLayout;
             childLayout.AddParent(this);
 
-            this.parentView = new ManageableView(this);
-            parentView.Content = this.parentView;
+            this.mainView = new ManageableView(this);
+            parentView.Content = this.mainView;
             this.displaySize = new Size(parentView.Width, parentView.Height);
         }
         public void SetLayout(LayoutChoice_Set childLayout)
@@ -35,6 +38,7 @@ namespace VisiPlacement
                 this.specificLayout.Remove_VisualDescendents();
         }
 
+        // does a layout of size <size> if anything has changed since the last layout
         public void DoLayoutIfOutOfDate(Size size)
         {
             if (size.Width != this.displaySize.Width || size.Height != this.displaySize.Height)
@@ -43,6 +47,7 @@ namespace VisiPlacement
                 this.DoLayout(size);
         }
 
+        // does a layout of size <size>
         public void DoLayout(Size size)
         {
             if (Double.IsInfinity(size.Width) || Double.IsInfinity(size.Height))
@@ -51,61 +56,41 @@ namespace VisiPlacement
             this.DoLayout();
         }
 
+        // redoes the layout
         private void DoLayout()
         {
             this.needsRelayout = false;
 
-            IEnumerable<SpecificLayout> previousLayouts;
+            // determine which views are currently focused so we can re-focus them after redoing the layout
+            List<View> focusedViews = new List<View>();
             if (this.specificLayout != null)
             {
-                previousLayouts = this.specificLayout.GetDescendents();
-            }
-            else
-            {
-                previousLayouts = new LinkedList<SpecificLayout>();
-            }
-            List<View> focusedLayouts = new List<View>();
-            foreach (SpecificLayout layout in previousLayouts)
-            {
-                if (layout.View != null && layout.View.IsFocused)
+                foreach (SpecificLayout layout in this.specificLayout.GetDescendents())
                 {
-                    focusedLayouts.Add(layout.View);
+                    if (layout.View != null && layout.View.IsFocused)
+                        focusedViews.Add(layout.View);
                 }
             }
 
+            // check some data in preparation for computing stats
             int num_grid_preComputations = GridLayout.NumComputations;
-
             DateTime startTime = DateTime.Now;
-            //this.Remove_VisualDescendents();
-            View newView = this.DoLayout(this.childLayout, this.displaySize);
-            this.Reset_ChangeAnnouncement();
-            this.parentView.Content = newView;
-            DateTime endTime = DateTime.Now;
-            TimeSpan duration = endTime.Subtract(startTime);
-            System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
-            System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
-            int num_grid_postComputations = GridLayout.NumComputations;
-            System.Diagnostics.Debug.WriteLine("Num grid computations = " + (num_grid_postComputations - num_grid_preComputations));
-            TextLayout.NumMeasures = 0;
-            TextLayout.TextTime = new TimeSpan();
 
-            foreach (View view in focusedLayouts)
-            {
-                view.Focus();
-            }
-        }
-
-        private View DoLayout(LayoutChoice_Set layout, Size bounds)
-        {
+            // record the parent of each view before the relayout, to help us know which parents to disconnect
             Dictionary<View, SpecificLayout> preParents = this.findAncestors(this.specificLayout);
 
+            // recompute the new desired layout
             LayoutQuery query = new MaxScore_LayoutQuery();
-            query.MaxWidth = bounds.Width;
-            query.MaxHeight = bounds.Height;
-            this.specificLayout = layout.GetBestLayout(query);
+            query.MaxWidth = this.displaySize.Width;
+            query.MaxHeight = this.displaySize.Height;
+            DateTime getBestLayout_startDate = DateTime.Now;
+            this.specificLayout = this.childLayout.GetBestLayout(query);
+            DateTime getBestLayout_endDate = DateTime.Now;
 
+            // find the parent of each view after the relayout, to help us know which parents to disconnect
             Dictionary<View, SpecificLayout> postParents = this.findAncestors(this.specificLayout);
 
+            // disconnect any parents that are no longer the same
             foreach (View view in preParents.Keys)
             {
                 SpecificLayout preLayout = preParents[view];
@@ -122,8 +107,33 @@ namespace VisiPlacement
                 }
             }
 
-            // figure out where the subviews are placed
-            return this.specificLayout.DoLayout(bounds);
+            // record that our layout is up-to-date (so any future updates will trigger a relayout)
+            this.Reset_ChangeAnnouncement();
+
+            // update our actual view
+            this.mainView.Content = this.specificLayout.DoLayout(displaySize);
+
+            // display stats
+            DateTime endTime = DateTime.Now;
+            TimeSpan duration = endTime.Subtract(startTime);
+            System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
+            System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
+            int num_grid_postComputations = GridLayout.NumComputations;
+            System.Diagnostics.Debug.WriteLine("Num grid computations = " + (num_grid_postComputations - num_grid_preComputations));
+            TextLayout.NumMeasures = 0;
+            TextLayout.TextTime = new TimeSpan();
+
+            // refocus the previously focused views
+            foreach (View view in focusedViews)
+                view.Focus();
+
+            if (this.LayoutCompleted != null)
+            {
+                ViewManager_LayoutStats stats = new ViewManager_LayoutStats();
+                stats.ViewManager_LayoutDuration = duration;
+                stats.ViewManager_getBestLayout_Duration = getBestLayout_endDate.Subtract(getBestLayout_startDate);
+                this.LayoutCompleted.Invoke(stats);
+            }
         }
 
         private SpecificLayout DictionaryGet(Dictionary<View, SpecificLayout> dictionary, View value)
@@ -172,11 +182,11 @@ namespace VisiPlacement
             this.even = !this.even;
             if (this.even)
             {
-                this.parentView.VerticalOptions = LayoutOptions.CenterAndExpand;
+                this.mainView.VerticalOptions = LayoutOptions.CenterAndExpand;
             }
             else
             {
-                this.parentView.VerticalOptions = LayoutOptions.Center;
+                this.mainView.VerticalOptions = LayoutOptions.Center;
             }
 
             // update our own note that layout is needed
@@ -290,7 +300,7 @@ namespace VisiPlacement
             return null;    // not relevant
         }
 
-        private ContentView parentView;
+        private ContentView mainView;
         private LayoutChoice_Set childLayout;
         private Size displaySize;
         private SpecificLayout specificLayout;
@@ -325,5 +335,13 @@ namespace VisiPlacement
 
             return new SizeRequest(bounds);
         }
+    }
+
+    public class ViewManager_LayoutStats
+    {
+        // the time spent in ViewManager.DoLayout
+        public TimeSpan ViewManager_LayoutDuration;
+        // the time spent in ViewManager.specificLayout.getBestLayout
+        public TimeSpan ViewManager_getBestLayout_Duration;
     }
 }

@@ -210,9 +210,9 @@ namespace VisiPlacement
 
             // diagnostics
             if (this.LoggingEnabled)
-                ErrorReporter.ReportParadox("measuring: maxWidth = " + availableSize.Width.ToString() + " maxHeight = " + availableSize.Height.ToString());
+                System.Diagnostics.Debug.WriteLine("measure bounds: maxWidth = " + availableSize.Width.ToString() + " maxHeight = " + availableSize.Height.ToString() + " for text '" + text + "'");
             if (this.LoggingEnabled)
-                ErrorReporter.ReportParadox("measure: desired width = " + specificLayout.Width.ToString() + " desired height = " + specificLayout.Height.ToString());
+                System.Diagnostics.Debug.WriteLine("measure desired: width = " + specificLayout.Width.ToString() + " desired height = " + specificLayout.Height.ToString() + " for text '" + text + "'");
 
             return specificLayout;
         }
@@ -347,6 +347,20 @@ namespace VisiPlacement
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         public Size FormatText(String text, double desiredWidth)
+        {
+            if (text == null || text == "")
+                return new Size();
+            string[] blocks = text.Split('\n');
+            double maxWidth = 0, totalHeight = 0;
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                Size blockSize = this.FormatParagraph(blocks[i], desiredWidth);
+                maxWidth = Math.Max(maxWidth, blockSize.Width);
+                totalHeight += blockSize.Height;
+            }
+            return new Size(maxWidth, totalHeight);
+        }
+        public Size FormatParagraph(String text, double desiredWidth)
         {
             if (text == null || text == "")
                 return new Size();

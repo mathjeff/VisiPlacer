@@ -59,6 +59,17 @@ namespace VisiPlacement
             }
         }
 
+        public bool LoggingEnabled
+        {
+            set
+            {
+                foreach (TextLayout layout in this.layouts)
+                {
+                    layout.LoggingEnabled = value;
+                }
+            }
+        }
+
         private TextLayout makeLayout(double fontsize)
         {
             TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock);
