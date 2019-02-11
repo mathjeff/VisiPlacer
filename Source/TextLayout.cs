@@ -15,6 +15,7 @@ namespace VisiPlacement
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
             this.ScoreIfEmpty = true;
+            this.ScoreIfCropped = false;
             this.previousText = this.TextItem_Configurer.Text;
             textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
 
@@ -22,6 +23,7 @@ namespace VisiPlacement
         protected TextItem_Configurer TextItem_Configurer { get; set; }
         public double FontSize { get; set; }
         public bool ScoreIfEmpty { get; set; }
+        public bool ScoreIfCropped { get; set; }
 
         public String Text
         {
@@ -195,17 +197,23 @@ namespace VisiPlacement
             if (desiredSize.Width <= availableSize.Width && desiredSize.Height <= availableSize.Height)
             {
                 // no cropping is necessary
-                cropped = false;
                 width = desiredSize.Width;
                 height = desiredSize.Height;
             }
             else
             {
                 // cropping
-                cropped = true;
-                width = height = 0;
+                if (this.ScoreIfCropped)
+                {
+                    width = Math.Min(desiredSize.Width, availableSize.Width);
+                    height = Math.Min(desiredSize.Height, availableSize.Height);
+                }
+                else
+                {
+                    width = height = 0;
+                }
             }
-            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(cropped, text));
+            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(desiredSize, availableSize, text));
             specificLayout.Cropped = cropped;
 
             // diagnostics
@@ -216,14 +224,25 @@ namespace VisiPlacement
 
             return specificLayout;
         }
-        private LayoutScore ComputeScore(bool dimensionsAreCropped, string text)
+        private LayoutScore ComputeScore(Size desiredSize, Size availableSize, string text)
         {
             if (text == "" && !this.ScoreIfEmpty)
                 return LayoutScore.Zero;
-            LayoutScore score = new LayoutScore(this.BonusScore);
-            if (dimensionsAreCropped)
-                return LayoutScore.Get_CutOff_LayoutScore(1);
-            return score;
+            bool cropped = (desiredSize.Width > availableSize.Width || desiredSize.Height > availableSize.Height);
+            if (cropped)
+            {
+                if (this.ScoreIfCropped)
+                {
+                    double desiredArea = desiredSize.Width * desiredSize.Height;
+                    double availableArea = availableSize.Width * availableSize.Height;
+                    return this.BonusScore.Times(availableArea / desiredArea).Plus(LayoutScore.Get_CutOff_LayoutScore(1));
+                }
+                else
+                {
+                    return LayoutScore.Get_CutOff_LayoutScore(1);
+                }
+            }
+            return new LayoutScore(this.BonusScore);
         }
 
 

@@ -18,12 +18,44 @@ namespace VisiPlacement
             textBox.BackgroundColor = Color.LightGray;
             this.TextBox.Margin = new Thickness();
 
-            List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
-            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 30));
-            layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
+            this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 30));
+            this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
 
             this.LayoutToManage = new LayoutUnion(layouts);
 
+        }
+
+        public bool ScoreIfEmpty
+        {
+            set
+            {
+                foreach (TextLayout layout in this.layouts)
+                {
+                    layout.ScoreIfEmpty = value;
+                }
+            }
+        }
+
+        public bool ScoreIfCropped
+        {
+            set
+            {
+                foreach (TextLayout layout in this.layouts)
+                {
+                    layout.ScoreIfCropped = value;
+                }
+            }
+        }
+
+        public bool LoggingEnabled
+        {
+            set
+            {
+                foreach (TextLayout layout in this.layouts)
+                {
+                    layout.LoggingEnabled = value;
+                }
+            }
         }
 
         private void Setup_PropertyChange_Listener(string propertyName, View element, PropertyChangedEventHandler callback)
@@ -31,7 +63,7 @@ namespace VisiPlacement
             this.TextBox.PropertyChanged += callback;
         }
 
-
+        private List<TextLayout> layouts = new List<TextLayout>();
         private Editor TextBox;
     }
 

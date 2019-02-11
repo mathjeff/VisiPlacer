@@ -59,6 +59,17 @@ namespace VisiPlacement
             }
         }
 
+        public bool ScoreIfCropped
+        {
+            set
+            {
+                foreach (TextLayout layout in this.layouts)
+                {
+                    layout.ScoreIfCropped = value;
+                }
+            }
+        }
+
         public bool LoggingEnabled
         {
             set
@@ -69,6 +80,7 @@ namespace VisiPlacement
                 }
             }
         }
+
 
         private TextLayout makeLayout(double fontsize)
         {
