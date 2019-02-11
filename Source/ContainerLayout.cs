@@ -91,9 +91,8 @@ namespace VisiPlacement
             {
                 // If there is no room for the border, then that violates a requirement and we return the worst possible score
                 result = this.makeSpecificLayout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
-                this.prepareLayoutForQuery(result, query);
                 if (query.Accepts(result))
-                    return result;
+                    return this.prepareLayoutForQuery(result, query);
                 return null;
             }
 
@@ -113,7 +112,11 @@ namespace VisiPlacement
                 return null;
             }
             // if there is no subLayout, for now we just return an empty size
-            result = this.makeSpecificLayout(this.View, new Size(), LayoutScore.Zero, null, new Thickness());
+            Specific_ContainerLayout empty = this.makeSpecificLayout(this.View, new Size(), LayoutScore.Zero, null, new Thickness());
+            if (query.Accepts(empty))
+                result = empty;
+            else
+                result = null;
             this.prepareLayoutForQuery(result, query);
             return result;
         }

@@ -189,16 +189,10 @@ namespace VisiPlacement
                 }
                 if (!correct)
                 {
-                    LayoutQuery subQuery = new MaxScore_LayoutQuery();
-                    subQuery.Debug = true;
                     if (fastResult != null)
                     {
-                        /*
-                        subQuery.MaxWidth = fastResult.Dimensions.Width;
-                        subQuery.MaxHeight = fastResult.Dimensions.Height;
-                        this.Query_SubLayout(subQuery);
-                        */
                         this.GetBestLayout_Quickly(query.Clone());
+                        this.Query_SubLayout(query.Clone());
                     }
                 }
                 return this.prepareLayoutForQuery(correctResult, query);

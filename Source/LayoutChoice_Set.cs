@@ -36,7 +36,7 @@ namespace VisiPlacement
             this.Reset_ChangeAnnouncement();
 
             int numMatches;
-            if (query.Debug)
+            //if (query.Debug)
             {
                 if (query.ProposedSolution_ForDebugging != null)
                 {
@@ -48,6 +48,9 @@ namespace VisiPlacement
                 if (layout != null && !query.Accepts(layout))
                 {
                     ErrorReporter.ReportParadox("Error: the returned layout was not valid");
+                    LayoutQuery query2 = query.Clone();
+                    query2.Debug = true;
+                    this.GetBestLayout(query2);
                 }
             }
 

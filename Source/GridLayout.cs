@@ -472,17 +472,20 @@ namespace VisiPlacement
                         if (layout2 == null)
                         {
                             ErrorReporter.ReportParadox("Error: min-width query did not find result from max-score query");
-                            // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                            LayoutQuery debugQuery1 = query.Clone();
+                            LayoutQuery debugQuery1 = query2.Clone();
                             debugQuery1.Debug = true;
                             debugQuery1.ProposedSolution_ForDebugging = bestLayout;
                             SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
-                            LayoutQuery debugQuery2 = query2.Clone();
+
+                            // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                            LayoutQuery debugQuery2 = query.Clone();
                             debugQuery2.Debug = true;
                             debugQuery2.ProposedSolution_ForDebugging = debugResult1;
                             subLayout.GetBestLayout(debugQuery2.Clone());
-                            debugQuery2.MinScore = LayoutScore.Minimum;
-                            SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery2.Clone());
+
+                            LayoutQuery debugQuery3 = debugQuery1.Clone();
+                            debugQuery3.MinScore = LayoutScore.Minimum;
+                            SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
                             ErrorReporter.ReportParadox("");
                         }
                         if (!query2.Accepts(layout2))
@@ -587,16 +590,20 @@ namespace VisiPlacement
                         {
                             ErrorReporter.ReportParadox("Error: min-height query did not find result from max-score query");
                             // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                            LayoutQuery debugQuery1 = query.Clone();
+                            LayoutQuery debugQuery1 = query2.Clone();
                             debugQuery1.Debug = true;
                             debugQuery1.ProposedSolution_ForDebugging = bestLayout;
-                            subLayout.GetBestLayout(debugQuery1.Clone());
-                            LayoutQuery debugQuery2 = query2.Clone();
+                            SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
+
+                            // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                            LayoutQuery debugQuery2 = query.Clone();
                             debugQuery2.Debug = true;
-                            debugQuery2.ProposedSolution_ForDebugging = bestLayout;
+                            debugQuery2.ProposedSolution_ForDebugging = debugResult1;
                             subLayout.GetBestLayout(debugQuery2.Clone());
-                            debugQuery2.MinScore = LayoutScore.Minimum;
-                            SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery2.Clone());
+
+                            LayoutQuery debugQuery3 = debugQuery1.Clone();
+                            debugQuery3.MinScore = LayoutScore.Minimum;
+                            SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
                             ErrorReporter.ReportParadox("");
                         }
 

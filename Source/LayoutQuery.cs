@@ -53,6 +53,7 @@ namespace VisiPlacement
         public void OptimizePastExample(SpecificLayout example)
         {
             this.OptimizePastDimensions(example.Dimensions);
+            this.ProposedSolution_ForDebugging = this.proposedSolution_forDebugging;
         }
         // returns a stricter query that won't even be satisfied by this example
         public abstract void OptimizePastDimensions(LayoutDimensions dimensions);
@@ -119,6 +120,8 @@ namespace VisiPlacement
             set
             {
                 this.maxWidth = value;
+                if (!this.Accepts(this.proposedSolution_forDebugging))
+                    this.proposedSolution_forDebugging = null;
             }
         }
         public double MaxHeight
@@ -130,6 +133,8 @@ namespace VisiPlacement
             set
             {
                 this.maxHeight = value;
+                if (!this.Accepts(this.proposedSolution_forDebugging))
+                    this.proposedSolution_forDebugging = null;
             }
         }
         public LayoutScore MinScore
@@ -141,6 +146,8 @@ namespace VisiPlacement
             set
             {
                 this.minScore = value;
+                if (!this.Accepts(this.proposedSolution_forDebugging))
+                    this.proposedSolution_forDebugging = null;
             }
         }
         public bool Debug { get; set; } // whether we want to do extra work for this query to ensure the results are correct
@@ -153,7 +160,7 @@ namespace VisiPlacement
             set
             {
                 SpecificLayout proposedSolution = value;
-                if ((value != null) && !this.Accepts(proposedSolution))
+                if ((proposedSolution != null) && !this.Accepts(proposedSolution))
                 {
                     ErrorReporter.ReportParadox("Error: attempted to provide an invalid debugging solution");
                     // go back and run the original query again
@@ -173,6 +180,7 @@ namespace VisiPlacement
                 this.proposedSolution_forDebugging = proposedSolution;
             }
         }
+
         public bool Equals(LayoutQuery other)
         {
             LayoutQuery query1 = this;

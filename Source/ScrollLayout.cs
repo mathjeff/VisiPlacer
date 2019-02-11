@@ -45,16 +45,13 @@ namespace VisiPlacement
             }
             else
             {
-                if (query.MinimizesHeight())
-                    result = this.getMinHeightLayout(query as MinHeight_LayoutQuery);
-                else
-                    result = this.getMaxScoreOrMinWidthLayout(query);
+                result = this.doGetBestLayout(query);
             }
             return this.prepareLayoutForQuery(result, query);
         }
 
         // suports MaxScore_LayoutQuery and MinWidth_LayoutQuery
-        private Specific_ScrollLayout getMaxScoreOrMinWidthLayout(LayoutQuery query)
+        private Specific_ScrollLayout doGetBestLayout(LayoutQuery query)
         {
             // find the max-scoring layout, to put a bounds on the search space
             LayoutQuery subQuery = new MaxScore_LayoutQuery();
@@ -81,19 +78,35 @@ namespace VisiPlacement
             if (bestScorePerWindow.CompareTo(query.MinScore) < 0)
                 bestSublayout = null;
 
+            LayoutQuery queryTemplate;
+            if (query.MinimizesHeight() || query.MaximizesScore())
+            {
+                queryTemplate = new MaxScore_LayoutQuery();
+            }
+            else
+            {
+                queryTemplate = new MinWidth_LayoutQuery();
+            }
+            queryTemplate.MaxWidth = query.MaxWidth;
             for (int numWindows = (int)bestNumWindows - 1; numWindows > 0; numWindows--)
             {
                 if (bestScorePerWindow.CompareTo(LayoutScore.Zero) < 0)
                 {
-                    // The only change in the sublayout's score that can happen as we shrink its size is that its score can decrease.
-                    // Shrinking the score also makes the score per window get further from zero, so if we're trying to maximize an already negative score, then we should give up.
-                    break;
+                    if (query.MaximizesScore())
+                    {
+                        // The only change in the sublayout's score that can happen as we shrink its size is that its score can decrease.
+                        // If the sublayout's score stays approximately constant, then its score per window can get further from zero
+                        // So, if the score is already negative, then score will just continue to get more negative, and we should give up
+                        break;
+                    }
                 }
 
                 // shrink the size by one window and look for a better layout
-                subQuery = query.Clone();
+                subQuery = queryTemplate.Clone();
                 subQuery.MaxHeight = numWindows * ourSize.Height;
-                subQuery.OptimizePastDimensions(new LayoutDimensions(ourSize.Width, subQuery.MaxHeight, bestScorePerWindow.Times(numWindows)));
+                subQuery.MinScore = query.MinScore.Times(numWindows);
+                if (bestSublayout != null)
+                    subQuery.OptimizePastDimensions(new LayoutDimensions(bestSublayout.Width, bestSublayout.Height, bestScorePerWindow.Times(numWindows)));
                 SpecificLayout childResult = this.subLayout.GetBestLayout(subQuery);
                 if (childResult != null)
                 {
@@ -106,6 +119,9 @@ namespace VisiPlacement
                 }
             }
 
+
+
+
             if (bestSublayout == null)
                 return null;
 
@@ -117,53 +133,7 @@ namespace VisiPlacement
                 ErrorReporter.ReportParadox("ScrollLayout.getMaxScoreOrMinWidthLayout returning illegal response");
                 LayoutQuery debugQuery = query.Clone();
                 debugQuery.Debug = true;
-                this.getMaxScoreOrMinWidthLayout(debugQuery);
-            }
-            return result;
-        }
-
-        private Specific_ScrollLayout getMinHeightLayout(MinHeight_LayoutQuery query)
-        {
-            MaxScore_LayoutQuery maxQuery = new MaxScore_LayoutQuery();
-            maxQuery.MaxWidth = query.MaxWidth;
-            maxQuery.MaxHeight = query.MaxHeight;
-            maxQuery.MinScore = query.MinScore;
-
-            Specific_ScrollLayout maxScoring = this.getMaxScoreOrMinWidthLayout(maxQuery);
-            if (maxScoring == null)
-                return null;
-            SpecificLayout subLayout = maxScoring.SubLayout;
-
-            double numWindows = Math.Ceiling(subLayout.Score.DividedBy(query.MinScore));
-            double windowHeight;
-            if (numWindows == 0)
-            {
-                // the only way this should happen is if query.MinScore is a negative number much larger in magnitude than subLayout.Score
-                windowHeight = 0;
-            }
-            else
-            {
-                windowHeight = subLayout.Height / numWindows;
-            }
-
-
-
-            Specific_ScrollLayout result = new Specific_ScrollLayout(this.view, new Size(maxScoring.Width, windowHeight), subLayout.Score.Times(1.0 / numWindows), subLayout);
-            if (query.Accepts(result))
-                return result;
-            // there was some rounding error in the score division; increase the window size by decreasing the window count and use that
-            numWindows--;
-            if (numWindows < 1)
-            {
-                ErrorReporter.ReportParadox("numWindows == " + numWindows + " (second try) in ScrollLayout.getMinHeightLayout");
-                numWindows = 0;
-            }
-            windowHeight = subLayout.Height / numWindows;
-            result = new Specific_ScrollLayout(this.view, new Size(maxScoring.Width, windowHeight), subLayout.Score.Times(1.0 / numWindows), subLayout);
-            if (!query.Accepts(result))
-            {
-                ErrorReporter.ReportParadox("query does not accept result of ScrollLayout.getMinHeightLayout");
-                return maxScoring;
+                this.doGetBestLayout(debugQuery);
             }
             return result;
         }

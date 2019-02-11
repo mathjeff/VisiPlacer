@@ -131,20 +131,20 @@ namespace VisiPlacement
             // if the width is really small, the text block doesn't realize that it doesn't need any space
             double maxWidth = query.MaxWidth;
 
-            Size bestAllowedSize = new Size(double.PositiveInfinity, 0);
+            Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity));
             double pixelSize = 1;
             double maxRejectedWidth = 0;
-            while (maxRejectedWidth < bestAllowedSize.Width - pixelSize / 2)
+            while (maxRejectedWidth < bestAllowedDimensions.Width - pixelSize / 2)
             {
                 // given the current width, compute the required height
                 Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity));
                 if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
                 {
                     // this layout fits in the required dimensions
-                    if (newDimensions.Width < bestAllowedSize.Width && newDimensions.Width <= query.MaxWidth)
+                    if (newDimensions.Width < bestAllowedDimensions.Width && newDimensions.Width <= query.MaxWidth)
                     {
                         // we even have improved on the best layout found so far
-                        bestAllowedSize = new Size(newDimensions.Width, newDimensions.Height);
+                        bestAllowedDimensions = newDimensions;
                         maxWidth = newDimensions.Width;
                     }
                     else
@@ -162,7 +162,7 @@ namespace VisiPlacement
                     if (maxWidth <= 0)
                         break;
                     // if the first layout we found was too tall, then there must be some cropping
-                    if (double.IsPositiveInfinity(bestAllowedSize.Width))
+                    if (double.IsPositiveInfinity(bestAllowedDimensions.Width))
                         return null;
                 }
                 // calculate a new size
@@ -170,13 +170,12 @@ namespace VisiPlacement
                 maxWidth = desiredArea / query.MaxHeight;
                 if (maxWidth < maxRejectedWidth + pixelSize / 2)
                     maxWidth = maxRejectedWidth + pixelSize / 2;
-                if (maxWidth > bestAllowedSize.Width - pixelSize / 2)
-                    maxWidth = bestAllowedSize.Width - pixelSize / 2;
+                if (maxWidth > bestAllowedDimensions.Width - pixelSize / 2)
+                    maxWidth = bestAllowedDimensions.Width - pixelSize / 2;
             }
-            if (bestAllowedSize.Width > query.MaxWidth)
+            if (!query.Accepts(bestAllowedDimensions))
                 return null;
-            Specific_TextLayout dimensions = this.ComputeDimensions(bestAllowedSize);
-            return dimensions;
+            return bestAllowedDimensions;
         }
 
         // compute the best dimensions fitting within the given size
@@ -203,6 +202,7 @@ namespace VisiPlacement
             else
             {
                 // cropping
+                cropped = true;
                 if (this.ScoreIfCropped)
                 {
                     width = Math.Min(desiredSize.Width, availableSize.Width);
@@ -226,7 +226,7 @@ namespace VisiPlacement
         }
         private LayoutScore ComputeScore(Size desiredSize, Size availableSize, string text)
         {
-            if (text == "" && !this.ScoreIfEmpty)
+            if ((text == "" || text == null) && !this.ScoreIfEmpty)
                 return LayoutScore.Zero;
             bool cropped = (desiredSize.Width > availableSize.Width || desiredSize.Height > availableSize.Height);
             if (cropped)
