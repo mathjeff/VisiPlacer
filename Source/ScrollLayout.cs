@@ -23,124 +23,63 @@ using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    public class ScrollLayout : LayoutChoice_Set
+    // A ScrollLayout will allow its content to scroll if needed
+    public class ScrollLayout : LayoutUnion
     {
         public static LayoutChoice_Set New(LayoutChoice_Set subLayout)
         {
-            return new PixelatedLayout(new LayoutCache(new ScrollLayout(subLayout)), 1);
+            return new ScrollLayout(subLayout);
         }
 
         private ScrollLayout(LayoutChoice_Set subLayout)
         {
-            this.subLayout = subLayout;
-            this.view = new ScrollView();
+            List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
+            subLayouts.Add(subLayout);
+            subLayouts.Add(new MustScroll_Layout(subLayout));
+            this.Set_LayoutChoices(subLayouts);
         }
+    }
 
+    // a MustScroll_Layout will always put its content into a ScrollView
+    public class MustScroll_Layout : LayoutChoice_Set
+    {
+        public MustScroll_Layout(LayoutChoice_Set subLayout)
+        {
+            if (subLayout is LayoutCache)
+                this.subLayout = subLayout;
+            else
+                this.subLayout = new LayoutCache(subLayout);
+        }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            SpecificLayout result;
-            if (query.MaxHeight < this.minHeight)
-            {
-                result = this.subLayout.GetBestLayout(query);
-            }
-            else
-            {
-                result = this.doGetBestLayout(query);
-            }
-            return this.prepareLayoutForQuery(result, query);
-        }
-
-        // suports MaxScore_LayoutQuery and MinWidth_LayoutQuery
-        private Specific_ScrollLayout doGetBestLayout(LayoutQuery query)
-        {
-            // find the max-scoring layout, to put a bounds on the search space
-            LayoutQuery subQuery = new MaxScore_LayoutQuery();
-            subQuery.MaxWidth = query.MaxWidth;
-            subQuery.MaxHeight = double.PositiveInfinity;
-            subQuery.MinScore = LayoutScore.Minimum;
-
-            SpecificLayout bestSublayout = this.subLayout.GetBestLayout(subQuery);
-            if (bestSublayout == null)
+            // ask the ImageLayout how much space to use
+            // TODO: make this cleaner and also maybe use a different algorithm
+            SpecificLayout window = this.imageLayout.GetBestLayout(query);
+            if (window == null)
                 return null;
+            // ask the sublayout for the best layout it can do for the given bounds
+            // First get the highest-scoring layout for these bounds
+            MaxScore_LayoutQuery maxScoreQuery = new MaxScore_LayoutQuery();
+            maxScoreQuery.MaxWidth = query.MaxWidth;
+            maxScoreQuery.MaxHeight = double.PositiveInfinity;
+            maxScoreQuery.MinScore = LayoutScore.Minimum;
+            SpecificLayout maxScore_sublayout = this.subLayout.GetBestLayout(maxScoreQuery);
+            // Next, get the smallest-height layout with having at least as good of a score
+            MinHeight_LayoutQuery minHeightQuery = new MinHeight_LayoutQuery();
+            minHeightQuery.MaxWidth = query.MaxWidth;
+            minHeightQuery.MaxHeight = maxScore_sublayout.Height;
+            minHeightQuery.MinScore = maxScore_sublayout.Score;
+            SpecificLayout minHeight_sublayout = this.subLayout.GetBestLayout(minHeightQuery);
 
-            // compute the score that we assign to the child's favorite layout
-            Size ourSize = new Size(query.MaxWidth, query.MaxHeight);
+            // Finally, return the result
+            Specific_ContainerLayout child = new Specific_ScrollLayout(this.view, window.Size, window.Score, minHeight_sublayout);
 
-            // We want to check a bunch of layout sizes for two reasons:
-            // 1. This lets us find the max-average-visible-score-at-once layout
-            // 2. This means that slightly increasing the width cannot cause a huge increase in height and therefore a large decrease in max-average-visible-score-at-once
-            // So, we need some sort of step size to use to avoid executing too slowly, and ourSize.Height is a convenient step size to use
-            // Also note that stepping is more convenient when we consider the final partial page to exist but have no value in its lower portion.
-            // That is, if ourSize.Height = 10 and bestSublayout.Height = 52, then the remaining 8 units of height (52 % 10 = 2, 10 - 2 = 8) are considered to take up space but
-            // to not provide value. This enables us to adjust bestSublayout.Height by ourSize.Height at each iteration and still be sure of correctness.
-            double bestNumWindows = Math.Ceiling(bestSublayout.Height / ourSize.Height);
-            LayoutScore bestScorePerWindow = bestSublayout.Score.Times(1.0 / bestNumWindows);
-            if (bestScorePerWindow.CompareTo(query.MinScore) < 0)
-                bestSublayout = null;
-
-            LayoutQuery queryTemplate;
-            if (query.MinimizesHeight() || query.MaximizesScore())
-            {
-                queryTemplate = new MaxScore_LayoutQuery();
-            }
-            else
-            {
-                queryTemplate = new MinWidth_LayoutQuery();
-            }
-            queryTemplate.MaxWidth = query.MaxWidth;
-            for (int numWindows = (int)bestNumWindows - 1; numWindows > 0; numWindows--)
-            {
-                if (bestScorePerWindow.CompareTo(LayoutScore.Zero) < 0)
-                {
-                    if (query.MaximizesScore())
-                    {
-                        // The only change in the sublayout's score that can happen as we shrink its size is that its score can decrease.
-                        // If the sublayout's score stays approximately constant, then its score per window can get further from zero
-                        // So, if the score is already negative, then score will just continue to get more negative, and we should give up
-                        break;
-                    }
-                }
-
-                // shrink the size by one window and look for a better layout
-                subQuery = queryTemplate.Clone();
-                subQuery.MaxHeight = numWindows * ourSize.Height;
-                subQuery.MinScore = query.MinScore.Times(numWindows);
-                if (bestSublayout != null)
-                    subQuery.OptimizePastDimensions(new LayoutDimensions(bestSublayout.Width, bestSublayout.Height, bestScorePerWindow.Times(numWindows)));
-                SpecificLayout childResult = this.subLayout.GetBestLayout(subQuery);
-                if (childResult != null)
-                {
-                    // compute our score for the child's layout and update bestLayout
-                    bestNumWindows = Math.Ceiling(childResult.Height / ourSize.Height);
-                    bestScorePerWindow = childResult.Score.Times(1.0 / bestNumWindows);
-                    bestSublayout = childResult;
-                    // jump to the given window
-                    numWindows = (int)(Math.Min(numWindows, bestNumWindows));
-                }
-            }
-
-
-
-
-            if (bestSublayout == null)
-                return null;
-
-            Size size = new Size(bestSublayout.Width, Math.Min(bestSublayout.Height, query.MaxHeight));
-
-            Specific_ScrollLayout result = new Specific_ScrollLayout(this.view, size, bestScorePerWindow, bestSublayout);
-            if (!query.Accepts(result))
-            {
-                ErrorReporter.ReportParadox("ScrollLayout.getMaxScoreOrMinWidthLayout returning illegal response");
-                LayoutQuery debugQuery = query.Clone();
-                debugQuery.Debug = true;
-                this.doGetBestLayout(debugQuery);
-            }
-            return result;
+            return this.prepareLayoutForQuery(child, query);
         }
-
         private LayoutChoice_Set subLayout;
-        private ScrollView view;
-        private double minHeight = 1;
+        private ScrollView view = new ScrollView();
+        private ImageLayout imageLayout = new ImageLayout(null, LayoutScore.Get_UsedSpace_LayoutScore(1));
+
     }
 
 

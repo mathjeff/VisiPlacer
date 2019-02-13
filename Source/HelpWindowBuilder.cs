@@ -24,13 +24,20 @@ namespace VisiPlacement
             int fontSize;
             for (fontSize = 20; fontSize >= 12; fontSize -= 8)
             {
-                GridLayout gridLayout = GridLayout.New(new BoundProperty_List(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
-                foreach (string message in this.messages)
+                if (messages.Count() > 1)
                 {
-                    string section = "    " + message;
-                    gridLayout.AddLayout(new TextblockLayout(section, fontSize));
+                    GridLayout gridLayout = GridLayout.New(new BoundProperty_List(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
+                    foreach (string message in this.messages)
+                    {
+                        string section = "    " + message;
+                        gridLayout.AddLayout(new TextblockLayout(section, fontSize));
+                    }
+                    fontChoices.Add(gridLayout);
                 }
-                fontChoices.Add(gridLayout);
+                else
+                {
+                    fontChoices.Add(new TextblockLayout(messages.First(), fontSize));
+                }
             }
             List<LayoutChoice_Set> allChoices = new List<LayoutChoice_Set>();
             foreach (LayoutChoice_Set fontChoice in fontChoices)

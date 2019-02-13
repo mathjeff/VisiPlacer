@@ -14,6 +14,13 @@ namespace VisiPlacement
         public abstract View View { get; }
         public abstract double Width { get; }
         public abstract double Height { get; }
+        public Size Size
+        {
+            get
+            {
+                return new Size(this.Width, this.Height);
+            }
+        }
         public abstract LayoutScore Score { get; }
         public LayoutDimensions Dimensions
         {

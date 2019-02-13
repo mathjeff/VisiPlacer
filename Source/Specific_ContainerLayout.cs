@@ -20,7 +20,7 @@ namespace VisiPlacement
             this.BorderThickness = borderThickness;
             this.subLayout = subLayout;
         }
-        public Specific_ContainerLayout(ContentView view, Size size, LayoutScore score, Thickness borderThickness)
+        public Specific_ContainerLayout(View view, Size size, LayoutScore score, Thickness borderThickness)
             : this(view, size, score, null, borderThickness)
         {
         }
@@ -102,7 +102,7 @@ namespace VisiPlacement
             this.BorderThickness = original.BorderThickness;
             this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
         }
-        public Size Size { get; set; }
+        public new Size Size { get; set; }
         public override double Width
         {
             get

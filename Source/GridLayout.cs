@@ -24,6 +24,13 @@ namespace VisiPlacement
                     }
                     // don't yet support automatically making a smaller grid in this case
                 }
+                else
+                {
+                    if (rowHeights.NumProperties == 1 && columnWidths.NumProperties == 1)
+                    {
+                        ErrorReporter.ReportParadox("Creating GridLayout of size 1x1");
+                    }
+                }
             }
             // can't compose from smaller grids
             return new GridLayout(rowHeights, columnWidths, bonusScore);
