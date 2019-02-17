@@ -24,6 +24,8 @@ namespace VisiPlacement
             double newHeight = example.Height * 0.9999999999;
             if (this.MaxHeight > newHeight)
                 this.MaxHeight = newHeight;
+            if (!this.Accepts(this.ProposedSolution_ForDebugging))
+                this.ProposedSolution_ForDebugging = null;
         }
         public override LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2)
         {
@@ -48,6 +50,9 @@ namespace VisiPlacement
         {
             return true;
         }
-
+        public override string ToString()
+        {
+            return "MinHeightQuery(" + this.MaxWidth + "," + this.MaxHeight + "," + this.MinScore + ")";
+        }
     }
 }

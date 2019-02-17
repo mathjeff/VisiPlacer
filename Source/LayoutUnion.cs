@@ -67,7 +67,6 @@ namespace VisiPlacement
             SpecificLayout debugResult = query.ProposedSolution_ForDebugging;
             if (debugResult != null)
                 debugResult = debugResult.Clone();
-            query.ProposedSolution_ForDebugging = query.ProposedSolution_ForDebugging;
             LinkedList<LayoutChoice_Set> good_sourceLayouts = new LinkedList<LayoutChoice_Set>();
             foreach (LayoutChoice_Set layoutSet in this.layoutOptions)
             {
@@ -91,11 +90,20 @@ namespace VisiPlacement
                     // keep track of this query (which must be the best so far)
                     best_specificLayout = currentLayout;
                     good_sourceLayouts.AddLast(layoutSet);
+
+                    if (query.Debug && query.ProposedSolution_ForDebugging != null)
+                    {
+                        if (query.PreferredLayout(query.ProposedSolution_ForDebugging, best_specificLayout) != query.ProposedSolution_ForDebugging)
+                        {
+                            ErrorReporter.ReportParadox("Error; query " + query + " prefers " + best_specificLayout + " over proposed debug solution " + query.ProposedSolution_ForDebugging);
+                            LayoutQuery debugQuery = query.Clone();
+                            debugQuery.Debug = true;
+                            layoutSet.GetBestLayout(query.Clone());
+                        }
+                    }
+
                     // make the query more strict, so we will only ever get dimensions that are at least as good as this
                     query.OptimizeUsingExample(best_specificLayout);
-                    // when the query changes, the suggested solution might not be valid
-                    if (!query.Accepts(query.ProposedSolution_ForDebugging))
-                        query.ProposedSolution_ForDebugging = null;
                 }
             }
             query.ProposedSolution_ForDebugging = debugResult;

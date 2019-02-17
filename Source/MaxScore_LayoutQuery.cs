@@ -21,9 +21,11 @@ namespace VisiPlacement
         }
         public override void OptimizePastDimensions(LayoutDimensions example)
         {
-            LayoutScore minScore = example.Score.Plus(new LayoutScore(-double.MaxValue, 1));
+            LayoutScore minScore = example.Score.Plus(LayoutScore.Tiny);
             if (this.MinScore.CompareTo(example.Score) < 0)
                 this.MinScore = minScore;
+            if (!this.Accepts(this.ProposedSolution_ForDebugging))
+                this.ProposedSolution_ForDebugging = null;
         }
         public override LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2)
         {
@@ -47,6 +49,11 @@ namespace VisiPlacement
         public override bool MaximizesScore()
         {
             return true;
+        }
+
+        public override string ToString()
+        {
+            return "MaxScoreQuery(" + this.MaxWidth + "," + this.MaxHeight + "," + this.MinScore + ")";
         }
     }
 }

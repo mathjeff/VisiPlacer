@@ -71,7 +71,7 @@ namespace VisiPlacement
         {
             this.Initialize();
         }
-        public LayoutScore(double priority, double weight)
+        private LayoutScore(double priority, double weight)
         {
             this.Initialize();
             this.addComponent(priority, weight);
@@ -306,11 +306,16 @@ namespace VisiPlacement
         }
         public override string ToString()
         {
-            String result = "";
+            String result = "(";
+            bool isFirst = true;
             foreach (ListItemStats<double, double> component in this.components.AllItems)
             {
-                result += component.Key + ":" + component.Value + ",";
+                if (!isFirst)
+                    result += ",";
+                result += component.Key + ":" + component.Value;
+                isFirst = false;
             }
+            result += ")";
             return result;
         }
 

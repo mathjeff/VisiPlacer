@@ -141,9 +141,9 @@ namespace VisiPlacement
                 if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
                 {
                     // this layout fits in the required dimensions
-                    if (newDimensions.Width < bestAllowedDimensions.Width && newDimensions.Width <= query.MaxWidth)
+                    if (newDimensions.Width <= bestAllowedDimensions.Width && newDimensions.Width <= query.MaxWidth)
                     {
-                        // we even have improved on the best layout found so far
+                        // this layout is at least as good as the best layout we found so far
                         bestAllowedDimensions = newDimensions;
                         maxWidth = newDimensions.Width;
                     }
@@ -217,10 +217,12 @@ namespace VisiPlacement
             specificLayout.Cropped = cropped;
 
             // diagnostics
+            if (text == "At least as fun as this activity (optional):")
+                this.LoggingEnabled = true;
             if (this.LoggingEnabled)
-                System.Diagnostics.Debug.WriteLine("measure bounds: maxWidth = " + availableSize.Width.ToString() + " maxHeight = " + availableSize.Height.ToString() + " for text '" + text + "'");
-            if (this.LoggingEnabled)
-                System.Diagnostics.Debug.WriteLine("measure desired: width = " + specificLayout.Width.ToString() + " desired height = " + specificLayout.Height.ToString() + " for text '" + text + "'");
+            {
+                System.Diagnostics.Debug.WriteLine("measured '" + text + "' in " + availableSize + "; got " + specificLayout.Size);
+            }
 
             return specificLayout;
         }

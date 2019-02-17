@@ -24,6 +24,8 @@ namespace VisiPlacement
             double newWidth = example.Width * 0.9999999999;
             if (this.MaxWidth > newWidth)
                 this.MaxWidth = newWidth;
+            if (!this.Accepts(this.ProposedSolution_ForDebugging))
+                this.ProposedSolution_ForDebugging = null;
         }
 
         public override LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2)
@@ -49,6 +51,9 @@ namespace VisiPlacement
         {
             return true;
         }
-
+        public override string ToString()
+        {
+            return "MinWidthQuery(" + this.MaxWidth + "," + this.MaxHeight + "," + this.MinScore + ")";
+        }
     }
 }

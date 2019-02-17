@@ -231,6 +231,35 @@ namespace VisiPlacement
             }
             return total;
         }
+
+        public void RescaleToTotalValue(double total)
+        {
+            double existingTotal = this.GetTotalValue();
+            double ratio;
+            if (double.IsPositiveInfinity(total))
+                ratio = total;
+            else
+                ratio = total / this.GetTotalValue();
+            for (int i = 0; i < this.NumGroups; i++)
+            {
+                this.Set_GroupTotal(i, this.Get_GroupTotal(i) * ratio);
+            }
+            // also go back and check for rounding error
+            if (!double.IsInfinity(total))
+            {
+                // fix any remaining errors without requiring evenness
+                for (int i = 0; i < this.NumGroups; i++)
+                {
+                    double error = total - this.GetTotalValue();
+                    if (error == 0)
+                        break;
+                    double currentAdjustment = error;
+                    double newValue = this.Get_GroupTotal(i) + currentAdjustment;
+                    this.Set_GroupTotal(i, newValue);
+                }
+            }
+        }
+
         public int NumGroups
         {
             get
@@ -252,6 +281,18 @@ namespace VisiPlacement
         public List<int> GetGroupAtIndex(int index)
         {
             return this.indicesByGroup[index];
+        }
+        public override string ToString()
+        {
+            string result = "(";
+            for (int i = 0; i < this.values.Length; i++)
+            {
+                result += values[i];
+                if (i < this.values.Length - 1)
+                    result += ",";
+            }
+            result += ")";
+            return result;
         }
         double[] scales;
         double[] values;

@@ -33,5 +33,10 @@
         public double Width { get; set; }
         public double Height { get; set; }
         public LayoutScore Score { get; set; }
+
+        public override string ToString()
+        {
+            return "(" + this.Width + "," + this.Height + "," + this.Score + ")";
+        }
     }
 }

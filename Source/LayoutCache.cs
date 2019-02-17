@@ -49,15 +49,18 @@ namespace VisiPlacement
                 ErrorReporter.ReportParadox("rounding error");
             }
         }
-        public SpecificLayout GetBestLayout_Quickly(LayoutQuery query)
+        private SpecificLayout GetBestLayout_Quickly(LayoutQuery query)
         {
             // check whether we've previously saved the result
             SpecificLayout result = null;
-            if (this.true_queryResults.TryGetValue(query, out result) || this.inferred_queryResults.TryGetValue(query, out result))
+            if (!query.Debug)
             {
-                if (result != null)
-                    return this.prepareLayoutForQuery(result.Clone(), query);
-                return null;
+                if (this.true_queryResults.TryGetValue(query, out result) || this.inferred_queryResults.TryGetValue(query, out result))
+                {
+                    if (result != null)
+                        return this.prepareLayoutForQuery(result.Clone(), query);
+                    return null;
+                }
             }
             // the result wasn't saved, so we need to delegate the layout query
             // However, we might first be able to make the query more strict
@@ -119,7 +122,15 @@ namespace VisiPlacement
                 // First, see if we can improve past what we currently have
                 LayoutQuery strictlyImprovedQuery = query.Clone();
                 strictlyImprovedQuery.OptimizePastExample(shrunken.Response);
-                result = this.Query_SubLayout(strictlyImprovedQuery);
+
+                // Ask the sublayout for this result (or use the cache if we've already asked)
+                if (!this.true_queryResults.TryGetValue(strictlyImprovedQuery, out result))
+                {
+                    // TODO: if we get here, then also re-check for a relevant broadened queries
+                    // We might be able to use one to prove that the answer to this query is null
+                    result = this.Query_SubLayout(strictlyImprovedQuery);
+                }
+
                 if (result == null)
                     result = shrunken.Response;      // couldn't improve past the previously found best layout
                 return this.inferredLayout(query, result);
@@ -143,10 +154,7 @@ namespace VisiPlacement
             }
 
             // record that this is the exact answer to this query
-            if (this.true_queryResults.ContainsKey(query))
-                ErrorReporter.ReportParadox("Error, layoutCache repeated a query that was already present ");
-            this.true_queryResults[query.Clone()] = result;
-            LayoutQuery_And_Response queryAndResponse = new LayoutQuery_And_Response(query, result);
+            LayoutQuery_And_Response queryAndResponse = new LayoutQuery_And_Response(query.Clone(), result);
             this.orderedResponses.Add(queryAndResponse);
 
 
@@ -160,10 +168,27 @@ namespace VisiPlacement
         private SpecificLayout Query_SubLayout(LayoutQuery query)
         {
             numComputations++;
-            return this.layoutToManage.GetBestLayout(query);
+            if (!query.Debug)
+            {
+                if (this.true_queryResults.ContainsKey(query))
+                    ErrorReporter.ReportParadox("Error, layoutCache repeated a query that was already present");
+            }
+            SpecificLayout result = this.layoutToManage.GetBestLayout(query.Clone());
+            if (!query.Debug)
+            {
+                if (this.true_queryResults.ContainsKey(query))
+                    ErrorReporter.ReportParadox("Error, layoutCache query results were saved before it completed?");
+                this.true_queryResults[query.Clone()] = result;
+            }
+            return result;
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            if (this.running)
+            {
+                ErrorReporter.ReportParadox("LayoutCache being called before it returns?");
+            }
+            this.running = true;
             numQueries++;
             if (numQueries % 10000 == 0)
                 System.Diagnostics.Debug.WriteLine("Overall LayoutCache miss rate: " + numComputations + " of " + numQueries + " = " + ((double)numComputations / (double)numQueries));
@@ -189,14 +214,13 @@ namespace VisiPlacement
                 }
                 if (!correct)
                 {
-                    if (fastResult != null)
-                    {
-                        this.GetBestLayout_Quickly(query.Clone());
-                        this.Query_SubLayout(query.Clone());
-                    }
+                    this.GetBestLayout_Quickly(query.Clone());
+                    this.Query_SubLayout(query.Clone());
                 }
+                this.running = false;
                 return this.prepareLayoutForQuery(correctResult, query);
             }
+            this.running = false;
             return fastResult;
         }
 
@@ -327,6 +351,9 @@ namespace VisiPlacement
         private SpecificLayout inferredLayout(LayoutQuery query, SpecificLayout response)
         {
             this.inferred_queryResults[query] = response;
+            LayoutQuery_And_Response pair = new LayoutQuery_And_Response(query.Clone(), response);
+            this.orderedResponses.Add(pair);
+            this.debugCheck(pair);
             return response;
         }
 
@@ -334,13 +361,38 @@ namespace VisiPlacement
         {
             // make sure that each query likes its response at least as much as all others
             SpecificLayout result = queryAndResponse.Response;
+            LayoutQuery query = queryAndResponse.Query;
             foreach (LayoutQuery_And_Response other in this.orderedResponses)
             {
                 if (other.Query.PreferredLayout(other.Response, result) != other.Response)
                 {
-                    ErrorReporter.ReportParadox("New response " + result + " from " + this.layoutToManage + " is a better solution to preexisting query " + other.Query + " than preexisting response " + other.Response);
-                    LayoutQuery query1 = queryAndResponse.Query.Clone();
+                    ErrorReporter.ReportParadox("New response is a better solution to previous query than preexisting response.\n" +
+                        "Layout      : " + this.layoutToManage + "\n" +
+                        "Old query   : " + other.Query + "\n" +
+                        "Old response: " + other.Response + "\n" +
+                        "New query   : " + query + "\n" +
+                        "New response: " + result);
+                    LayoutQuery query2 = other.Query.Clone();
+                    query2.Debug = true;
+                    query2.ProposedSolution_ForDebugging = result;
+                    this.layoutToManage.GetBestLayout(query2);
+                    LayoutQuery query1 = query.Clone();
                     query1.Debug = true;
+                    this.layoutToManage.GetBestLayout(query1);
+                    System.Diagnostics.Debug.WriteLine("done debugging LayoutCache discrepancy");
+                }
+                if (query.PreferredLayout(result, other.Response) != result)
+                {
+                    ErrorReporter.ReportParadox("New response is a work solution to new query than previous response.\n" +
+                        "Layout      : " + this.layoutToManage + "\n" +
+                        "Old query   : " + other.Query + "\n" +
+                        "Old response: " + other.Response + "\n" +
+                        "New query   : " + query + "\n" +
+                        "New response: " + result);
+
+                    LayoutQuery query1 = query.Clone();
+                    query1.Debug = true;
+                    query1.ProposedSolution_ForDebugging = other.Response;
                     this.layoutToManage.GetBestLayout(query1);
                     LayoutQuery query2 = other.Query.Clone();
                     query2.Debug = true;
@@ -403,8 +455,9 @@ namespace VisiPlacement
         Dictionary<LayoutQuery, SpecificLayout> true_queryResults; // for a query, gives the sublayout's response
         Dictionary<LayoutQuery, SpecificLayout> inferred_queryResults; // for a query, gives what we infer must be the sublayout's response
         private LayoutChoice_Set layoutToManage;
-        List<LayoutQuery_And_Response> orderedResponses;
+        List<LayoutQuery_And_Response> orderedResponses; // all responses that were returned by this LayoutCache that required querying the sublayout as part of their computation
         static int numComputations = 0;
         static int numQueries = 0;
+        public bool running;
     }
 }

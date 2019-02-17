@@ -99,6 +99,11 @@ namespace VisiPlacement
             }
         }
 
+        public override string ToString()
+        {
+            return "SpecificLayout: " + this.Dimensions;
+        }
+
         LinkedList<LayoutChoice_Set> ancestors;
     }
 

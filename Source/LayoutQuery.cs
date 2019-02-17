@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace VisiPlacement
 {
@@ -15,36 +16,36 @@ namespace VisiPlacement
 
         }
         // returns whichever layout it likes better
-        public abstract LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2);
+        public abstract LayoutDimensions PreferredLayout(LayoutDimensions tieWinner, LayoutDimensions tieLoser);
         // returns whichever layout it likes better
-        public SpecificLayout PreferredLayout(SpecificLayout layout1, SpecificLayout layout2)
+        public SpecificLayout PreferredLayout(SpecificLayout tieWinner, SpecificLayout tieLoser)
         {
-            if (!this.Accepts(layout1))
+            if (!this.Accepts(tieWinner))
             {
-                if (this.Accepts(layout2))
-                    return layout2;
+                if (this.Accepts(tieLoser))
+                    return tieLoser;
                 else
                     return null;
             }
-            if (!this.Accepts(layout2))
+            if (!this.Accepts(tieLoser))
             {
-                if (this.Accepts(layout1))
-                    return layout1;
+                if (this.Accepts(tieWinner))
+                    return tieWinner;
                 else
                     return null;
             }
             LayoutDimensions dimensions1 = new LayoutDimensions();
-            dimensions1.Width = layout1.Width;
-            dimensions1.Height = layout1.Height;
-            dimensions1.Score = layout1.Score;
+            dimensions1.Width = tieWinner.Width;
+            dimensions1.Height = tieWinner.Height;
+            dimensions1.Score = tieWinner.Score;
             LayoutDimensions dimensions2 = new LayoutDimensions();
-            dimensions2.Width = layout2.Width;
-            dimensions2.Height = layout2.Height;
-            dimensions2.Score = layout2.Score;
+            dimensions2.Width = tieLoser.Width;
+            dimensions2.Height = tieLoser.Height;
+            dimensions2.Score = tieLoser.Score;
             if (this.PreferredLayout(dimensions1, dimensions2) == dimensions1)
-                return layout1;
+                return tieWinner;
             else
-                return layout2;
+                return tieLoser;
         }
         public abstract LayoutQuery Clone();
         // returns a stricter query given that this example is one of the options
@@ -53,7 +54,6 @@ namespace VisiPlacement
         public void OptimizePastExample(SpecificLayout example)
         {
             this.OptimizePastDimensions(example.Dimensions);
-            this.ProposedSolution_ForDebugging = this.proposedSolution_forDebugging;
         }
         // returns a stricter query that won't even be satisfied by this example
         public abstract void OptimizePastDimensions(LayoutDimensions dimensions);
@@ -119,6 +119,8 @@ namespace VisiPlacement
             }
             set
             {
+                if (double.IsNaN(value))
+                    throw new ArgumentException("Illegal width: " + value);
                 this.maxWidth = value;
                 if (!this.Accepts(this.proposedSolution_forDebugging))
                     this.proposedSolution_forDebugging = null;
@@ -132,6 +134,8 @@ namespace VisiPlacement
             }
             set
             {
+                if (double.IsNaN(value))
+                    throw new ArgumentException("Illegal height: " + value);
                 this.maxHeight = value;
                 if (!this.Accepts(this.proposedSolution_forDebugging))
                     this.proposedSolution_forDebugging = null;
