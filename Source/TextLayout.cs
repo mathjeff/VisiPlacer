@@ -217,11 +217,9 @@ namespace VisiPlacement
             specificLayout.Cropped = cropped;
 
             // diagnostics
-            if (text == "At least as fun as this activity (optional):")
-                this.LoggingEnabled = true;
             if (this.LoggingEnabled)
             {
-                System.Diagnostics.Debug.WriteLine("measured '" + text + "' in " + availableSize + "; got " + specificLayout.Size);
+                System.Diagnostics.Debug.WriteLine("measured '" + text + "' in " + availableSize + "; desired " + desiredSize + "; requesting " + specificLayout.Size);
             }
 
             return specificLayout;

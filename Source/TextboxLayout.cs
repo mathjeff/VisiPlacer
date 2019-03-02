@@ -7,6 +7,10 @@ namespace VisiPlacement
 {
     public class TextboxLayout : LayoutCache
     {
+        public TextboxLayout()
+            :this(new Editor())
+        {
+        }
         public TextboxLayout(Editor textBox)
         {
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");

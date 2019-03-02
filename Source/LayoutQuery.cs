@@ -28,12 +28,7 @@ namespace VisiPlacement
                     return null;
             }
             if (!this.Accepts(tieLoser))
-            {
-                if (this.Accepts(tieWinner))
-                    return tieWinner;
-                else
-                    return null;
-            }
+                return tieWinner;
             LayoutDimensions dimensions1 = new LayoutDimensions();
             dimensions1.Width = tieWinner.Width;
             dimensions1.Height = tieWinner.Height;
@@ -77,6 +72,8 @@ namespace VisiPlacement
         }
         public bool Accepts(LayoutDimensions dimensions)
         {
+            if (dimensions == null)
+                return false;
             if (dimensions.Width > this.MaxWidth)
                 return false;
             if (dimensions.Height > this.MaxHeight)

@@ -140,9 +140,27 @@ namespace VisiPlacement
         {
             if (this.subLayout != null)
                 this.subLayout.Remove_VisualDescendents();
-            ContentView content = this.view as ContentView;
-            if (content != null)
-                content.Content = null;
+
+
+            View view = this.view;
+            ContentView parentAsContentControl = view as ContentView;
+            if (parentAsContentControl != null)
+            {
+                parentAsContentControl.Content = null;
+                return;
+            }
+            Frame parentAsBorder = view as Frame;
+            if (parentAsBorder != null)
+            {
+                parentAsBorder.Content = null;
+                return;
+            }
+            ScrollView parentAsScrollView = view as ScrollView;
+            if (parentAsScrollView != null)
+            {
+                parentAsScrollView.Content = null;
+                return;
+            }
         }
 
         public override IEnumerable<SpecificLayout> GetChildren()

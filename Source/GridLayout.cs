@@ -24,13 +24,6 @@ namespace VisiPlacement
                     }
                     // don't yet support automatically making a smaller grid in this case
                 }
-                else
-                {
-                    if (rowHeights.NumProperties == 1 && columnWidths.NumProperties == 1)
-                    {
-                        ErrorReporter.ReportParadox("Creating GridLayout of size 1x1");
-                    }
-                }
             }
             // can't compose from smaller grids
             return new GridLayout(rowHeights, columnWidths, bonusScore);
@@ -1054,8 +1047,9 @@ namespace VisiPlacement
             this.nextDimensionToSet = original.nextDimensionToSet;
             this.bonusScore = original.bonusScore;
             this.setWidthBeforeHeight = original.setWidthBeforeHeight;
-            this.score = original.score;
+            this.SetScore(original.score);
             this.view = original.view;
+            this.sub_specificLayouts = original.sub_specificLayouts;
         }
         private void Initialize()
         {
@@ -1230,7 +1224,7 @@ namespace VisiPlacement
         }
         public void InvalidateScore()
         {
-            this.score = null;
+            this.SetScore(null);
         }
 
         public override LayoutScore Score
@@ -1238,7 +1232,7 @@ namespace VisiPlacement
             get
             {
                 if (this.score == null)
-                    this.score = this.ComputeScore();
+                    this.SetScore(this.ComputeScore());
                 return this.score;
             }
         }
@@ -1251,7 +1245,7 @@ namespace VisiPlacement
         // TODO this should probably be deduplicated with isScoreAtLeast()
         private LayoutScore ComputeScore()
         {
-            this.subLayouts = new SpecificLayout[this.elements.GetLength(0), this.elements.GetLength(1)];
+            this.sub_specificLayouts = new SpecificLayout[this.elements.GetLength(0), this.elements.GetLength(1)];
             LayoutScore totalScore = this.bonusScore;
             int rowNumber, columnNumber;
             double width, height;
@@ -1269,7 +1263,7 @@ namespace VisiPlacement
                         query.MaxHeight = Math.Max(height, 0);
                         SpecificLayout layout = subLayout.GetBestLayout(query);
                         totalScore = totalScore.Plus(layout.Score);
-                        this.subLayouts[columnNumber, rowNumber] = this.prepareLayoutForQuery(layout, query);
+                        this.sub_specificLayouts[columnNumber, rowNumber] = this.prepareLayoutForQuery(layout, query);
                     }
                 }
             }
@@ -1409,7 +1403,6 @@ namespace VisiPlacement
             double nextUnscaledX, nextUnscaledY;
             double unscaledHeight, unscaledWidth;
             double x, y, nextX, nextY;
-            this.specificSublayouts = new LinkedList<SpecificLayout>();
 
             // the actual provided size might be slightly more than we asked for, so rescale accordingly
             double horizontalScale, desiredWidth, verticalScale, desiredHeight;
@@ -1427,6 +1420,7 @@ namespace VisiPlacement
             List<double> columnWidths = new List<double>();
             List<double> rowHeights = new List<double>();
             View[,] subviews = new View[this.columnWidths.NumProperties, this.rowHeights.NumProperties];
+            LayoutScore totalScore = this.bonusScore;
             for (rowNumber = 0; rowNumber < this.rowHeights.NumProperties; rowNumber++)
             {
                 // compute the coordinates in the unscaled coordinate system
@@ -1458,7 +1452,7 @@ namespace VisiPlacement
                         query.MaxWidth = width;
                         query.MaxHeight = height;
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
-                        this.specificSublayouts.AddLast(bestLayout);
+                        totalScore = totalScore.Plus(bestLayout.Score);
                         subview = bestLayout.DoLayout(new Size(width, height));
                     }
                     subviews[columnNumber, rowNumber] = subview;
@@ -1468,6 +1462,15 @@ namespace VisiPlacement
                 }
                 unscaledY = nextUnscaledY;
                 y = nextY;
+            }
+            if (this.score != null)
+            {
+                if (this.score.CompareTo(totalScore) != 0)
+                {
+                    ErrorReporter.ReportParadox("Score discrepancy in " + this + "; previously computed " + this.score + "; recomputed " + totalScore);
+                    LayoutScore recomputed = this.ComputeScore();
+                    ErrorReporter.ReportParadox("Recomputed score = " + recomputed);
+                }
             }
             if (!dryRun)
             {
@@ -1501,28 +1504,37 @@ namespace VisiPlacement
 
         public SpecificLayout GetChildLayout(int columnNumber, int rowNumber)
         {
-            if (this.subLayouts == null)
+            if (this.sub_specificLayouts == null)
                 this.ComputeScore();
-            return this.subLayouts[columnNumber, rowNumber];
+            return this.sub_specificLayouts[columnNumber, rowNumber];
         }
 
         public override void Remove_VisualDescendents()
         {
             this.GridView.Remove_VisualDescendents();
-            foreach (SpecificLayout layout in this.specificSublayouts)
+            foreach (SpecificLayout layout in this.GetChildren())
             {
                 layout.Remove_VisualDescendents();
             }
-            this.specificSublayouts.Clear();
         }
 
         public override IEnumerable<SpecificLayout> GetChildren()
         {
-            if (this.specificSublayouts == null)
+            if (this.sub_specificLayouts == null)
             {
                 this.DoLayout_Impl(new Size(this.columnWidths.GetTotalValue(), this.rowHeights.GetTotalValue()), true);
             }
-            return this.specificSublayouts;
+            List<SpecificLayout> results = new List<SpecificLayout>();
+            for (int i = 0; i < this.columnWidths.NumProperties; i++)
+            {
+                for (int j = 0; j < this.rowHeights.NumProperties; j++)
+                {
+                    SpecificLayout candidate = this.sub_specificLayouts[i, j];
+                    if (candidate != null)
+                        results.Add(candidate);
+                }
+            }
+            return results;
         }
 
         public override string ToString()
@@ -1535,12 +1547,11 @@ namespace VisiPlacement
         int nextDimensionToSet;
         BoundProperty_List rowHeights;
         BoundProperty_List columnWidths;
-        SpecificLayout[,] subLayouts;
         LayoutScore bonusScore;
         bool setWidthBeforeHeight;
         GridView view;
         LayoutScore score;
-        LinkedList<SpecificLayout> specificSublayouts;
+        SpecificLayout[,] sub_specificLayouts;
     }
 
     // A CompositeGridLayout just has a few GridLayouts inside it, which results in better (more-granular) caching than just one grid with everything

@@ -51,6 +51,7 @@ namespace VisiPlacement
                 this.subLayout = subLayout;
             else
                 this.subLayout = new LayoutCache(subLayout);
+            this.subLayout.AddParent(this);
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
@@ -304,7 +305,8 @@ namespace VisiPlacement
             }
             if (bestDimensions == null)
                 return null;
-            return this.makeLayout(new Size(bestDimensions.Width, bestDimensions.Height), bestDimensions.Score);
+            SpecificLayout result = this.makeLayout(new Size(bestDimensions.Width, bestDimensions.Height), bestDimensions.Score);
+            return this.prepareLayoutForQuery(result, query);
         }
 
         // returns the empty layout if it's accepted
@@ -348,7 +350,8 @@ namespace VisiPlacement
 
         protected override Size chooseSize(Size availableSize)
         {
-            return new Size(Math.Max(availableSize.Width, this.SubLayout.Width), this.SubLayout.Height);
+            Size result = new Size(Math.Max(availableSize.Width, this.SubLayout.Width), this.SubLayout.Height);
+            return result;
         }
 
         public override SpecificLayout Clone()
