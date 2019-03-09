@@ -8,11 +8,22 @@ namespace VisiPlacement
     public class TextboxLayout : LayoutCache
     {
         public TextboxLayout()
-            :this(new Editor())
         {
+            this.initialize(new Editor(), null);
+        }
+        public TextboxLayout(Editor textBox, double fontSize)
+        {
+            this.initialize(textBox, new List<double>() { fontSize });
         }
         public TextboxLayout(Editor textBox)
         {
+            this.initialize(textBox, null);
+        }
+
+        private void initialize(Editor textBox, IEnumerable<double> fontSizes)
+        {
+            if (fontSizes == null)
+                fontSizes = new List<double>() { 30, 16 };
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBox.Effects.Add(effect);
 
@@ -22,11 +33,12 @@ namespace VisiPlacement
             textBox.BackgroundColor = Color.LightGray;
             this.TextBox.Margin = new Thickness();
 
-            this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 30));
-            this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), 16));
+            foreach (double fontSize in fontSizes)
+            {
+                this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), fontSize));
+            }
 
             this.LayoutToManage = new LayoutUnion(layouts);
-
         }
 
         public bool ScoreIfEmpty
