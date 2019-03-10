@@ -186,10 +186,13 @@ namespace VisiPlacement
         private Specific_TextLayout ComputeDimensions(Size availableSize, string text)
         {
             numComputations++;
-            //ErrorReporter.ReportParadox("Text items: computations per query: " + AverageNumComputationsPerQuery);
 
             TextFormatter textFormatter = this.MakeTextFormatter();
             Size desiredSize = textFormatter.FormatText(text, availableSize.Width);
+            if (desiredSize.Width < 0 || desiredSize.Height < 0)
+            {
+                ErrorReporter.ReportParadox("Illegal size " + desiredSize + " returned by textFormatter.FormatText");
+            }
             bool cropped = false;
             double width, height;
             // assign the width, height, and score
@@ -452,18 +455,22 @@ namespace VisiPlacement
                 this.sizeCache = new Dictionary<string, Size>();
             if (!this.sizeCache.TryGetValue(text, out size))
             {
-                size = this.computeSize(text);
+                size = this.computeLineSize(text);
                 this.sizeCache[text] = size;
             }
             return size;
         }
 
-        // computes the size required by a TextBlock that plans to display this text
-        private Size computeSize(String text)
+        // computes the size required by a TextBlock that plans to display this text all in a line
+        private Size computeLineSize(String text)
         {
+#if true
+            return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, this.FontSize);
+#else
             // Get enough width for the given text, and enough height to accomodate the line spacing
             double width = this.computeGlyphSize(text).Width;
             return new Size(width + this.leftMargin, this.fontLineHeight);
+#endif
         }
 
         public double FontSize

@@ -33,6 +33,14 @@ namespace VisiPlacement
         // Given a SpecificLayout, sets any necessary properties to make it suitable to return to the caller of GetBestLayout(LayoutQuery)
         protected SpecificLayout prepareLayoutForQuery(SpecificLayout layout, LayoutQuery query)
         {
+            if (layout != null)
+            {
+                if (layout.Width < 0 || layout.Height < 0)
+                {
+                    ErrorReporter.ReportParadox("Illegal layout size: " + layout.Size);
+                    this.GetBestLayout(query);
+                }
+            }
             this.Reset_ChangeAnnouncement();
 
             int numMatches;

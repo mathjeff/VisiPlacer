@@ -96,8 +96,11 @@ namespace VisiPlacement
         }
         public override View DoLayout(Size bounds)
         {
-            this.view.WidthRequest = bounds.Width;
-            this.view.HeightRequest = bounds.Height;
+            if (this.view != null)
+            {
+                this.view.WidthRequest = bounds.Width;
+                this.view.HeightRequest = bounds.Height;
+            }
             return this.view;
         }
         private View view;

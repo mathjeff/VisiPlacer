@@ -114,7 +114,11 @@ namespace VisiPlacement
         }
         public string Text
         {
-            get { return this.TextBox.Text; }
+            get
+            {
+                // add another character because the operating system leaves extra space for the user to type another character
+                return this.TextBox.Text + "M";
+            }
             set { this.TextBox.Text = value; }
         }
         public View View

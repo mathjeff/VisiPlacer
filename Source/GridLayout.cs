@@ -446,7 +446,8 @@ namespace VisiPlacement
                 results.AddLast(new SemiFixed_GridLayout(currentSublayout));
                 if (results.Count > 10)
                 {
-                    System.Diagnostics.Debug.WriteLine("Surprisingly slow query " + query + " in GridLayout " + this);
+                    System.Diagnostics.Debug.WriteLine("Surprisingly slow query " + query + " in GridLayout " + this.DebugId + ": " + results.Count +
+                        " results so far, currentCoordinate = " + currentCoordinate);
                 }
                 // keep track of the best layout so far
                 if (query.PreferredLayout(currentSublayout, bestSublayout) == currentSublayout)

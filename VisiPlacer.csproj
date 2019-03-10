@@ -74,6 +74,7 @@
     <Compile Include="Source\TextDiagnosticLayout.cs" />
     <Compile Include="Source\TextItem_Configurer.cs" />
     <Compile Include="Source\TextLayout.cs" />
+    <Compile Include="Source\TextMeasurement_Test_Layout.cs" />
     <Compile Include="Source\TitledControl.cs" />
     <Compile Include="Source\ViewManager.cs" />
   </ItemGroup>
@@ -81,6 +82,9 @@
     <Reference Include="SkiaSharp, Version=1.59.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\..\packages\SkiaSharp.1.59.1\lib\portable-net45+win8+wpa81+wp8\SkiaSharp.dll</HintPath>
     </Reference>
+    <PackageReference Include="Uniforms.Misc">
+      <Version>0.9.1</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="2.4.0.282" />
   </ItemGroup>
   <ItemGroup>
