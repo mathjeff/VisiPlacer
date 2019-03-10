@@ -940,6 +940,14 @@ namespace VisiPlacement
             this.subLayouts.AddLast(subLayout);
             return this;
         }
+        public Vertical_GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
+        {
+            foreach (LayoutChoice_Set subLayout in subLayouts)
+            {
+                this.AddLayout(subLayout);
+            }
+            return this;
+        }
         public Vertical_GridLayout_Builder Uniform()
         {
             this.uniform = true;
@@ -972,6 +980,14 @@ namespace VisiPlacement
         public Horizontal_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
         {
             this.subLayouts.AddLast(subLayout);
+            return this;
+        }
+        public Horizontal_GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
+        {
+            foreach (LayoutChoice_Set subLayout in subLayouts)
+            {
+                this.AddLayout(subLayout);
+            }
             return this;
         }
         public Horizontal_GridLayout_Builder Uniform()
