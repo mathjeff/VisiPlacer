@@ -7,51 +7,26 @@ using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    public class CheckBox : Button
+    public class CheckBox : SingleSelect
     {
         public CheckBox(string falseValue, string trueValue)
+            : base(new List<String>() { falseValue, trueValue})
         {
-            this.falseValue = falseValue;
-            this.trueValue = trueValue;
-            this.updateText();
-            this.Clicked += CheckBox_Clicked;
         }
 
-        public string SelectedItem
-        {
-            get
-            {
-                if (this.selected)
-                    return this.trueValue;
-                else
-                    return this.falseValue;
-            }
-        }
         public bool Checked
         {
             get
             {
-                return this.selected;
+                return this.SelectedIndex == 1;
             }
             set
             {
-                this.selected = value;
-                this.updateText();
+                if (value)
+                    base.SelectedIndex = 0;
+                else
+                    base.SelectedIndex = 1;
             }
         }
-
-        private void CheckBox_Clicked(object sender, EventArgs e)
-        {
-            this.selected = !this.selected;
-            this.updateText();
-        }
-        private void updateText()
-        {
-            this.Text = this.SelectedItem;
-        }
-
-        string falseValue;
-        string trueValue;
-        bool selected;
     }
 }

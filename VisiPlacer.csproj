@@ -66,6 +66,7 @@
     <Compile Include="Source\ContainerView.cs" />
     <Compile Include="Source\ScrollLayout.cs" />
     <Compile Include="Source\SinglelineTextboxLayout.cs" />
+    <Compile Include="Source\SingleSelect.cs" />
     <Compile Include="Source\SpecificLayout.cs" />
     <Compile Include="Source\Specific_ContainerLayout.cs" />
     <Compile Include="Source\Specific_TextLayout.cs" />

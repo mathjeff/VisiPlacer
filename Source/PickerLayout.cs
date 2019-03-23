@@ -13,6 +13,7 @@ namespace VisiPlacement
     {
         public PickerLayout(Picker picker)
         {
+            this.picker = picker;
             this.SetTitle(picker.Title);
 
             picker.BackgroundColor = Color.White;
@@ -20,6 +21,14 @@ namespace VisiPlacement
 
             this.SetContent(new TextLayout(new PickerConfigurer(picker), 16));
         }
+        public Picker Picker
+        {
+            get
+            {
+                return this.Picker;
+            }
+        }
+        private Picker picker;
     }
 
     class PickerConfigurer : TextItem_Configurer
