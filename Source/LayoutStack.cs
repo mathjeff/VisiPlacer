@@ -32,6 +32,10 @@ namespace VisiPlacement
             StackEntry entry = new StackEntry();
             entry.layout = newLayout;
             entry.listeners.AddLast(listener);
+            this.AddEntry(entry);
+        }
+        public void AddEntry(StackEntry entry)
+        {
             this.layouts.AddLast(entry);
             this.updateSubLayout();
         }
@@ -72,10 +76,19 @@ namespace VisiPlacement
         private LinkedList<StackEntry> layouts = new LinkedList<StackEntry>();
     }
 
-    class StackEntry
+    public class StackEntry
     {
         public StackEntry()
         {
+        }
+        public StackEntry(LayoutChoice_Set layout)
+        {
+            this.layout = layout;
+        }
+        public StackEntry(LayoutChoice_Set layout, OnBack_Listener listener)
+        {
+            this.layout = layout;
+            this.listeners.AddLast(listener);
         }
 
         public LayoutChoice_Set layout;
