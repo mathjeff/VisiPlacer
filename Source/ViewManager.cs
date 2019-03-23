@@ -17,8 +17,20 @@ namespace VisiPlacement
             childLayout.AddParent(this);
 
             this.mainView = new ManageableView(this);
-            parentView.Content = this.mainView;
-            this.displaySize = new Size(parentView.Width, parentView.Height);
+            this.SetParent(parentView);
+        }
+        public void SetParent(ContentView parentView)
+        {
+            if (parentView != null)
+            {
+                parentView.Content = this.mainView;
+                this.displaySize = new Size(parentView.Width, parentView.Height);
+            }
+            else
+            {
+                this.displaySize = new Size();
+            }
+            this.forceRelayout();
         }
         public void SetLayout(LayoutChoice_Set childLayout)
         {
