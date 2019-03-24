@@ -284,8 +284,7 @@ namespace VisiPlacement
         private void addComponent(double priority, double weight)
         {
             // workaround for rounding error
-            if (Math.Abs(weight) < 0.0000001)
-                weight = 0;
+            weight = Math.Round(weight, 6);
             this.components.Add(priority, weight);
             ListItemStats<double, double> lastItem = this.components.GetLastValue();
             if (double.IsPositiveInfinity(lastItem.Key))

@@ -55,258 +55,207 @@ namespace VisiPlacement
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            SpecificLayout result = this.GetBestLayout2(query);
+            SpecificLayout result = this.GetBestLayout3(query);
             return result;
 
         }
-        public SpecificLayout GetBestLayout1(LayoutQuery query)
+
+        public SpecificLayout GetBestLayout3(LayoutQuery query)
         {
-            // ask the ImageLayout how much space to use
-            // TODO: make this cleaner and also maybe use a different algorithm
-            SpecificLayout window = this.imageLayout.GetBestLayout(query);
-            if (window == null)
-                return null;
-            // ask the sublayout for the best layout it can do for the given bounds
-            // First get the highest-scoring layout for these bounds
-            MaxScore_LayoutQuery maxScoreQuery = new MaxScore_LayoutQuery();
-            maxScoreQuery.MaxWidth = query.MaxWidth;
-            maxScoreQuery.MaxHeight = double.PositiveInfinity;
-            maxScoreQuery.MinScore = LayoutScore.Minimum;
-            SpecificLayout maxScore_sublayout = this.subLayout.GetBestLayout(maxScoreQuery);
-            // Next, get the smallest-height layout with having at least as good of a score
-            MinHeight_LayoutQuery minHeightQuery = new MinHeight_LayoutQuery();
-            minHeightQuery.MaxWidth = query.MaxWidth;
-            minHeightQuery.MaxHeight = maxScore_sublayout.Height;
-            minHeightQuery.MinScore = maxScore_sublayout.Score;
-            SpecificLayout minHeight_sublayout = this.subLayout.GetBestLayout(minHeightQuery);
-
-            // Finally, return the result
-            Specific_ContainerLayout child = new Specific_ScrollLayout(this.view, window.Size, window.Score, minHeight_sublayout);
-
-            return this.prepareLayoutForQuery(child, query);
-        }
-        public SpecificLayout GetBestLayout2(LayoutQuery query)
-        {
-            // Find the max-scoring sublayout
-
-            // Now we get a couple of representative sublayouts and do linear interpolation among them
+            // We get a couple of representative sublayouts and do linear interpolation among them
             // It would be nice to check all existent sublayouts but that would take a while
 
-            // Find the min-width sublayout having nonzero score
-            MinWidth_LayoutQuery minWidthPositiveQuery = new MinWidth_LayoutQuery();
-            minWidthPositiveQuery.MinScore = LayoutScore.Tiny;
-            SpecificLayout minWidthPositiveSublayout = this.subLayout.GetBestLayout(minWidthPositiveQuery);
-            if (minWidthPositiveSublayout == null || minWidthPositiveSublayout.Width > query.MaxWidth)
+            // First, find the layout of min height among those having max score
+            LayoutScore minInterestingScore = LayoutScore.Tiny;
+            SpecificLayout maxScore_subLayout = this.subLayout.GetBestLayout(new MaxScore_LayoutQuery());
+            if (maxScore_subLayout == null)
             {
-                // our result will entail a negative score, so don't bother using any space
+                ErrorReporter.ReportParadox("No layouts found for " + this.subLayout);
+                return null;
+            }
+            if (maxScore_subLayout.Score.CompareTo(minInterestingScore) < 0)
+            {
+                // not interested in layouts having negative score
                 return this.zeroOrNull(query);
             }
-            else
+            MinHeight_LayoutQuery minHeightAwesomeQuery = new MinHeight_LayoutQuery();
+            minHeightAwesomeQuery.MaxWidth = maxScore_subLayout.Width;
+            minHeightAwesomeQuery.MaxHeight = maxScore_subLayout.Height;
+            minHeightAwesomeQuery.MinScore = maxScore_subLayout.Score;
+            SpecificLayout minHeightAwesomeSublayout = this.subLayout.GetBestLayout(minHeightAwesomeQuery);
+            LayoutScore maxScore = maxScore_subLayout.Score;
+            if (!query.MinimizesWidth() && minHeightAwesomeSublayout.Width <= query.MaxWidth)
             {
-                MinHeight_LayoutQuery minHeightPositiveQuery = new MinHeight_LayoutQuery();
-                minHeightPositiveQuery.MaxWidth = minWidthPositiveSublayout.Width;
-                minHeightPositiveQuery.MaxHeight = minWidthPositiveSublayout.Height;
-                minHeightPositiveQuery.MinScore = minWidthPositiveSublayout.Score;
-                minWidthPositiveSublayout = this.subLayout.GetBestLayout(minHeightPositiveQuery);
-                if (minWidthPositiveSublayout == null)
-                {
-                    ErrorReporter.ReportParadox("MinHeight query " + minHeightPositiveQuery + " could not find the response from the MinWidth query " + minWidthPositiveQuery + " for " + this);
-                }
-                LayoutScore minScorePerHeight;
-                if (minWidthPositiveSublayout.Height <= 0)
-                    minScorePerHeight = LayoutScore.Zero;
-                else
-                    minScorePerHeight = minWidthPositiveSublayout.Score.Times(1.0 / minWidthPositiveSublayout.Height);
-
-                // Next, check for the layout of minimum width having maximum score
-                SpecificLayout maxScore_subLayout = this.subLayout.GetBestLayout(new MaxScore_LayoutQuery());
-                MinWidth_LayoutQuery minWidthAwesomeQuery = new MinWidth_LayoutQuery();
-                minWidthAwesomeQuery.MinScore = maxScore_subLayout.Score;
-                SpecificLayout minWidthAwesomeSublayoutIntermediate = this.subLayout.GetBestLayout(minWidthAwesomeQuery);
-                if (minWidthAwesomeSublayoutIntermediate == null)
-                {
-                    ErrorReporter.ReportParadox("MinWidth query " + minWidthAwesomeQuery + " could not find the response from the MaxScore query for " + this);
-                }
-                MinHeight_LayoutQuery minHeightAwesomeQuery = new MinHeight_LayoutQuery();
-                minHeightAwesomeQuery.MaxWidth = minWidthAwesomeSublayoutIntermediate.Width;
-                minHeightAwesomeQuery.MaxHeight = minWidthAwesomeSublayoutIntermediate.Height;
-                minHeightAwesomeQuery.MinScore = minWidthAwesomeSublayoutIntermediate.Score;
-                SpecificLayout minWidthAwesomeSublayout = this.subLayout.GetBestLayout(minHeightAwesomeQuery);
-                if (minWidthAwesomeSublayout == null)
-                {
-                    ErrorReporter.ReportParadox("MinHeight query " + minHeightAwesomeQuery + " could not find the response from the MinWidth query " + minWidthAwesomeQuery + " for " + this);
-                }
-                LayoutScore middleScorePerHeight;
-                if (minWidthAwesomeSublayout.Height <= 0)
-                    middleScorePerHeight = LayoutScore.Zero;
-                else
-                    middleScorePerHeight = minWidthAwesomeSublayout.Score.Times(1.0 / minWidthAwesomeSublayout.Height);
-                if (middleScorePerHeight.CompareTo(minScorePerHeight) < 0)
-                {
-                    // Clamp so we don't give our caller inconsistent results where a wider layout might have less score
-                    middleScorePerHeight = minScorePerHeight;
-                }
-                if (minWidthAwesomeSublayout.Width > query.MaxWidth || (query.MinimizesWidth() && query.Accepts(minWidthAwesomeSublayout)))
-                {
-                    // Use some sublayout having width between the positive-scoring layout and the max-scoring layout
-                    return this.interpolate(minWidthPositiveSublayout.Size, minScorePerHeight, minWidthAwesomeSublayout.Size, middleScorePerHeight, query);
-                }
-                // If we get here, our sublayout will give max score but we should check how much height it needs
-
-                MinHeight_LayoutQuery minHeightQuery = new MinHeight_LayoutQuery();
-                minHeightQuery.MaxWidth = query.MaxWidth;
-                minHeightQuery.MinScore = maxScore_subLayout.Score;
-                SpecificLayout maxWidth_subLayout = this.subLayout.GetBestLayout(minHeightQuery);
-                LayoutScore maxScorePerHeight;
-                if (maxWidth_subLayout.Height <= 0)
-                    maxScorePerHeight = LayoutScore.Zero;
-                else
-                    maxScorePerHeight = maxWidth_subLayout.Score.Times(1.0 / maxWidth_subLayout.Height);
-                if (maxScorePerHeight.CompareTo(middleScorePerHeight) < 0)
-                {
-                    // Clamp so we don't give our caller inconsistent results where a wider layout might have less score
-                    maxScorePerHeight = middleScorePerHeight;
-                }
-                // Now interpolate from the middle coordinates to the max coordinates
-                return this.interpolate(minWidthAwesomeSublayout.Size, middleScorePerHeight, maxWidth_subLayout.Size, maxScorePerHeight, query);
+                // This layout has as much score per height as possible, so we don't have to check any other layouts
+                return this.prepareLayoutForQuery(this.interpolate(minHeightAwesomeSublayout.Size, maxScore, minHeightAwesomeSublayout.Size, maxScore, query), query);
             }
 
+            // Next, find the layout of min height among those having min width among those having max score
+            // Next, check for the layout of minimum width having maximum score
+            MinWidth_LayoutQuery minWidthAwesomeQuery = new MinWidth_LayoutQuery();
+            minWidthAwesomeQuery.MinScore = maxScore_subLayout.Score;
+            SpecificLayout minWidthAwesomeSublayoutIntermediate = this.subLayout.GetBestLayout(minWidthAwesomeQuery);
+            if (minWidthAwesomeSublayoutIntermediate == null)
+            {
+                ErrorReporter.ReportParadox("MinWidth query " + minWidthAwesomeQuery + " could not find the response from the MaxScore query for " + this);
+            }
+            MinHeight_LayoutQuery minWidthMinHeightAwesomeQuery = new MinHeight_LayoutQuery();
+            minWidthMinHeightAwesomeQuery.MaxWidth = minWidthAwesomeSublayoutIntermediate.Width;
+            minWidthMinHeightAwesomeQuery.MaxHeight = minWidthAwesomeSublayoutIntermediate.Height;
+            minWidthMinHeightAwesomeQuery.MinScore = minWidthAwesomeSublayoutIntermediate.Score;
+            SpecificLayout minWidthAwesomeSublayout = this.subLayout.GetBestLayout(minWidthMinHeightAwesomeQuery);
+            if (minWidthAwesomeSublayout == null)
+            {
+                ErrorReporter.ReportParadox("MinHeight query " + minHeightAwesomeQuery + " could not find the response from the MinWidth query " + minWidthAwesomeQuery + " for " + this);
+            }
+
+            LayoutScore middleScore = minWidthAwesomeSublayout.Score;
+            if (middleScore.CompareTo(maxScore) > 0)
+                middleScore = maxScore;
+            if (minWidthAwesomeSublayout.Width <= query.MaxWidth)
+            {
+                SpecificLayout result = this.interpolate(minWidthAwesomeSublayout.Size, middleScore, minHeightAwesomeSublayout.Size, maxScore, query);
+                if (!query.MinimizesWidth())
+                {
+                    // The layouts having less width won't have more score per height (we enforce this below)
+                    // So, no need to keep looking
+                    return this.prepareLayoutForQuery(result, query);
+                }
+                if (result == null)
+                {
+                    // Not enough score per height to satisfy the query
+                    return this.prepareLayoutForQuery(result, query);
+                }
+                if (result.Width > query.MaxWidth)
+                {
+                    // If the MinWidth query didn't want to shrink the width any more, then no need to check other layouts having less width
+                    return this.prepareLayoutForQuery(result, query);
+                }
+            }
+
+            // Now find the min-height sublayout among min-width sublayouts having positive score
+            MinWidth_LayoutQuery minWidthPositiveQuery = new MinWidth_LayoutQuery();
+            minWidthPositiveQuery.MinScore = minInterestingScore;
+            SpecificLayout minWidthPositiveSublayout = this.subLayout.GetBestLayout(minWidthPositiveQuery);
+            MinHeight_LayoutQuery minHeightPositiveQuery = new MinHeight_LayoutQuery();
+            minHeightPositiveQuery.MaxWidth = minWidthPositiveSublayout.Width;
+            SpecificLayout minHeightPositiveSublayout = this.subLayout.GetBestLayout(minHeightPositiveQuery);
+            
+            LayoutScore minScore = minHeightPositiveSublayout.Score;
+            if (minScore.CompareTo(middleScore) > 0)
+                minScore = middleScore;
+
+            return this.prepareLayoutForQuery(this.interpolate(minHeightPositiveSublayout.Size, minScore, minHeightPositiveSublayout.Size, middleScore, query), query);
         }
 
+
         // Given two layouts and a query, does linear interpolation to tell which part of the connecting line the query prefers
-        private SpecificLayout interpolate(Size leftSize, LayoutScore leftScorePerHeight, Size rightSize, LayoutScore rightScorePerHeight, LayoutQuery query)
+        private SpecificLayout interpolate(Size leftSize, LayoutScore leftScore, Size rightSize, LayoutScore rightScore, LayoutQuery query)
         {
-            List<LayoutDimensions> options = new List<LayoutDimensions>();
+            List<Size> options = new List<Size>();
 
-            LayoutScore leftScore = leftScorePerHeight.Times(leftSize.Height);
-            LayoutScore rightScore = rightScorePerHeight.Times(rightSize.Height);
+            // Add the two ends
+            options.Add(leftSize);
+            options.Add(rightSize);
 
-            if (query.MinimizesHeight())
-            {
-                // for a MinHeight query, shrink the height of the bounds more
-                if (leftScore.CompareTo(query.MinScore) > 0)
-                {
-                    double multiplier = query.MinScore.DividedBy(leftScore);
-                    if (!double.IsInfinity(multiplier))
-                    {
-                        leftSize.Height *= multiplier;
-                        leftScore = leftScorePerHeight.Times(leftSize.Height);
-                        if (leftScore.CompareTo(query.MinScore) < 0)
-                        {
-                            // the score had some extra components that the division didn't catch
-                            leftSize.Height = Math.Floor(leftSize.Height / this.pixelSize + 1.0) * this.pixelSize;
-                            leftScore = leftScorePerHeight.Times(leftSize.Height);
-
-                            if (leftScore.CompareTo(query.MinScore) < 0)
-                            {
-                                // the height must have already been so close to an integer that it hardly changed, so the score didn't change at all due to rounding error
-                                leftSize.Height += this.pixelSize;
-                                leftScore = leftScorePerHeight.Times(leftSize.Height);
-
-                                if (leftScore.CompareTo(query.MinScore) < 0)
-                                    ErrorReporter.ReportParadox("leftScore " + leftScore + " < query.MinScore " + query.MinScore);
-                            }
-                        }
-                    }
-                }
-                if (rightScore.CompareTo(query.MinScore) > 0)
-                {
-                    double multiplier = query.MinScore.DividedBy(rightScore);
-                    if (!double.IsInfinity(multiplier))
-                    {
-                        rightSize.Height *= multiplier;
-                        rightScore = rightScorePerHeight.Times(rightSize.Height);
-                        if (rightScore.CompareTo(query.MinScore) < 0)
-                        {
-                            // the score had some extra components that the division didn't catch
-                            rightSize.Height = Math.Floor(rightSize.Height / this.pixelSize + 1.0) * this.pixelSize;
-                            rightScore = rightScorePerHeight.Times(rightSize.Height);
-                            if (rightScore.CompareTo(query.MinScore) < 0)
-                            {
-                                // the height must have already been so close to an integer that it hardly changed, so the score didn't change at all due to rounding error
-                                rightSize.Height += this.pixelSize;
-                                rightScore = rightScorePerHeight.Times(rightSize.Height);
-                                if (rightScore.CompareTo(query.MinScore) < 0)
-                                    ErrorReporter.ReportParadox("rightScore " + rightScore + " < query.MinScore " + query.MinScore);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // clamp the heights to only allow getting points for sizes up to the maximum available height
-            if (leftSize.Height > query.MaxHeight)
-            {
-                leftSize.Height = query.MaxHeight;
-                leftScore = leftScorePerHeight.Times(leftSize.Height);
-            }
-            if (rightSize.Height > query.MaxHeight)
-            {
-                rightSize.Height = query.MaxHeight;
-                rightScore = rightScorePerHeight.Times(rightSize.Height);
-            }
-
-
-            // check the two ends
-            options.Add(new LayoutDimensions(leftSize.Width, leftSize.Height, leftScore));
-            options.Add(new LayoutDimensions(rightSize.Width, rightSize.Height, rightScore));
-
-            // check the possibility of the score being the limiting factor
-            LayoutScore leftScoreDifference = query.MinScore.Minus(leftScore);
-            LayoutScore rightScoreDifference = query.MinScore.Minus(rightScore);
-            if (leftScoreDifference.CompareTo(LayoutScore.Zero) != rightScoreDifference.CompareTo(LayoutScore.Zero))
-            {
-                // The score difference crosses 0 between the two points
-                LayoutScore totalWeight = leftScoreDifference.Minus(rightScoreDifference);
-                double rightFraction = leftScoreDifference.DividedBy(totalWeight);
-                double leftFraction = 1 - rightFraction;
-                double x = leftSize.Width * leftFraction + rightSize.Width * rightFraction;
-                double y = leftSize.Height * leftFraction + rightSize.Height * rightFraction;
-                LayoutScore score = leftScore.Times(leftFraction).Plus(rightScore.Times(rightFraction));
-                options.Add(new LayoutDimensions(x, y, score));
-            }
-
-            // check the possibility of the width being the limiting factor
+            // Compute the location where X and Y are the limiting factors
             double leftXDifference = query.MaxWidth - leftSize.Width;
             double rightXDifference = query.MaxWidth - rightSize.Width;
             if (leftXDifference.CompareTo(0) != rightXDifference.CompareTo(0))
             {
-                // the width difference crosses 0 between the two points
-                double totalWeight = leftXDifference - rightXDifference;
-                double rightFraction = leftXDifference / totalWeight;
-                double leftFraction = 1 - rightFraction;
-                double x = leftSize.Width * leftFraction + rightSize.Width * rightFraction;
-                double y = leftSize.Height * leftFraction + rightSize.Height * rightFraction;
-                LayoutScore score = leftScore.Times(leftFraction).Plus(rightScore.Times(rightFraction));
-                options.Add(new LayoutDimensions(x, y, score));
+                options.Add(new Size(query.MaxWidth, query.MaxHeight));
             }
 
-            // check the possibility of the height being the limiting factor
-            double leftYDifference = query.MaxHeight - leftSize.Height;
-            double rightYDifference = query.MaxHeight - rightSize.Height;
-            if (leftYDifference.CompareTo(0) != rightYDifference.CompareTo(0))
+            // Compute the location where X and Score are the limiting factors
+            if (query.MaxHeight > 0)
             {
-                // the height difference crosses 0 between the two points
-                double totalWeight = leftYDifference - rightYDifference;
-                double rightFraction = leftYDifference / totalWeight;
+                double totalWeight = leftXDifference - rightXDifference;
+                double rightFraction;
+                if (totalWeight != 0)
+                    rightFraction = leftXDifference / totalWeight;
+                else
+                    rightFraction = 1;
                 double leftFraction = 1 - rightFraction;
-                double x = leftSize.Width * leftFraction + rightSize.Width * rightFraction;
-                double y = leftSize.Height * leftFraction + rightSize.Height * rightFraction;
-                LayoutScore score = leftScore.Times(leftFraction).Plus(rightScore.Times(rightFraction));
-                options.Add(new LayoutDimensions(x, y, score));
+                double x = query.MaxWidth;
+                double interpolatedY = leftSize.Height * leftFraction + rightSize.Height * rightFraction;
+                if (interpolatedY != 0)
+                {
+                    LayoutScore interpolatedScore = leftScore.Times(leftFraction).Plus(rightScore.Times(rightFraction));
+                    double y = query.MinScore.DividedBy(interpolatedScore.Times(1.0 / interpolatedY));
+                    if (!double.IsInfinity(y))
+                    {
+                        LayoutScore score = interpolatedScore.Times(y / interpolatedY);
+                        if (score.CompareTo(query.MinScore) < 0)
+                        {
+                            // the score had some components that the division didn't catch
+                            y = Math.Floor(y / this.pixelSize + 1.0) * this.pixelSize;
+                            score = interpolatedScore.Times(y / interpolatedY);
+
+                            if (score.CompareTo(query.MinScore) < 0)
+                            {
+                                // the height must have already been so close to an integer that it hardly changed, so the score didn't change at all due to rounding error
+                                y += this.pixelSize;
+                                score = interpolatedScore.Times(y / interpolatedY);
+
+                                if (score.CompareTo(query.MinScore) < 0)
+                                    ErrorReporter.ReportParadox("ScrollLayout rounding error: score " + leftScore + " < query.MinScore " + query.MinScore);
+                            }
+                        }
+                        options.Add(new Size(x, y));
+                    }
+                }
             }
+
+            // Compute the location where Y and Score are the limiting factors
+            {
+                double y = query.MaxHeight;
+                LayoutScore leftRescaledScore = leftScore.Times(y / leftSize.Height);
+                LayoutScore rightRescaledScore = rightScore.Times(y / rightSize.Height);
+                LayoutScore leftScoreDifference = query.MinScore.Minus(leftRescaledScore);
+                LayoutScore rightScoreDifference = query.MinScore.Minus(rightRescaledScore);
+                LayoutScore totalWeight = leftScoreDifference.Minus(rightScoreDifference);
+                double rightFraction = leftScoreDifference.DividedBy(totalWeight);
+                if (double.IsInfinity(rightFraction) || double.IsNaN(rightFraction))
+                    rightFraction = 1;
+                double leftFraction = 1 - rightFraction;
+                LayoutScore score = leftRescaledScore.Times(leftFraction).Plus(rightRescaledScore.Times(rightFraction));
+                double x = leftSize.Width * leftFraction + rightSize.Height * rightFraction;
+                options.Add(new Size(x, y));
+            }
+
 
             // choose best dimensions
             LayoutDimensions bestDimensions = null;
-            foreach (LayoutDimensions option in options)
+            foreach (Size size in options)
             {
+                double x = Math.Ceiling(size.Width / this.pixelSize) * this.pixelSize;
+                double leftDifference = x - leftSize.Width;
+                double rightDifference = x - rightSize.Width;
+                double totalWeight = leftDifference - rightDifference;
+                double rightFraction;
+                if (totalWeight != 0)
+                    rightFraction = leftDifference / totalWeight;
+                else
+                    rightFraction = 1;
+                double leftFraction = 1 - rightFraction;
+
+                LayoutScore interpolatedScore = leftScore.Times(leftFraction).Plus(rightScore.Times(rightFraction));
+                double interpolatedY = leftSize.Height * leftFraction + rightSize.Height * rightFraction;
+
+                double y = Math.Ceiling(size.Height / this.pixelSize) * this.pixelSize;
+                if (y > interpolatedY)
+                    y = interpolatedY;
+
+                LayoutScore score = interpolatedScore.Times(y / interpolatedY);
+
+                LayoutDimensions option = new LayoutDimensions(x, y, score);
                 if (query.PreferredLayout(bestDimensions, option) == option)
                     bestDimensions = option;
             }
             if (bestDimensions == null)
                 return null;
             SpecificLayout result = this.makeLayout(new Size(bestDimensions.Width, bestDimensions.Height), bestDimensions.Score);
-            return this.prepareLayoutForQuery(result, query);
+            return result;
         }
 
         // returns the empty layout if it's accepted
