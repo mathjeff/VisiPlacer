@@ -36,7 +36,16 @@ namespace VisiPlacement
             List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
             subLayouts.Add(subLayout);
             double pixelSize = 1;
-            subLayouts.Add(new PixelatedLayout(new MustScroll_Layout(subLayout, pixelSize), pixelSize));
+            subLayouts.Add(
+                new ScoreShifted_LayoutSet(
+                    new PixelatedLayout(
+                        new MustScroll_Layout(subLayout, pixelSize),
+                        pixelSize
+                    )
+                ,
+                    LayoutScore.Get_UnCentered_LayoutScore(1)
+                )
+            );
             this.Set_LayoutChoices(subLayouts);
         }
     }
