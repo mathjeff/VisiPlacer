@@ -953,6 +953,7 @@ namespace VisiPlacement
             this.uniform = true;
             return this;
         }
+        // builds a GridLayout
         public GridLayout Build()
         {
             BoundProperty_List rowHeights = new BoundProperty_List(this.subLayouts.Count);
@@ -969,6 +970,12 @@ namespace VisiPlacement
                 grid.AddLayout(sublayout);
             }
             return grid;
+        }
+        public LayoutChoice_Set BuildAnyLayout()
+        {
+            if (this.subLayouts.Count == 1)
+                return this.subLayouts.First.Value;
+            return this.Build();
         }
 
         private LinkedList<LayoutChoice_Set> subLayouts = new LinkedList<LayoutChoice_Set>();
