@@ -1021,6 +1021,13 @@ namespace VisiPlacement
             return grid;
         }
 
+        public LayoutChoice_Set BuildAnyLayout()
+        {
+            if (this.subLayouts.Count == 1)
+                return this.subLayouts.First.Value;
+            return this.Build();
+        }
+
         private LinkedList<LayoutChoice_Set> subLayouts = new LinkedList<LayoutChoice_Set>();
         private bool uniform = false;
     }

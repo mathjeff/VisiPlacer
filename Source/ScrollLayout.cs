@@ -37,7 +37,7 @@ namespace VisiPlacement
             subLayouts.Add(subLayout);
             double pixelSize = 1;
             subLayouts.Add(
-                new ScoreShifted_LayoutSet(
+                new ScoreShifted_Layout(
                     new PixelatedLayout(
                         new MustScroll_Layout(subLayout, pixelSize),
                         pixelSize

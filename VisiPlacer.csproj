@@ -61,7 +61,7 @@
     <Compile Include="Source\PickerLayout.cs" />
     <Compile Include="Source\PixelatedLayout.cs" />
     <Compile Include="Source\ReorderableList.cs" />
-    <Compile Include="Source\ScoreShifted_View.cs" />
+    <Compile Include="Source\ScoreShifted_Layout.cs" />
     <Compile Include="Source\ContainerLayout.cs" />
     <Compile Include="Source\ContainerView.cs" />
     <Compile Include="Source\ScrollLayout.cs" />
