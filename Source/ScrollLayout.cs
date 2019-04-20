@@ -148,13 +148,14 @@ namespace VisiPlacement
             SpecificLayout minWidthPositiveSublayout = this.subLayout.GetBestLayout(minWidthPositiveQuery);
             MinHeight_LayoutQuery minHeightPositiveQuery = new MinHeight_LayoutQuery();
             minHeightPositiveQuery.MaxWidth = minWidthPositiveSublayout.Width;
+            minHeightPositiveQuery.MinScore = minInterestingScore;
             SpecificLayout minHeightPositiveSublayout = this.subLayout.GetBestLayout(minHeightPositiveQuery);
             
             LayoutScore minScore = minHeightPositiveSublayout.Score;
             if (minScore.CompareTo(middleScore) > 0)
                 minScore = middleScore;
 
-            return this.prepareLayoutForQuery(this.interpolate(minHeightPositiveSublayout.Size, minScore, minHeightPositiveSublayout.Size, middleScore, query), query);
+            return this.prepareLayoutForQuery(this.interpolate(minWidthAwesomeSublayout.Size, minScore, minHeightPositiveSublayout.Size, middleScore, query), query);
         }
 
 
@@ -237,6 +238,8 @@ namespace VisiPlacement
             LayoutDimensions bestDimensions = null;
             foreach (Size size in options)
             {
+                if (size.Width < 0 || size.Height < 0)
+                    continue;
                 double x = Math.Ceiling(size.Width / this.pixelSize) * this.pixelSize;
                 double leftDifference = x - leftSize.Width;
                 double rightDifference = x - rightSize.Width;
