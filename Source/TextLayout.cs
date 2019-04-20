@@ -44,9 +44,7 @@ namespace VisiPlacement
         }
         private TextFormatter MakeTextFormatter()
         {
-            TextFormatter formatter = TextFormatter.Default;
-            formatter.FontSize = this.FontSize;
-            return formatter;
+            return TextFormatter.ForSize(this.FontSize);
         }
 
         public static TimeSpan TextTime = new TimeSpan();
@@ -352,19 +350,16 @@ namespace VisiPlacement
     // the entire TextFormatter class should be unnecessary, but Silverlight doesn't seem to otherwise support synchronously computing the size of some text
     public class TextFormatter
     {
-        public static TextFormatter Default
+        private static Dictionary<double, TextFormatter> formattersByFontSize = new Dictionary<double, TextFormatter>();
+        public static TextFormatter ForSize(double size)
         {
-            get
+            if (!formattersByFontSize.ContainsKey(size))
             {
-                if (defaultFormatter == null)
-                    defaultFormatter = new TextFormatter();
-                return defaultFormatter;
+                TextFormatter formatter = new TextFormatter();
+                formatter.FontSize = size;
+                formattersByFontSize[size] = formatter;
             }
-        }
-        private static TextFormatter defaultFormatter;
-
-        public TextFormatter()
-        {
+            return formattersByFontSize[size];
         }
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
@@ -450,6 +445,9 @@ namespace VisiPlacement
         private Size getBlockSize(String text)
         {
             Size size;
+            // clear cache if too large
+            if (this.sizeCache != null && this.sizeCache.Count > 2000)
+                this.sizeCache = null;
             // try to load from cache
             if (this.sizeCache == null)
                 this.sizeCache = new Dictionary<string, Size>();
