@@ -371,7 +371,11 @@ namespace VisiPlacement
             double maxWidth = 0, totalHeight = 0;
             for (int i = 0; i < blocks.Length; i++)
             {
-                Size blockSize = this.FormatParagraph(blocks[i], desiredWidth);
+                string block = blocks[i];
+                if (block == "")
+                    block = "M";
+
+                Size blockSize = this.FormatParagraph(block, desiredWidth);
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }
