@@ -113,7 +113,16 @@ namespace VisiPlacement
                         }
                         if (theirComponent.Key == priority)
                         {
-                            weight += theirComponent.Value;
+                            if (double.IsInfinity(weight) && double.IsInfinity(theirComponent.Value)
+                                && double.IsPositiveInfinity(weight) != double.IsPositiveInfinity(theirComponent.Value))
+                            {
+                                // Treat negative infinity plus positive infinity as zero
+                                weight = 0;
+                            }
+                            else
+                            {
+                                weight += theirComponent.Value;
+                            }
                             theirIndex++;
                         }
                     }
@@ -284,7 +293,7 @@ namespace VisiPlacement
         private void addComponent(double priority, double weight)
         {
             // workaround for rounding error
-            weight = Math.Round(weight, 6);
+            // weight = Math.Round(weight, 6);
             this.components.Add(priority, weight);
             ListItemStats<double, double> lastItem = this.components.GetLastValue();
             if (double.IsPositiveInfinity(lastItem.Key))

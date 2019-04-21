@@ -10,20 +10,25 @@ namespace VisiPlacement
 {
     public class TextLayout : LayoutChoice_Set
     {
+        // returns a TextLayout that still gets fractional points while cropped
+        public static LayoutChoice_Set New_Croppable(TextItem_Configurer textItem, double fontSize)
+        {
+            // We make a ScrollLayout and ask it to do the size computations but to not actually put the result into a ScrollView
+            return ScrollLayout.New(new TextLayout(textItem, fontSize), null);
+        }
+
         public TextLayout(TextItem_Configurer textItem, double fontSize)
         {
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
             this.ScoreIfEmpty = true;
-            this.ScoreIfCropped = false;
             this.previousText = this.TextItem_Configurer.Text;
             textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
-
         }
         protected TextItem_Configurer TextItem_Configurer { get; set; }
         public double FontSize { get; set; }
         public bool ScoreIfEmpty { get; set; }
-        public bool ScoreIfCropped { get; set; }
+        public bool ScoreIfCropped { get; }
 
         public String Text
         {

@@ -7,25 +7,42 @@ namespace VisiPlacement
 {
     public class TextblockLayout : LayoutCache
     {
+        public TextblockLayout(string text, bool allowCropping)
+        {
+            Label textBlock = this.makeTextBlock(text);
+            this.Initialize(textBlock, -1, false);
+        }
+        public TextblockLayout(string text, bool allowCropping, double fontSize)
+        {
+            Label textBlock = this.makeTextBlock(text);
+            this.Initialize(textBlock, fontSize, false);
+        }
+        public TextblockLayout(Label textBlock, bool allowCropping, double fontSize = -1)
+        {
+            this.Initialize(textBlock, fontSize, allowCropping);
+        }
         public TextblockLayout(Label textBlock, double fontSize = -1)
         {
-            this.Initialize(textBlock, fontSize);
+            this.Initialize(textBlock, fontSize, false);
         }
-        public TextblockLayout(String text, double fontsize = -1)
+        public TextblockLayout(String text, double fontSize = -1)
         {
-            Label textBlock = new Label();
-            textBlock.TextColor = Color.Black;
-            textBlock.Text = text;
-            this.Initialize(textBlock, fontsize);
+            Label textBlock = this.makeTextBlock(text);
+            this.Initialize(textBlock, fontSize, false);
         }
         public TextblockLayout(string text, TextAlignment horizontalTextAlignment)
         {
-            Label textBlock = new Label();
+            Label textBlock = this.makeTextBlock(text);
             textBlock.HorizontalTextAlignment = horizontalTextAlignment;
-            textBlock.Text = text;
-            this.Initialize(textBlock, -1);
+            this.Initialize(textBlock, -1, false);
         }
-        private void Initialize(Label textBlock, double fontsize)
+        private Label makeTextBlock(string text)
+        {
+            Label textBlock = new Label();
+            textBlock.Text = text;
+            return textBlock;
+        }
+        private void Initialize(Label textBlock, double fontsize, bool allowCropping)
         {
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
@@ -33,16 +50,16 @@ namespace VisiPlacement
             textBlock.TextColor = Color.LightGray;
             this.textBlock = textBlock;
 
-            this.layouts = new List<TextLayout>();
+            this.layouts = new List<LayoutChoice_Set>();
             if (fontsize > 0)
             {
-                layouts.Add(this.makeLayout(fontsize));
+                layouts.Add(this.makeLayout(fontsize, allowCropping));
             }
             else
             {
-                layouts.Add(this.makeLayout(30));
-                layouts.Add(this.makeLayout(16));
-                layouts.Add(this.makeLayout(10));
+                layouts.Add(this.makeLayout(30, allowCropping));
+                layouts.Add(this.makeLayout(16, allowCropping));
+                layouts.Add(this.makeLayout(10, allowCropping));
             }
                 
             this.LayoutToManage = new LayoutUnion(layouts);
@@ -59,17 +76,6 @@ namespace VisiPlacement
             }
         }
 
-        public bool ScoreIfCropped
-        {
-            set
-            {
-                foreach (TextLayout layout in this.layouts)
-                {
-                    layout.ScoreIfCropped = value;
-                }
-            }
-        }
-
         public bool LoggingEnabled
         {
             set
@@ -82,16 +88,19 @@ namespace VisiPlacement
         }
 
 
-        private TextLayout makeLayout(double fontsize)
+        private LayoutChoice_Set makeLayout(double fontsize, bool allowCropping)
         {
             TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock);
-            TextLayout layout = new TextLayout(configurer, fontsize);
-            layout.ScoreIfEmpty = false;
+            LayoutChoice_Set layout;
+            if (allowCropping)
+                layout = TextLayout.New_Croppable(configurer, fontsize);
+            else
+                layout = new TextLayout(configurer, fontsize);
             return layout;
         }
 
         private Label textBlock;
-        private List<TextLayout> layouts;
+        private List<LayoutChoice_Set> layouts;
     }
 
     // The TextBlock_Configurer is an implementation detail that facilitates sharing code between TextblockLayout and TextboxLayout

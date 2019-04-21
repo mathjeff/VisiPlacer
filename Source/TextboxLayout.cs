@@ -52,17 +52,6 @@ namespace VisiPlacement
             }
         }
 
-        public bool ScoreIfCropped
-        {
-            set
-            {
-                foreach (TextLayout layout in this.layouts)
-                {
-                    layout.ScoreIfCropped = value;
-                }
-            }
-        }
-
         public bool LoggingEnabled
         {
             set

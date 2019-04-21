@@ -16,10 +16,10 @@ namespace VisiPlacement
             this.Initialize(button);
         }
 
-        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true)
+        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true, bool allowCropping = false)
         {
             button.Text = content;
-            this.Initialize(button, fontSize, includeBevel);
+            this.Initialize(button, fontSize, includeBevel, allowCropping);
         }
 
 
@@ -28,32 +28,46 @@ namespace VisiPlacement
             return new ButtonLayout(button, button.Text, -1, false);
         }
 
-        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true)
+        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false)
         {
             button.Margin = new Thickness();
             button.BorderRadius = 0;
             button.TextColor = Color.LightGray;
 
             ButtonText_Configurer buttonConfigurer = new ButtonText_Configurer(button);
-            LayoutChoice_Set buttonLayout;
+            LayoutChoice_Set sublayout;
             if (fontSize > 0)
             {
-                buttonLayout = new TextLayout(new ButtonText_Configurer(button), fontSize);
+                if (allowCropping)
+                    sublayout = TextLayout.New_Croppable(new ButtonText_Configurer(button), fontSize);
+                else
+                    sublayout = new TextLayout(new ButtonText_Configurer(button), fontSize);
+
+                this.sublayoutOptions = new List<LayoutChoice_Set>() { sublayout };
             }
             else
             {
-                List<LayoutChoice_Set> options = new List<LayoutChoice_Set>();
-                options.Add(new TextLayout(buttonConfigurer, 30));
-                options.Add(new TextLayout(buttonConfigurer, 16));
-                options.Add(new TextLayout(buttonConfigurer, 12));
-                LayoutUnion layoutUnion = new LayoutUnion(options);
-                buttonLayout = layoutUnion;
+                this.sublayoutOptions = new List<LayoutChoice_Set>();
+                if (allowCropping)
+                {
+                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 30));
+                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 16));
+                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 12));
+                }
+                else
+                {
+                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30));
+                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16));
+                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12));
+                }
+                LayoutUnion layoutUnion = new LayoutUnion(this.sublayoutOptions);
+                sublayout = layoutUnion;
             }
 
             // add a view behind the button to change its normal background color without changing its color when selected
             ContentView buttonBackground = new ContentView();
             buttonBackground.BackgroundColor = Color.Black;
-            ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, buttonLayout, new Thickness(), LayoutScore.Zero, false);
+            ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, new Thickness(), LayoutScore.Zero, false);
 
             if (includeBevel)
             {
@@ -79,13 +93,16 @@ namespace VisiPlacement
                 ContainerLayout spacingLayout = new ContainerLayout(spacing, outsideLayout, spacingThickness, LayoutScore.Zero, false);
 
                 this.SubLayout = spacingLayout;
-            } else
+            }
+            else
             {
                 button.TextColor = Color.Black;
                 button.BackgroundColor = Color.LightGray;
                 this.SubLayout = backgroundLayout;
             }
         }
+
+        private List<LayoutChoice_Set> sublayoutOptions;
 
     }
 

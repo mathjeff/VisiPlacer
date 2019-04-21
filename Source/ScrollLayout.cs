@@ -28,10 +28,14 @@ namespace VisiPlacement
     {
         public static LayoutChoice_Set New(LayoutChoice_Set subLayout)
         {
-            return new ScrollLayout(subLayout);
+            return New(subLayout, new ScrollView());
+        }
+        public static LayoutChoice_Set New(LayoutChoice_Set subLayout, ScrollView scrollView)
+        {
+            return new ScrollLayout(subLayout, scrollView);
         }
 
-        private ScrollLayout(LayoutChoice_Set subLayout)
+        private ScrollLayout(LayoutChoice_Set subLayout, ScrollView scrollView)
         {
             List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
             subLayouts.Add(subLayout);
@@ -39,7 +43,7 @@ namespace VisiPlacement
             subLayouts.Add(
                 new ScoreShifted_Layout(
                     new PixelatedLayout(
-                        new MustScroll_Layout(subLayout, pixelSize),
+                        new MustScroll_Layout(subLayout, scrollView, pixelSize),
                         pixelSize
                     )
                 ,
@@ -53,7 +57,10 @@ namespace VisiPlacement
     // a MustScroll_Layout will always put its content into a ScrollView
     public class MustScroll_Layout : LayoutChoice_Set
     {
-        public MustScroll_Layout(LayoutChoice_Set subLayout, double pixelSize)
+        public MustScroll_Layout(LayoutChoice_Set subLayout, double pixelSize) : this(subLayout, new ScrollView(), pixelSize)
+        {
+        }
+        public MustScroll_Layout(LayoutChoice_Set subLayout, ScrollView view, double pixelSize)
         {
             this.pixelSize = pixelSize;
             if (subLayout is LayoutCache)
@@ -61,15 +68,9 @@ namespace VisiPlacement
             else
                 this.subLayout = new LayoutCache(subLayout);
             this.subLayout.AddParent(this);
+            this.view = view;
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
-        {
-            SpecificLayout result = this.GetBestLayout3(query);
-            return result;
-
-        }
-
-        public SpecificLayout GetBestLayout3(LayoutQuery query)
         {
             // We get a couple of representative sublayouts and do linear interpolation among them
             // It would be nice to check all existent sublayouts but that would take a while
@@ -177,7 +178,7 @@ namespace VisiPlacement
             }
 
             // Compute the location where X and Score are the limiting factors
-            if (query.MaxHeight > 0)
+            if (query.MaxHeight > 0 && !double.IsInfinity(query.MaxWidth))
             {
                 double totalWeight = leftXDifference - rightXDifference;
                 double rightFraction;
@@ -217,6 +218,7 @@ namespace VisiPlacement
             }
 
             // Compute the location where Y and Score are the limiting factors
+            if (!double.IsInfinity(query.MaxHeight))
             {
                 double y = query.MaxHeight;
                 LayoutScore leftRescaledScore = leftScore.Times(y / leftSize.Height);
@@ -226,7 +228,7 @@ namespace VisiPlacement
                 LayoutScore totalWeight = leftScoreDifference.Minus(rightScoreDifference);
                 double rightFraction = leftScoreDifference.DividedBy(totalWeight);
                 if (double.IsInfinity(rightFraction) || double.IsNaN(rightFraction))
-                    rightFraction = 1;
+                    rightFraction = 0;
                 double leftFraction = 1 - rightFraction;
                 LayoutScore score = leftRescaledScore.Times(leftFraction).Plus(rightRescaledScore.Times(rightFraction));
                 double x = leftSize.Width * leftFraction + rightSize.Height * rightFraction;
@@ -238,9 +240,9 @@ namespace VisiPlacement
             LayoutDimensions bestDimensions = null;
             foreach (Size size in options)
             {
-                if (size.Width < 0 || size.Height < 0)
-                    continue;
                 double x = Math.Ceiling(size.Width / this.pixelSize) * this.pixelSize;
+                if (x < 0)
+                    x = 0;
                 double leftDifference = x - leftSize.Width;
                 double rightDifference = x - rightSize.Width;
                 double totalWeight = leftDifference - rightDifference;
@@ -257,6 +259,8 @@ namespace VisiPlacement
                 double y = Math.Ceiling(size.Height / this.pixelSize) * this.pixelSize;
                 if (y > interpolatedY)
                     y = interpolatedY;
+                if (y < 0)
+                    y = 0;
 
                 LayoutScore score = interpolatedScore.Times(y / interpolatedY);
 
@@ -295,7 +299,7 @@ namespace VisiPlacement
         }
 
         private LayoutChoice_Set subLayout;
-        private ScrollView view = new ScrollView();
+        private ScrollView view;
         private ImageLayout imageLayout = new ImageLayout(null, LayoutScore.Get_UsedSpace_LayoutScore(1));
         private double pixelSize;
 
