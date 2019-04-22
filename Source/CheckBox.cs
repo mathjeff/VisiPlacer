@@ -23,9 +23,9 @@ namespace VisiPlacement
             set
             {
                 if (value)
-                    base.SelectedIndex = 0;
-                else
                     base.SelectedIndex = 1;
+                else
+                    base.SelectedIndex = 0;
             }
         }
     }

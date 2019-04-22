@@ -34,6 +34,7 @@ namespace VisiPlacement
             set
             {
                 this.selectedIndex = value;
+                this.updateText();
             }
         }
 
