@@ -58,6 +58,15 @@ namespace VisiPlacement
             }
             return false;
         }
+        public bool Contains(LayoutChoice_Set layout)
+        {
+            foreach (StackEntry entry in this.layouts)
+            {
+                if (entry.layout == layout)
+                    return true;
+            }
+            return false;
+        }
         private void updateSubLayout()
         {
             if (this.layouts.Count > 0)
