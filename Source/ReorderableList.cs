@@ -23,7 +23,11 @@ namespace VisiPlacement
             }
 
             this.makeArrows();
-            this.mainGrid = GridLayout.New(BoundProperty_List.Uniform(this.itemLayouts.Count), new BoundProperty_List(2), LayoutScore.Zero);
+            BoundProperty_List columnWidths = new BoundProperty_List(2);
+            columnWidths.BindIndices(0, 1);
+            columnWidths.SetPropertyScale(0, 1);
+            columnWidths.SetPropertyScale(1, 7);
+            this.mainGrid = GridLayout.New(BoundProperty_List.Uniform(this.itemLayouts.Count), columnWidths, LayoutScore.Zero);
             this.SubLayout = this.mainGrid;
             this.putLayouts();
         }

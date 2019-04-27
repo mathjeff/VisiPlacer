@@ -33,8 +33,13 @@ namespace VisiPlacement
         public TextblockLayout(string text, TextAlignment horizontalTextAlignment)
         {
             Label textBlock = this.makeTextBlock(text);
-            textBlock.HorizontalTextAlignment = horizontalTextAlignment;
             this.Initialize(textBlock, -1, false);
+            this.AlignHorizontally(horizontalTextAlignment);
+        }
+        public TextblockLayout AlignHorizontally(TextAlignment horizontalTextAlignment)
+        {
+            this.textBlock.HorizontalTextAlignment = horizontalTextAlignment;
+            return this;
         }
         private Label makeTextBlock(string text)
         {
