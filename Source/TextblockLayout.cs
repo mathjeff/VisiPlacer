@@ -10,30 +10,40 @@ namespace VisiPlacement
         public TextblockLayout(string text, bool allowCropping)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, -1, false);
+            this.Initialize(textBlock, -1, false, false);
+        }
+        public TextblockLayout(string text, bool allowCropping, bool allowSplittingWords)
+        {
+            Label textBlock = this.makeTextBlock(text);
+            this.Initialize(textBlock, -1, false, allowSplittingWords);
         }
         public TextblockLayout(string text, bool allowCropping, double fontSize)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, fontSize, false);
+            this.Initialize(textBlock, fontSize, false, false);
         }
         public TextblockLayout(Label textBlock, bool allowCropping, double fontSize = -1)
         {
-            this.Initialize(textBlock, fontSize, allowCropping);
+            this.Initialize(textBlock, fontSize, allowCropping, false);
         }
         public TextblockLayout(Label textBlock, double fontSize = -1)
         {
-            this.Initialize(textBlock, fontSize, false);
+            this.Initialize(textBlock, fontSize, false, false);
         }
         public TextblockLayout(String text, double fontSize = -1)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, fontSize, false);
+            this.Initialize(textBlock, fontSize, false, false);
+        }
+        public TextblockLayout(String text, double fontSize, bool allowCropping, bool allowSplittingWords)
+        {
+            Label textBlock = this.makeTextBlock(text);
+            this.Initialize(textBlock, fontSize, allowCropping, allowSplittingWords);
         }
         public TextblockLayout(string text, TextAlignment horizontalTextAlignment)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, -1, false);
+            this.Initialize(textBlock, -1, false, false);
             this.AlignHorizontally(horizontalTextAlignment);
         }
         public TextblockLayout AlignHorizontally(TextAlignment horizontalTextAlignment)
@@ -47,7 +57,7 @@ namespace VisiPlacement
             textBlock.Text = text;
             return textBlock;
         }
-        private void Initialize(Label textBlock, double fontsize, bool allowCropping)
+        private void Initialize(Label textBlock, double fontsize, bool allowCropping, bool allowSplittingWords)
         {
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
@@ -58,13 +68,13 @@ namespace VisiPlacement
             this.layouts = new List<LayoutChoice_Set>();
             if (fontsize > 0)
             {
-                layouts.Add(this.makeLayout(fontsize, allowCropping));
+                layouts.Add(this.makeLayout(fontsize, allowCropping, allowSplittingWords));
             }
             else
             {
-                layouts.Add(this.makeLayout(30, allowCropping));
-                layouts.Add(this.makeLayout(16, allowCropping));
-                layouts.Add(this.makeLayout(10, allowCropping));
+                layouts.Add(this.makeLayout(30, allowCropping, allowSplittingWords));
+                layouts.Add(this.makeLayout(16, allowCropping, allowSplittingWords));
+                layouts.Add(this.makeLayout(10, allowCropping, allowSplittingWords));
             }
                 
             this.LayoutToManage = new LayoutUnion(layouts);
@@ -93,14 +103,14 @@ namespace VisiPlacement
         }
 
 
-        private LayoutChoice_Set makeLayout(double fontsize, bool allowCropping)
+        private LayoutChoice_Set makeLayout(double fontSize, bool allowCropping, bool allowSplittingWords)
         {
             TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock);
             LayoutChoice_Set layout;
             if (allowCropping)
-                layout = TextLayout.New_Croppable(configurer, fontsize);
+                layout = TextLayout.New_Croppable(configurer, fontSize);
             else
-                layout = new TextLayout(configurer, fontsize);
+                layout = new TextLayout(configurer, fontSize, allowSplittingWords);
             return layout;
         }
 

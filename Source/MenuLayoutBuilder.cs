@@ -24,13 +24,13 @@ namespace VisiPlacement
 
         public LayoutChoice_Set Build()
         {
-            GridLayout layout = GridLayout.New(BoundProperty_List.Uniform(this.layoutNames.Count), BoundProperty_List.Uniform(1), LayoutScore.Zero);
+            Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
             foreach (string name in this.layoutNames)
             {
                 LayoutChoice_Set subLayout = this.Get_ButtonLayout_By_Name(name);
-                layout.AddLayout(subLayout);
+                gridBuilder.AddLayout(subLayout);
             }
-            return layout;
+            return gridBuilder.BuildAnyLayout();
         }
 
         private Button MakeButton(string name, ValueProvider<StackEntry> target)

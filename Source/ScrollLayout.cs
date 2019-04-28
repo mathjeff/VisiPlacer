@@ -30,12 +30,17 @@ namespace VisiPlacement
         {
             return New(subLayout, new ScrollView());
         }
-        public static LayoutChoice_Set New(LayoutChoice_Set subLayout, ScrollView scrollView)
+        public static LayoutChoice_Set New(LayoutChoice_Set subLayout, bool treatNegativeScoresAsZero)
         {
-            return new ScrollLayout(subLayout, scrollView);
+            return new ScrollLayout(subLayout, new ScrollView(), treatNegativeScoresAsZero);
         }
 
-        private ScrollLayout(LayoutChoice_Set subLayout, ScrollView scrollView)
+        public static LayoutChoice_Set New(LayoutChoice_Set subLayout, ScrollView scrollView, bool treatNegativeScoresAsZero = false)
+        {
+            return new ScrollLayout(subLayout, scrollView, treatNegativeScoresAsZero);
+        }
+
+        private ScrollLayout(LayoutChoice_Set subLayout, ScrollView scrollView, bool treatNegativeScoresAsZero)
         {
             List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
             subLayouts.Add(subLayout);
@@ -43,7 +48,7 @@ namespace VisiPlacement
             subLayouts.Add(
                 new ScoreShifted_Layout(
                     new PixelatedLayout(
-                        new MustScroll_Layout(subLayout, scrollView, pixelSize),
+                        new MustScroll_Layout(subLayout, scrollView, pixelSize, treatNegativeScoresAsZero),
                         pixelSize
                     )
                 ,
@@ -57,12 +62,13 @@ namespace VisiPlacement
     // a MustScroll_Layout will always put its content into a ScrollView
     public class MustScroll_Layout : LayoutChoice_Set
     {
-        public MustScroll_Layout(LayoutChoice_Set subLayout, double pixelSize) : this(subLayout, new ScrollView(), pixelSize)
+        public MustScroll_Layout(LayoutChoice_Set subLayout, double pixelSize, bool treatNegativeScoresAsZero) : this(subLayout, new ScrollView(), pixelSize, treatNegativeScoresAsZero)
         {
         }
-        public MustScroll_Layout(LayoutChoice_Set subLayout, ScrollView view, double pixelSize)
+        public MustScroll_Layout(LayoutChoice_Set subLayout, ScrollView view, double pixelSize, bool treatNegativeScoresAsZero)
         {
             this.pixelSize = pixelSize;
+            this.treatNegativeScoresAsZero = treatNegativeScoresAsZero;
             if (subLayout is LayoutCache)
                 this.subLayout = subLayout;
             else
@@ -72,21 +78,26 @@ namespace VisiPlacement
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            if (query.MaxHeight == 0 && query.MaxWidth >= 0)
+            {
+                // No height means no score
+                return this.zeroOrNull(query);
+            }
+
             // We get a couple of representative sublayouts and do linear interpolation among them
             // It would be nice to check all existent sublayouts but that would take a while
 
             // First, find the layout of min height among those having max score
             LayoutScore minInterestingScore = LayoutScore.Tiny;
-            SpecificLayout maxScore_subLayout = this.subLayout.GetBestLayout(new MaxScore_LayoutQuery());
+            // The ScrollLayout's score won't be higher than that of its sublayout, so only check for high-scoring sublayouts
+            if (minInterestingScore.CompareTo(query.MinScore) < 0)
+                minInterestingScore = query.MinScore;
+            MaxScore_LayoutQuery maxScore_layoutQuery = new MaxScore_LayoutQuery();
+            maxScore_layoutQuery.MinScore = minInterestingScore;
+            SpecificLayout maxScore_subLayout = this.subLayout.GetBestLayout(maxScore_layoutQuery);
             if (maxScore_subLayout == null)
             {
-                ErrorReporter.ReportParadox("No layouts found for " + this.subLayout);
                 return null;
-            }
-            if (maxScore_subLayout.Score.CompareTo(minInterestingScore) < 0)
-            {
-                // not interested in layouts having negative score
-                return this.zeroOrNull(query);
             }
             MinHeight_LayoutQuery minHeightAwesomeQuery = new MinHeight_LayoutQuery();
             minHeightAwesomeQuery.MaxWidth = maxScore_subLayout.Width;
@@ -156,7 +167,17 @@ namespace VisiPlacement
             if (minScore.CompareTo(middleScore) > 0)
                 minScore = middleScore;
 
-            return this.prepareLayoutForQuery(this.interpolate(minWidthAwesomeSublayout.Size, minScore, minHeightPositiveSublayout.Size, middleScore, query), query);
+            // Any sublayout having width less than minHeightPositiveSublayout.Width will have score <= 0
+            // Normally, because the score of a ScrollLayout is defined as (sublayout.Score / layout.Height),
+            //   that means that if the sublayout's score is negative then we should create a ScrollView having infinite height
+            // Rather than creating a ScrollView whose contents are of infinite height, normally we skip showing any content having negative score
+            // However, we can be configured to treat this score as 0
+            if (minHeightPositiveSublayout.Width > query.MaxWidth && this.treatNegativeScoresAsZero)
+            {
+                return this.prepareLayoutForQuery(this.interpolate(new Size(), LayoutScore.Zero, minHeightPositiveSublayout.Size, minScore, query), query);
+            }
+
+            return this.prepareLayoutForQuery(this.interpolate(minHeightPositiveSublayout.Size, minScore, minWidthAwesomeSublayout.Size, middleScore, query), query);
         }
 
 
@@ -277,7 +298,7 @@ namespace VisiPlacement
         // returns the empty layout if it's accepted
         private SpecificLayout zeroOrNull(LayoutQuery query)
         {
-            SpecificLayout empty = this.makeLayout(new Size(), LayoutScore.Minimum);
+            SpecificLayout empty = this.makeLayout(new Size(), LayoutScore.Zero);
             if (query.Accepts(empty))
                 return this.prepareLayoutForQuery(empty, query);
             return null;
@@ -302,6 +323,7 @@ namespace VisiPlacement
         private ScrollView view;
         private ImageLayout imageLayout = new ImageLayout(null, LayoutScore.Get_UsedSpace_LayoutScore(1));
         private double pixelSize;
+        private bool treatNegativeScoresAsZero;
 
     }
 

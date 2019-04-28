@@ -14,21 +14,24 @@ namespace VisiPlacement
         public static LayoutChoice_Set New_Croppable(TextItem_Configurer textItem, double fontSize)
         {
             // We make a ScrollLayout and ask it to do the size computations but to not actually put the result into a ScrollView
-            return ScrollLayout.New(new TextLayout(textItem, fontSize), null);
+            TextLayout textLayout = new TextLayout(textItem, fontSize, true);
+            return ScrollLayout.New(textLayout, null);
         }
 
-        public TextLayout(TextItem_Configurer textItem, double fontSize)
+        public TextLayout(TextItem_Configurer textItem, double fontSize, bool allowSplittingWords = false)
         {
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
             this.ScoreIfEmpty = true;
             this.previousText = this.TextItem_Configurer.Text;
+            this.AllowSplittingWords = allowSplittingWords;
             textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
         }
         protected TextItem_Configurer TextItem_Configurer { get; set; }
         public double FontSize { get; set; }
         public bool ScoreIfEmpty { get; set; }
         public bool ScoreIfCropped { get; }
+        public bool AllowSplittingWords { get; set; }
 
         public String Text
         {
@@ -131,16 +134,18 @@ namespace VisiPlacement
         // computes the layout dimensions of the layout of minimum width such that there is no cropping
         private Specific_TextLayout Get_NonCropping_MinWidthLayout(LayoutQuery query)
         {
-            // if the width is really small, the text block doesn't realize that it doesn't need any space
-            double maxWidth = query.MaxWidth;
 
             Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity));
             double pixelSize = 1;
             double maxRejectedWidth = 0;
+            int numIterations = 0;
+            bool firstIteration = true;
+            double maxWidth = query.MaxWidth;
             while (maxRejectedWidth < bestAllowedDimensions.Width - pixelSize / 2)
             {
+                numIterations++;
                 // given the current width, compute the required height
-                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity));
+                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), this.TextToFit);
                 if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
                 {
                     // this layout fits in the required dimensions
@@ -162,20 +167,42 @@ namespace VisiPlacement
                     // this layout does not fit in the required dimensions
                     if (maxWidth > maxRejectedWidth)
                         maxRejectedWidth = maxWidth;
-                    if (maxWidth <= 0)
-                        break;
-                    // if the first layout we found was too tall, then there must be some cropping
+                    // if the first layout we found was too tall, then there will need to be some cropping
                     if (double.IsPositiveInfinity(bestAllowedDimensions.Width))
                         return null;
                 }
-                // calculate a new size
-                double desiredArea = newDimensions.Height * maxWidth;
+                // calculate a new size, by guessing based on required area
+                double desiredArea = newDimensions.Height * Math.Max(maxWidth, newDimensions.Width);
                 maxWidth = desiredArea / query.MaxHeight;
-                if (maxWidth < maxRejectedWidth + pixelSize / 2)
-                    maxWidth = maxRejectedWidth + pixelSize / 2;
-                if (maxWidth > bestAllowedDimensions.Width - pixelSize / 2)
-                    maxWidth = bestAllowedDimensions.Width - pixelSize / 2;
+                // Make sure that the next value we check is inside the range that we haven't checked yet, to make sure we're making progress
+                // If our area-based is outside the unexplored range, then from now on just split the remaining range in half on each iteration
+                if (maxWidth < (maxRejectedWidth + pixelSize / 2))
+                {
+                    if (firstIteration)
+                    {
+                        // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
+                        Size desiredSize = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords);
+                        if (desiredSize.Width > maxWidth)
+                            maxRejectedWidth = desiredSize.Width - pixelSize / 2;
+                        maxWidth = desiredSize.Width;
+                    }
+                    else
+                    {
+                        // The second time we find that we have enough area to make the width very tiny, we don't recalculate the true min width required because we already did
+                        // Instead we just do a binary search
+                        maxWidth = (maxRejectedWidth + bestAllowedDimensions.Width) / 2;
+                    }
+                }
+                else
+                {
+                    if (maxWidth > (bestAllowedDimensions.Width - pixelSize / 2))
+                    {
+                        maxWidth = (maxRejectedWidth + bestAllowedDimensions.Width) / 2;
+                    }
+                }
+                firstIteration = false;
             }
+            System.Diagnostics.Debug.WriteLine("Spent " + numIterations + " iterations in Get_NonCropping_MinWidthLayout with query = " + query + " and text length = " + this.Text.Length);
             if (!query.Accepts(bestAllowedDimensions))
                 return null;
             return bestAllowedDimensions;
@@ -191,7 +218,7 @@ namespace VisiPlacement
             numComputations++;
 
             TextFormatter textFormatter = this.MakeTextFormatter();
-            Size desiredSize = textFormatter.FormatText(text, availableSize.Width);
+            Size desiredSize = textFormatter.FormatText(text, availableSize.Width, this.AllowSplittingWords);
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
                 ErrorReporter.ReportParadox("Illegal size " + desiredSize + " returned by textFormatter.FormatText");
@@ -368,7 +395,7 @@ namespace VisiPlacement
         }
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
-        public Size FormatText(String text, double desiredWidth)
+        public Size FormatText(String text, double desiredWidth, bool allowSplittingWords)
         {
             if (text == null || text == "")
                 return new Size();
@@ -380,18 +407,34 @@ namespace VisiPlacement
                 if (block == "")
                     block = "M";
 
-                Size blockSize = this.FormatParagraph(block, desiredWidth);
+                Size blockSize = this.FormatParagraph(block, desiredWidth, allowSplittingWords);
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }
             return new Size(maxWidth, totalHeight);
         }
-        public Size FormatParagraph(String text, double desiredWidth)
+        public Size FormatParagraph(String text, double desiredWidth, bool allowSplittingWords)
         {
             if (text == null || text == "")
                 return new Size();
 
-            string[] components = text.Split(' ');
+            Size singleLine_size = this.getBlockSize(text);
+            if (singleLine_size.Width <= desiredWidth)
+                return singleLine_size;
+
+            string[] components;
+            if (allowSplittingWords)
+            {
+                components = new string[text.Length];
+                for (int i = 0; i < text.Length; i++)
+                {
+                    components[i] = text.Substring(i, 1);
+                }
+            }
+            else
+            {
+                components = text.Split(' ');
+            }
             string currentLine_text = "";
             List<string> lines = new List<string>();
             double maxWidth = 0;
@@ -410,7 +453,6 @@ namespace VisiPlacement
 
                 Size blockSize = this.getBlockSize(proposedLine);
                 bool tooLong = (blockSize.Width > desiredWidth && currentLine_text != "");
-                bool end = (i == components.Length - 1);
                 if (tooLong)
                 {
                     // go to the next line
@@ -425,6 +467,7 @@ namespace VisiPlacement
                 }
                 else
                 {
+                    bool end = (i == components.Length - 1);
                     if (end)
                     {
                         // go to the next line
