@@ -43,12 +43,13 @@ namespace VisiPlacement
         private ScrollLayout(LayoutChoice_Set subLayout, ScrollView scrollView, bool treatNegativeScoresAsZero)
         {
             List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
-            subLayouts.Add(subLayout);
+            LayoutCache sublayoutCache = LayoutCache.For(subLayout);
+            subLayouts.Add(sublayoutCache);
             double pixelSize = 1;
             subLayouts.Add(
                 new ScoreShifted_Layout(
                     new PixelatedLayout(
-                        new MustScroll_Layout(subLayout, scrollView, pixelSize, treatNegativeScoresAsZero),
+                        new MustScroll_Layout(sublayoutCache, scrollView, pixelSize, treatNegativeScoresAsZero),
                         pixelSize
                     )
                 ,
@@ -69,10 +70,7 @@ namespace VisiPlacement
         {
             this.pixelSize = pixelSize;
             this.treatNegativeScoresAsZero = treatNegativeScoresAsZero;
-            if (subLayout is LayoutCache)
-                this.subLayout = subLayout;
-            else
-                this.subLayout = new LayoutCache(subLayout);
+            this.subLayout = subLayout;
             this.subLayout.AddParent(this);
             this.view = view;
         }
@@ -172,9 +170,11 @@ namespace VisiPlacement
             //   that means that if the sublayout's score is negative then we should create a ScrollView having infinite height
             // Rather than creating a ScrollView whose contents are of infinite height, normally we skip showing any content having negative score
             // However, we can be configured to treat this score as 0
-            if (minHeightPositiveSublayout.Width > query.MaxWidth && this.treatNegativeScoresAsZero)
+            if (minHeightPositiveSublayout.Width > query.MaxWidth)
             {
-                return this.prepareLayoutForQuery(this.interpolate(new Size(), LayoutScore.Zero, minHeightPositiveSublayout.Size, minScore, query), query);
+                if (this.treatNegativeScoresAsZero)
+                    return this.prepareLayoutForQuery(this.interpolate(new Size(), LayoutScore.Zero, minHeightPositiveSublayout.Size, minScore, query), query);
+                return this.zeroOrNull(query);
             }
 
             return this.prepareLayoutForQuery(this.interpolate(minHeightPositiveSublayout.Size, minScore, minWidthAwesomeSublayout.Size, middleScore, query), query);

@@ -7,6 +7,13 @@ namespace VisiPlacement
 {
     public class LayoutCache : LayoutChoice_Set, IEqualityComparer<LayoutQuery>, IEqualityComparer<Size>
     {
+        public static LayoutCache For(LayoutChoice_Set layout)
+        {
+            LayoutCache result = layout as LayoutCache;
+            if (result != null)
+                return result;
+            return new LayoutCache(layout);
+        }
         public LayoutCache()
         {
             this.Initialize();

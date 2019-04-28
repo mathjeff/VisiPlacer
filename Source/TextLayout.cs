@@ -23,7 +23,7 @@ namespace VisiPlacement
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
             this.ScoreIfEmpty = true;
-            this.previousText = this.TextItem_Configurer.Text;
+            this.textItem_text = this.TextItem_Configurer.Text;
             this.AllowSplittingWords = allowSplittingWords;
             textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
         }
@@ -44,7 +44,7 @@ namespace VisiPlacement
         {
             get
             {
-                String result = this.Text;
+                String result = this.textItem_text;
                 if ((result == "" || result == null) && this.ScoreIfEmpty)
                     result = "A";
                 return result;
@@ -69,7 +69,7 @@ namespace VisiPlacement
                 System.Diagnostics.Debug.WriteLine("num text measurements = " + TextLayout.NumMeasures);
             }
             DateTime startTime = DateTime.Now;
-            this.previousText = this.TextItem_Configurer.Text;
+            this.textItem_text = this.TextItem_Configurer.Text;
             //ErrorReporter.ReportParadox("avg num computations per query = " + (double)numComputations / (double)numQueries);
             numQueries++;
 
@@ -145,7 +145,7 @@ namespace VisiPlacement
             {
                 numIterations++;
                 // given the current width, compute the required height
-                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), this.TextToFit);
+                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity));
                 if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
                 {
                     // this layout fits in the required dimensions
@@ -181,7 +181,7 @@ namespace VisiPlacement
                     if (firstIteration)
                     {
                         // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
-                        Size desiredSize = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords);
+                        Size desiredSize = this.formatText(maxWidth);
                         if (desiredSize.Width > maxWidth)
                             maxRejectedWidth = desiredSize.Width - pixelSize / 2;
                         maxWidth = desiredSize.Width;
@@ -208,17 +208,29 @@ namespace VisiPlacement
             return bestAllowedDimensions;
         }
 
+        private Size formatText(double maxWidth)
+        {
+            // check the cache
+            Size size;
+            if (this.layoutsByWidth.TryGetValue(maxWidth, out size))
+            {
+                if (this.LoggingEnabled)
+                    System.Diagnostics.Debug.WriteLine("TextLayout.formatText cache hit for width " + maxWidth + ": " + size);
+                return size;
+            }
+            // recompute and save into cache
+            size = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords);
+            this.layoutsByWidth[maxWidth] = size;
+            return size;
+        }
+
         // compute the best dimensions fitting within the given size
         private Specific_TextLayout ComputeDimensions(Size availableSize)
         {
-            return this.ComputeDimensions(availableSize, this.TextToFit);
-        }
-        private Specific_TextLayout ComputeDimensions(Size availableSize, string text)
-        {
+            DateTime start = DateTime.Now;
             numComputations++;
 
-            TextFormatter textFormatter = this.MakeTextFormatter();
-            Size desiredSize = textFormatter.FormatText(text, availableSize.Width, this.AllowSplittingWords);
+            Size desiredSize = this.formatText(availableSize.Width);
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
                 ErrorReporter.ReportParadox("Illegal size " + desiredSize + " returned by textFormatter.FormatText");
@@ -246,13 +258,21 @@ namespace VisiPlacement
                     width = height = 0;
                 }
             }
-            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(desiredSize, availableSize, text));
+            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(desiredSize, availableSize, this.Text));
             specificLayout.Cropped = cropped;
 
             // diagnostics
             if (this.LoggingEnabled)
             {
-                System.Diagnostics.Debug.WriteLine("measured '" + text + "' in " + availableSize + "; desired " + desiredSize + "; requesting " + specificLayout.Size);
+                int maxLengthToLog = 100;
+                string textToLog;
+                if (this.Text.Length > maxLengthToLog)
+                    textToLog = this.Text.Substring(0, maxLengthToLog) + "...";
+                else
+                    textToLog = this.Text;
+                DateTime end = DateTime.Now;
+                TimeSpan duration = end.Subtract(start);
+                System.Diagnostics.Debug.WriteLine("spent " + duration + " to measure '" + textToLog + "' in " + availableSize + "; desired " + desiredSize + "; requesting " + specificLayout.Size);
             }
 
             return specificLayout;
@@ -315,48 +335,54 @@ namespace VisiPlacement
         {
             // when we set the size of the text item, it generates a change event that we don't want
             // So, here we make sure that it actually changed
-            if (this.Text != this.previousText)
+            if (this.Text != this.textItem_text)
             {
-                if (this.Get_ChangedSinceLastRender())
-                    return; // nothing new to report
-                bool mustRedraw = false;
-                if (!this.ScoreIfEmpty && (this.Text == "" || this.previousText == ""))
+                this.considerAnnouncingChanges();
+                this.textItem_text = this.Text;
+                this.layoutsByWidth = new Dictionary<double, Size>();
+            }
+        }
+
+        private void considerAnnouncingChanges()
+        {
+            if (this.Get_ChangedSinceLastRender())
+                return;
+            bool mustRedraw = false;
+            if (!this.ScoreIfEmpty && (this.Text == "" || this.textItem_text == ""))
+            {
+                mustRedraw = true;
+            }
+            else
+            {
+                View view = this.TextItem_Configurer.View;
+                Size currentSize = new Size(view.Width, view.Height);
+                Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize);
+                this.textItem_text = this.Text;
+                Specific_TextLayout layoutForNewText = this.ComputeDimensions(new Size(this.TextItem_Configurer.View.Width, this.TextItem_Configurer.View.Height));
+                if (!layoutForNewText.Cropped)
                 {
-                    mustRedraw = true;
+                    // The new text fits in the existing box, so this box doesn't need any more space
+                    // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
+                    mustRedraw = false;
                 }
                 else
                 {
-                    Specific_TextLayout layoutForNewText = this.ComputeDimensions(new Size(this.TextItem_Configurer.View.Width, this.TextItem_Configurer.View.Height), this.Text);
-                    if (!layoutForNewText.Cropped)
+                    if (!layoutForCurrentText.Cropped)
                     {
-                        // The new text fits in the existing box, so this box doesn't need any more space
-                        // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
-                        mustRedraw = false;
+                        // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
+                        mustRedraw = true;
                     }
                     else
                     {
-                        View view = this.TextItem_Configurer.View;
-                        Size currentSize = new Size(view.Width, view.Height);
-                        Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, this.previousText);
-                        if (!layoutForCurrentText.Cropped)
-                        {
-                            // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
-                            mustRedraw = true;
-                        }
-                        else
-                        {
-                            // If the text layout was cropped before and after then we might need to ask the engine for more space,
-                            // but it would annoy the user to keep redoing the layout and probably see no change
-                            // So, we don't bother asking for more space since we probably already had as much space as we could get anyway
-                            mustRedraw = false;
-                        }
+                        // If the text layout was cropped before and after then we might need to ask the engine for more space,
+                        // but it would annoy the user to keep redoing the layout and probably see no change
+                        // So, we don't bother asking for more space since we probably already had as much space as we could get anyway
+                        mustRedraw = false;
                     }
                 }
-
-                this.previousText = this.Text;
-
-                this.AnnounceChange(mustRedraw);
             }
+
+            this.AnnounceChange(mustRedraw);
         }
 
         public bool LoggingEnabled { get; set; }
@@ -374,12 +400,12 @@ namespace VisiPlacement
         static double numQueries = 0;
         private TextFormatter textFormatter;
         private LayoutScore bonusScore;
-        private String previousText;
+        private String textItem_text;
+        private Dictionary<double, Size> layoutsByWidth = new Dictionary<double, Size>();
 
     }
 
 
-    // the entire TextFormatter class should be unnecessary, but Silverlight doesn't seem to otherwise support synchronously computing the size of some text
     public class TextFormatter
     {
         private static Dictionary<double, TextFormatter> formattersByFontSize = new Dictionary<double, TextFormatter>();
@@ -395,6 +421,7 @@ namespace VisiPlacement
         }
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
+        // The returned size might have larger width than desiredWidth if needed for the text to fit
         public Size FormatText(String text, double desiredWidth, bool allowSplittingWords)
         {
             if (text == null || text == "")
@@ -418,6 +445,10 @@ namespace VisiPlacement
             if (text == null || text == "")
                 return new Size();
 
+            if (desiredWidth == 0 && allowSplittingWords)
+            {
+                return this.formatAsSingleColumn(text);
+            }
             Size singleLine_size = this.getBlockSize(text);
             if (singleLine_size.Width <= desiredWidth)
                 return singleLine_size;
@@ -435,6 +466,7 @@ namespace VisiPlacement
             {
                 components = text.Split(' ');
             }
+
             string currentLine_text = "";
             List<string> lines = new List<string>();
             double maxWidth = 0;
@@ -467,31 +499,35 @@ namespace VisiPlacement
                 }
                 else
                 {
-                    bool end = (i == components.Length - 1);
-                    if (end)
-                    {
-                        // go to the next line
-                        lines.Add(proposedLine);
-                        maxLineHeight = Math.Max(currentHeight, blockSize.Height);
-                        totalHeight += blockSize.Height;
-                        maxWidth = Math.Max(blockSize.Width, maxWidth);
-                    }
-                    else
-                    {
-                        // extend the current line
-                        currentHeight = blockSize.Height;
-                        currentWidth = blockSize.Width;
-                        currentLine_text = proposedLine;
-                    }
+                    // extend the current line
+                    currentHeight = blockSize.Height;
+                    currentWidth = blockSize.Width;
+                    currentLine_text = proposedLine;
                 }
             }
+            // include the last line
+            lines.Add(currentLine_text);
+            maxLineHeight = Math.Max(currentHeight, maxLineHeight);
+            totalHeight += currentHeight;
+            maxWidth = Math.Max(currentWidth, maxWidth);
 
 
-
-            string finalText = string.Join("\n", lines);
-            Label label = new Label();
+            //string finalText = string.Join("\n", lines);
             Size finalSize = new Size(maxWidth, maxLineHeight * lines.Count);
             return finalSize;
+        }
+
+        private Size formatAsSingleColumn(string text)
+        {
+            double maxWidth = 0;
+            double totalHeight = 0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                Size size = this.getBlockSize(text.Substring(i, 1));
+                maxWidth = Math.Max(size.Width, maxWidth);
+                totalHeight += size.Height;
+            }
+            return new Size(maxWidth, totalHeight);
         }
 
         private Size getBlockSize(String text)
