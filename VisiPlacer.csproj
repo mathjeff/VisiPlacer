@@ -38,6 +38,7 @@
     <Compile Include="Source\ButtonLayout.cs" />
     <Compile Include="Source\CheckBox.cs" />
     <Compile Include="Source\DurationEntryView.cs" />
+    <Compile Include="Source\EnableDebugging_Layout.cs" />
     <Compile Include="Source\ErrorReporter.cs" />
     <Compile Include="Source\GridLayout.cs" />
     <Compile Include="Source\GridView.cs" />

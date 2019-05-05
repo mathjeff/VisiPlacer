@@ -13,8 +13,8 @@ namespace VisiPlacement
         // That is, the ViewManager is what triggers the querying of layouts in the first place.
         public ViewManager(ContentView parentView, LayoutChoice_Set childLayout)
         {
-            this.childLayout = childLayout;
-            childLayout.AddParent(this);
+            this.callerHolder.AddParent(this);
+            this.SetLayout(childLayout);
 
             this.mainView = new ManageableView(this);
             this.SetParent(parentView);
@@ -34,15 +34,44 @@ namespace VisiPlacement
         }
         public void SetLayout(LayoutChoice_Set childLayout)
         {
-            if (this.childLayout != null)
-                this.childLayout.RemoveParent(this);
-            this.childLayout = childLayout;
-            if (this.childLayout != null)
+            this.callerHolder.SubLayout = childLayout;
+        }
+
+        public bool Debugging
+        {
+            get
             {
-                childLayout.AddParent(this);
-                this.DoLayout();
+                return this.debugLayout != null;
+            }
+            set
+            {
+                bool willDebug = value;
+                if (willDebug != this.Debugging)
+                {
+                    if (willDebug)
+                    {
+                        this.debugLayout = GridLayout.New(new BoundProperty_List(2), new BoundProperty_List(1), LayoutScore.Zero);
+                        this.debugLayout.AddLayout(new LayoutDuration_Layout(this));
+                        this.debugLayout.AddLayout(this.callerHolder);
+                    }
+                    else
+                    {
+                        this.debugLayout = null;
+                    }
+                    this.forceRelayout();
+                }
             }
         }
+
+        // The layout that we actually use as the root layout
+        // If debugging is enabled then we display some extra information
+        private LayoutChoice_Set GetSublayout()
+        {
+            if (this.debugLayout != null)
+                return this.debugLayout;
+            return this.callerHolder;
+        }
+
 
         public void Remove_VisualDescendents()
         {
@@ -96,7 +125,7 @@ namespace VisiPlacement
             query.MaxWidth = this.displaySize.Width;
             query.MaxHeight = this.displaySize.Height;
             DateTime getBestLayout_startDate = DateTime.Now;
-            this.specificLayout = this.childLayout.GetBestLayout(query);
+            this.specificLayout = this.GetSublayout().GetBestLayout(query);
             DateTime getBestLayout_endDate = DateTime.Now;
 
             // find the parent of each view after the relayout, to help us know which parents to disconnect
@@ -313,11 +342,13 @@ namespace VisiPlacement
         }
 
         private ContentView mainView;
-        private LayoutChoice_Set childLayout;
+        // the layout that we put the caller's layout into
+        private ContainerLayout callerHolder = new ContainerLayout();
         private Size displaySize;
         private SpecificLayout specificLayout;
         private bool even;
         private bool needsRelayout = true;
+        private GridLayout debugLayout;
     }
 
     // The ManageableView listens for changes in its dimensions and informs its ViewManager
