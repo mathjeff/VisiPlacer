@@ -30,9 +30,9 @@ namespace VisiPlacement
 
         private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false)
         {
-            button.Margin = new Thickness();
-            button.BorderRadius = 0;
-            button.TextColor = Color.LightGray;
+            //button.Margin = new Thickness();
+            //button.CornerRadius = 0;
+            //button.Padding = new Thickness();
 
             ButtonText_Configurer buttonConfigurer = new ButtonText_Configurer(button);
             LayoutChoice_Set sublayout;
@@ -93,6 +93,9 @@ namespace VisiPlacement
                 ContainerLayout spacingLayout = new ContainerLayout(spacing, outsideLayout, spacingThickness, LayoutScore.Zero, false);
 
                 this.SubLayout = spacingLayout;
+
+                button.TextColor = Color.LightGray;
+                //button.BackgroundColor = Color.Black;
             }
             else
             {
