@@ -20,7 +20,7 @@ namespace VisiPlacement
         public TextblockLayout(string text, bool allowCropping, double fontSize)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, fontSize, false, false);
+            this.Initialize(textBlock, fontSize, allowCropping, false);
         }
         public TextblockLayout(Label textBlock, bool allowCropping, double fontSize = -1)
         {
