@@ -66,11 +66,11 @@ namespace VisiPlacement
 
             // add a view behind the button to change its normal background color without changing its color when selected
             ContentView buttonBackground = new ContentView();
-            buttonBackground.BackgroundColor = Color.Black;
             ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, new Thickness(), LayoutScore.Zero, false);
 
             if (includeBevel)
             {
+                buttonBackground.BackgroundColor = Color.Black;
                 // add a small border, so that it's easy to see where the buttons end
                 Thickness innerBevelThickness = new Thickness(1);
                 ContentView insideBevel = new ContentView();
@@ -99,6 +99,7 @@ namespace VisiPlacement
             }
             else
             {
+                buttonBackground.BackgroundColor = Color.White;
                 button.TextColor = Color.Black;
                 button.BackgroundColor = Color.LightGray;
                 this.SubLayout = backgroundLayout;
