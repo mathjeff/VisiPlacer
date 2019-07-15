@@ -12,7 +12,12 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, LayoutChoice_Set layout)
         {
-            this.AddLayout(name, new ConstantValueProvider<StackEntry>(new StackEntry(layout)));
+            this.AddLayout(name, new StackEntry(layout));
+            return this;
+        }
+        public MenuLayoutBuilder AddLayout(string name, StackEntry entry)
+        {
+            this.AddLayout(name, new ConstantValueProvider<StackEntry>(entry));
             return this;
         }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
