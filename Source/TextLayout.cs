@@ -40,6 +40,15 @@ namespace VisiPlacement
                 return this.TextItem_Configurer.Text;
             }
         }
+        public int TextLength
+        {
+            get
+            {
+                if (this.Text == null)
+                    return 0;
+                return this.Text.Length;
+            }
+        }
         private String TextToFit
         {
             get
@@ -202,7 +211,7 @@ namespace VisiPlacement
                 }
                 firstIteration = false;
             }
-            System.Diagnostics.Debug.WriteLine("Spent " + numIterations + " iterations in Get_NonCropping_MinWidthLayout with query = " + query + " and text length = " + this.Text.Length);
+            System.Diagnostics.Debug.WriteLine("Spent " + numIterations + " iterations in Get_NonCropping_MinWidthLayout with query = " + query + " and text length = " + this.TextLength);
             if (!query.Accepts(bestAllowedDimensions))
                 return null;
             return bestAllowedDimensions;
