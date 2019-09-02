@@ -22,7 +22,7 @@ namespace VisiPlacement
         {
             List<LayoutChoice_Set> fontChoices = new List<LayoutChoice_Set>();
             int fontSize;
-            for (fontSize = 20; fontSize >= 12; fontSize -= 8)
+            for (fontSize = 20; fontSize >= 16; fontSize -= 4)
             {
                 if (messages.Count() > 1)
                 {
