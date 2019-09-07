@@ -41,7 +41,8 @@ namespace VisiPlacement
         {
             int numColumns = columnWidths.NumProperties;
             int numRows = rowHeights.NumProperties;
-            this.elements = new LayoutChoice_Set[numColumns, numRows];
+            this.wrappedChildren = new LayoutChoice_Set[numColumns, numRows];
+            this.givenChildren = new LayoutChoice_Set[numColumns, numRows];
             this.rowHeights = rowHeights;
             this.columnWidths = columnWidths;
             this.bonusScore = bonusScore;
@@ -51,18 +52,22 @@ namespace VisiPlacement
         // puts this layout in the designated part of the grid
         public virtual void PutLayout(LayoutChoice_Set layout, int xIndex, int yIndex)
         {
-            LayoutChoice_Set previousLayout = this.elements[xIndex, yIndex];
+            if (this.GetLayout(xIndex, yIndex) == layout)
+                return;
+            LayoutChoice_Set wrappedLayout = layout;
+            LayoutChoice_Set previousLayout = this.wrappedChildren[xIndex, yIndex];
             if (previousLayout != null)
                 previousLayout.RemoveParent(this);
 
-            if (layout != null)
+            if (wrappedLayout != null)
             {
-                if (!(layout is LayoutCache))
-                    layout = new LayoutCache(layout);
-                layout = new PixelatedLayout(layout, this.pixelSize);
-                layout.AddParent(this);
+                if (!(wrappedLayout is LayoutCache))
+                    wrappedLayout = new LayoutCache(wrappedLayout);
+                wrappedLayout = new PixelatedLayout(wrappedLayout, this.pixelSize);
+                wrappedLayout.AddParent(this);
             }
-            this.elements[xIndex, yIndex] = layout;
+            this.wrappedChildren[xIndex, yIndex] = wrappedLayout;
+            this.givenChildren[xIndex, yIndex] = layout;
             this.AnnounceChange(true);
         }
 
@@ -94,20 +99,20 @@ namespace VisiPlacement
         }
         public virtual LayoutChoice_Set GetLayout(int xIndex, int yIndex)
         {
-            return this.elements[xIndex, yIndex];
+            return this.givenChildren[xIndex, yIndex];
         }
         public virtual int NumRows
         {
             get
             {
-                return this.elements.GetLength(1);
+                return this.wrappedChildren.GetLength(1);
             }
         }
         public virtual int NumColumns
         {
             get
             {
-                return this.elements.GetLength(0);
+                return this.wrappedChildren.GetLength(0);
             }
         }
 
@@ -140,13 +145,13 @@ namespace VisiPlacement
                         setWidthBeforeHeight = false;
                 }
             }
-            SemiFixed_GridLayout layout = this.GetBestLayout(query.Clone(), new SemiFixed_GridLayout(this.elements, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
+            SemiFixed_GridLayout layout = this.GetBestLayout(query.Clone(), new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
             if (layout != null && !query.Accepts(layout))
             {
                 ErrorReporter.ReportParadox("error");
                 LayoutQuery debugQuery = query.Clone();
                 debugQuery.Debug = true;
-                SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.elements, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
+                SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
             }
             if (query.MaximizesScore())
             {
@@ -511,7 +516,7 @@ namespace VisiPlacement
                 for (rowNumber = 0; rowNumber < this.rowHeights.NumProperties; rowNumber++)
                 {
                     double currentWidth = 0;
-                    LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
+                    LayoutChoice_Set subLayout = this.wrappedChildren[columnNumber, rowNumber];
                     if (subLayout != null)
                     {
                         double columnWeight = layout.GetWidthFraction(columnNumber);
@@ -618,7 +623,7 @@ namespace VisiPlacement
                 for (columnNumber = 0; columnNumber < this.columnWidths.NumProperties; columnNumber++)
                 {
                     double currentHeight = 0;
-                    LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
+                    LayoutChoice_Set subLayout = this.wrappedChildren[columnNumber, rowNumber];
                     if (subLayout != null)
                     {
                         double rowWeight = layout.GetHeightFraction(rowNumber);
@@ -776,7 +781,7 @@ namespace VisiPlacement
                 for (columnNumber = layout.GetNumWidthProperties() - 1; columnNumber >= 0; columnNumber--)
                 {
                     double width = this.GetUsableColumnWidth(columnNumber, layout);
-                    LayoutChoice_Set currentLayout = this.elements[columnNumber, rowNumber];
+                    LayoutChoice_Set currentLayout = this.wrappedChildren[columnNumber, rowNumber];
                     if (currentLayout != null)
                     {
                         // ask the subview for the best layout that fits in these dimensions. Hopefully, it will generate a result that is no larger than needed
@@ -922,7 +927,10 @@ namespace VisiPlacement
 
 
 
-        private LayoutChoice_Set[,] elements;
+        // the children that we given to us by the caller
+        private LayoutChoice_Set[,] givenChildren;
+        // We add some extra wrapping around elements for caching and for snapping to gridlines. These are the wrapped layouts
+        private LayoutChoice_Set[,] wrappedChildren;
         private BoundProperty_List rowHeights;
         private BoundProperty_List columnWidths;
         private LayoutScore bonusScore;
