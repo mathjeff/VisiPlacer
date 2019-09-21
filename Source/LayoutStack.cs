@@ -11,8 +11,20 @@ namespace VisiPlacement
 {
     public class LayoutStack : ContainerLayout
     {
-        public LayoutStack()
+        public LayoutStack(bool addBackButton = false)
         {
+            this.addBackButton = addBackButton;
+            if (addBackButton)
+            {
+                Button backButton = new Button();
+                this.backButtonLayout = new ButtonLayout(backButton, "<-");
+                backButton.Pressed += BackButton_Pressed;
+            }
+        }
+
+        private void BackButton_Pressed(object sender, EventArgs e)
+        {
+            this.GoBack();
         }
 
         private void BackButton_Clicked(object sender, EventArgs e)
@@ -80,9 +92,18 @@ namespace VisiPlacement
         }
         private void setSublayout(LayoutChoice_Set layout)
         {
-            this.SubLayout = layout;
+            if (this.addBackButton)
+            {
+                this.SubLayout = new Vertical_GridLayout_Builder().AddLayout(layout).AddLayout(this.backButtonLayout).BuildAnyLayout();
+            }
+            else
+            {
+                this.SubLayout = layout;
+            }
         }
         private LinkedList<StackEntry> layouts = new LinkedList<StackEntry>();
+        private bool addBackButton;
+        private LayoutChoice_Set backButtonLayout;
     }
 
     public class StackEntry
