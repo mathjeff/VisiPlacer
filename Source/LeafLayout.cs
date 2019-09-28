@@ -71,7 +71,7 @@ namespace VisiPlacement
         public override void Remove_VisualDescendents()
         {
         }
-        public override IEnumerable<SpecificLayout> GetChildren()
+        public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
             return new LinkedList<SpecificLayout>();
         }

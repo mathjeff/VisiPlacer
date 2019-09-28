@@ -189,7 +189,7 @@ namespace VisiPlacement
         {
             Dictionary<View, SpecificLayout> parents = new Dictionary<View, SpecificLayout>();
             if (layout != null)
-                this.addAllParents(layout.GetChildren(), layout, parents);
+                this.addAllParents(layout.GetParticipatingChildren(), layout, parents);
             return parents;
         }
         private void addAllParents(IEnumerable<SpecificLayout> candidates, SpecificLayout parentView_layout, Dictionary<View, SpecificLayout> accumulator)
@@ -199,11 +199,11 @@ namespace VisiPlacement
                 if (childLayout.View != null)
                 {
                     accumulator[childLayout.View] = parentView_layout;
-                    this.addAllParents(childLayout.GetChildren(), childLayout, accumulator);
+                    this.addAllParents(childLayout.GetParticipatingChildren(), childLayout, accumulator);
                 }
                 else
                 {
-                    this.addAllParents(childLayout.GetChildren(), parentView_layout, accumulator);
+                    this.addAllParents(childLayout.GetParticipatingChildren(), parentView_layout, accumulator);
                 }
             }
         }

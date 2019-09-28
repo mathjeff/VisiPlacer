@@ -16,32 +16,33 @@ namespace VisiPlacement
             this.Initialize(button);
         }
 
-        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true, bool allowCropping = false)
+        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)
         {
             button.Text = content;
-            this.Initialize(button, fontSize, includeBevel, allowCropping);
+            this.Initialize(button, fontSize, includeBevel, allowCropping, scoreIfEmpty);
         }
 
 
         public static ButtonLayout WithoutBevel(Button button)
         {
-            return new ButtonLayout(button, button.Text, -1, false);
+            return new ButtonLayout(button, button.Text, -1, false, false, true);
         }
 
-        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false)
+        public static LayoutChoice_Set HideIfEmpty(ButtonLayout buttonLayout)
         {
-            //button.Margin = new Thickness();
-            //button.CornerRadius = 0;
-            //button.Padding = new Thickness();
-
+            return new LayoutUnion(buttonLayout, new ContainerLayout());
+        }
+        
+        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)
+        {
             ButtonText_Configurer buttonConfigurer = new ButtonText_Configurer(button);
             LayoutChoice_Set sublayout;
             if (fontSize > 0)
             {
                 if (allowCropping)
-                    sublayout = TextLayout.New_Croppable(new ButtonText_Configurer(button), fontSize);
+                    sublayout = TextLayout.New_Croppable(new ButtonText_Configurer(button), fontSize, scoreIfEmpty);
                 else
-                    sublayout = new TextLayout(new ButtonText_Configurer(button), fontSize);
+                    sublayout = new TextLayout(new ButtonText_Configurer(button), fontSize, scoreIfEmpty);
 
                 this.sublayoutOptions = new List<LayoutChoice_Set>() { sublayout };
             }
@@ -50,15 +51,15 @@ namespace VisiPlacement
                 this.sublayoutOptions = new List<LayoutChoice_Set>();
                 if (allowCropping)
                 {
-                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 30));
-                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 16));
-                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 12));
+                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 30, scoreIfEmpty));
+                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 16, scoreIfEmpty));
+                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 12, scoreIfEmpty));
                 }
                 else
                 {
-                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30));
-                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16));
-                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12));
+                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30, false, scoreIfEmpty));
+                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16, false, scoreIfEmpty));
+                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12, false, scoreIfEmpty));
                 }
                 LayoutUnion layoutUnion = new LayoutUnion(this.sublayoutOptions);
                 sublayout = layoutUnion;
@@ -107,7 +108,6 @@ namespace VisiPlacement
         }
 
         private List<LayoutChoice_Set> sublayoutOptions;
-
     }
 
     public class ButtonText_Configurer : TextItem_Configurer

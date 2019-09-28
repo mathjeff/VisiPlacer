@@ -85,7 +85,7 @@ namespace VisiPlacement
             return clone;
         }
 
-        public override IEnumerable<SpecificLayout> GetChildren()
+        public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
             return new LinkedList<SpecificLayout>();
         }

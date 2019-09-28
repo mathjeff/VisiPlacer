@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 // a LayoutUnion consists of a bunch of layouts to choose from and always selects the best sub-layout to use
+// Layout options later in the list will win ties against layout options earlier in the list
 namespace VisiPlacement
 {
     public class LayoutUnion : LayoutChoice_Set

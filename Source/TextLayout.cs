@@ -11,18 +11,18 @@ namespace VisiPlacement
     public class TextLayout : LayoutChoice_Set
     {
         // returns a TextLayout that still gets fractional points while cropped
-        public static LayoutChoice_Set New_Croppable(TextItem_Configurer textItem, double fontSize)
+        public static LayoutChoice_Set New_Croppable(TextItem_Configurer textItem, double fontSize, bool scoreIfEmpty = true)
         {
             // We make a ScrollLayout and ask it to do the size computations but to not actually put the result into a ScrollView
-            TextLayout textLayout = new TextLayout(textItem, fontSize, true);
+            TextLayout textLayout = new TextLayout(textItem, fontSize, true, scoreIfEmpty);
             return ScrollLayout.New(textLayout, null);
         }
 
-        public TextLayout(TextItem_Configurer textItem, double fontSize, bool allowSplittingWords = false)
+        public TextLayout(TextItem_Configurer textItem, double fontSize, bool allowSplittingWords = false, bool scoreIfEmpty = true)
         {
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
-            this.ScoreIfEmpty = true;
+            this.ScoreIfEmpty = scoreIfEmpty;
             this.textItem_text = this.TextItem_Configurer.Text;
             this.AllowSplittingWords = allowSplittingWords;
             textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
@@ -357,7 +357,7 @@ namespace VisiPlacement
             if (this.Get_ChangedSinceLastRender())
                 return;
             bool mustRedraw = false;
-            if (!this.ScoreIfEmpty && (this.Text == "" || this.textItem_text == ""))
+            if (!this.ScoreIfEmpty && (this.Text == "" || this.Text == null || this.textItem_text == "" || this.textItem_text == null))
             {
                 mustRedraw = true;
             }
@@ -370,9 +370,18 @@ namespace VisiPlacement
                 Specific_TextLayout layoutForNewText = this.ComputeDimensions(new Size(this.TextItem_Configurer.View.Width, this.TextItem_Configurer.View.Height));
                 if (!layoutForNewText.Cropped)
                 {
-                    // The new text fits in the existing box, so this box doesn't need any more space
-                    // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
-                    mustRedraw = false;
+                    if (!layoutForCurrentText.Cropped)
+                    {
+                        // The new text fits in the existing box, so this box doesn't need any more space
+                        // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
+                        mustRedraw = false;
+                    }
+                    else
+                    {
+                        // This layout suddenly no longer needs to be cropped. That might be something that the user cares about
+                        // This might allow us to increase the font size, for example
+                        mustRedraw = true;
+                    }
                 }
                 else
                 {

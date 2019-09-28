@@ -15,6 +15,7 @@ namespace VisiPlacement
             this.changedSinceLatestQuery = true;
             this.changedSinceLastRender = true;
             this.parents = new HashSet<LayoutChoice_Set>();
+            this.children = new HashSet<LayoutChoice_Set>();
 
             this.DebugId = nextDebugId;
             nextDebugId++;
@@ -23,7 +24,16 @@ namespace VisiPlacement
         {
             this.changedSinceLatestQuery = original.changedSinceLatestQuery;
             this.changedSinceLastRender = original.changedSinceLastRender;
-            this.parents = new HashSet<LayoutChoice_Set>(original.parents);
+            this.parents = new HashSet<LayoutChoice_Set>();
+            foreach (LayoutChoice_Set parent in original.parents)
+            {
+                this.AddParent(parent);
+            }
+            this.children = new HashSet<LayoutChoice_Set>();
+            foreach (LayoutChoice_Set child in original.children)
+            {
+                child.AddParent(this);
+            }
         }
 
         // asks for the best dimensions that this set allows
@@ -41,7 +51,6 @@ namespace VisiPlacement
                     this.GetBestLayout(query);
                 }
             }
-            this.Reset_ChangeAnnouncement();
 
             int numMatches;
             //if (query.Debug)
@@ -86,10 +95,12 @@ namespace VisiPlacement
         public void AddParent(LayoutChoice_Set parent)
         {
             this.parents.Add(parent);
+            parent.children.Add(this);
         }
         public void RemoveParent(LayoutChoice_Set parent)
         {
             this.parents.Remove(parent);
+            parent.children.Remove(this);
         }
 
         // Call this when the layout changes and can no longer be cached
@@ -110,8 +121,15 @@ namespace VisiPlacement
 
         public void Reset_ChangeAnnouncement()
         {
-            this.changedSinceLatestQuery = false;
-            this.changedSinceLastRender = false;
+            if (this.changedSinceLatestQuery || this.changedSinceLatestQuery)
+            {
+                this.changedSinceLatestQuery = false;
+                this.changedSinceLastRender = false;
+                foreach (LayoutChoice_Set child in this.children)
+                {
+                    child.Reset_ChangeAnnouncement();
+                }
+            }
         }
 
         // override this in any layout that caches anything
@@ -130,5 +148,6 @@ namespace VisiPlacement
         private bool changedSinceLastRender; // for caching
 
         private HashSet<LayoutChoice_Set> parents;
+        private HashSet<LayoutChoice_Set> children;
     }
 }

@@ -70,13 +70,13 @@ namespace VisiPlacement
         {
             List<SpecificLayout> layouts = new List<SpecificLayout>();
             layouts.Add(this);
-            foreach (SpecificLayout child in this.GetChildren())
+            foreach (SpecificLayout child in this.GetParticipatingChildren())
             {
                 layouts.AddRange(child.GetDescendents());
             }
             return layouts;
         }
-        public abstract IEnumerable<SpecificLayout> GetChildren();
+        public abstract IEnumerable<SpecificLayout> GetParticipatingChildren();
         // Sets the general layout that created this specific layout
         public void Set_SourceParent(LayoutChoice_Set parent)
         {

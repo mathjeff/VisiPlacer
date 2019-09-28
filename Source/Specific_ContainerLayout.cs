@@ -163,7 +163,7 @@ namespace VisiPlacement
             }
         }
 
-        public override IEnumerable<SpecificLayout> GetChildren()
+        public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
             LinkedList<SpecificLayout> children = new LinkedList<SpecificLayout>();
             if (this.subLayout != null)
