@@ -44,7 +44,6 @@ namespace VisiPlacement
         {
             List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
             LayoutCache sublayoutCache = LayoutCache.For(subLayout);
-            subLayouts.Add(sublayoutCache);
             double pixelSize = 1;
             subLayouts.Add(
                 new ScoreShifted_Layout(
@@ -56,6 +55,7 @@ namespace VisiPlacement
                     LayoutScore.Get_UnCentered_LayoutScore(1)
                 )
             );
+            subLayouts.Add(sublayoutCache);
             this.Set_LayoutChoices(subLayouts);
         }
     }
