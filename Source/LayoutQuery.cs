@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace VisiPlacement
 {
+    [System.Diagnostics.DebuggerDisplay("{ToString()}")]
     public abstract class LayoutQuery
     {
         static int nextID;
@@ -199,6 +200,11 @@ namespace VisiPlacement
             if (query1.MaximizesScore() != query2.MaximizesScore())
                 return false;
             return true;
+        }
+
+        public override string ToString()
+        {
+            return this.GetType().Name + ": (" + this.MaxWidth + ", " + this.MaxHeight + ", " + this.minScore + ")";
         }
         private double maxWidth, maxHeight;
         private LayoutScore minScore;

@@ -6,6 +6,7 @@
 // The SpecificLayout is the precomputed version that is the result of these calucations and knows where to put the child views.
 namespace VisiPlacement
 {
+    [System.Diagnostics.DebuggerDisplay("{ToString()}")]
     public abstract class LayoutChoice_Set
     {
         static int nextDebugId = 0;

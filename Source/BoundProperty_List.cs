@@ -282,6 +282,13 @@ namespace VisiPlacement
         {
             return this.indicesByGroup[index];
         }
+        public List<double> Values
+        {
+            get
+            {
+                return new List<double>(this.values);
+            }
+        }
         public override string ToString()
         {
             string result = "(";

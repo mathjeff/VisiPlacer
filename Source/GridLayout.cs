@@ -1261,6 +1261,11 @@ namespace VisiPlacement
                 return this.rowHeights.GetTotalValue();
             }
         }
+
+        public override String ToString()
+        {
+            return "SemiFixed_GridLayout: (" + String.Join(",", this.columnWidths.Values) + ") x (" + String.Join(",", this.rowHeights.Values) + ")";
+        }
         public void InvalidateScore()
         {
             this.SetScore(null);
@@ -1575,12 +1580,6 @@ namespace VisiPlacement
             }
             return results;
         }
-
-        public override string ToString()
-        {
-            return "SemiFixed_GridLayout (" + this.columnWidths + ", " + this.rowHeights + ", " + this.score + ")";
-        }
-
 
         LayoutChoice_Set[,] elements;
         int nextDimensionToSet;
