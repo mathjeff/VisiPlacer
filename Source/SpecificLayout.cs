@@ -46,6 +46,8 @@ namespace VisiPlacement
         }
         protected virtual bool isScoreAtLeast(LayoutQuery query)
         {
+            if (query.MinScore.Equals(LayoutScore.Minimum))
+                return true;
             return this.Score.CompareTo(query.MinScore) >= 0;
         }
         public abstract View DoLayout(Size bounds);
