@@ -9,23 +9,23 @@ namespace VisiPlacement
         {
             this.Initialize();
         }
-        public TitledControl(string startingTitle)
+        public TitledControl(string startingTitle, double titleFontSize = -1)
         {
-            this.Initialize();
+            this.Initialize(titleFontSize);
             this.titleBlock.Text = startingTitle;
         }
-        public TitledControl(string startingTitle, LayoutChoice_Set content)
-            : this(startingTitle)
+        public TitledControl(string startingTitle, LayoutChoice_Set content, double titleFontSize = -1)
+            : this(startingTitle, titleFontSize)
         {
             this.SetContent(content);
         }
 
-        private void Initialize()
+        private void Initialize(double titleFontSize = -1)
         {
             this.titleBlock = new Label();
             this.titleBlock.HorizontalTextAlignment = TextAlignment.Center;
             this.gridLayout = GridLayout.New(new BoundProperty_List(2), new BoundProperty_List(1), LayoutScore.Zero);
-            this.gridLayout.AddLayout(new TextblockLayout(this.titleBlock));
+            this.gridLayout.AddLayout(new TextblockLayout(this.titleBlock, titleFontSize));
             base.LayoutToManage = gridLayout;
         }
         public void SetTitle(string newTitle)
