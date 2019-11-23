@@ -35,6 +35,7 @@ namespace VisiPlacement
         
         private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)
         {
+            bool isButtonColorSet = button.BackgroundColor.A > 0;
             ButtonText_Configurer buttonConfigurer = new ButtonText_Configurer(button);
             LayoutChoice_Set sublayout;
             if (fontSize > 0)
@@ -96,13 +97,15 @@ namespace VisiPlacement
                 this.SubLayout = spacingLayout;
 
                 button.TextColor = Color.LightGray;
-                //button.BackgroundColor = Color.Black;
             }
             else
             {
-                buttonBackground.BackgroundColor = Color.White;
-                button.TextColor = Color.Black;
-                button.BackgroundColor = Color.LightGray;
+                if (!isButtonColorSet)
+                {
+                    buttonBackground.BackgroundColor = Color.White;
+                    button.TextColor = Color.Black;
+                    button.BackgroundColor = Color.LightGray;
+                }
                 this.SubLayout = backgroundLayout;
             }
         }

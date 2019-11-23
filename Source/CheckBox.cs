@@ -10,9 +10,15 @@ namespace VisiPlacement
     public class CheckBox : SingleSelect
     {
         public CheckBox(string falseValue, string trueValue)
-            : base(new List<String>() { falseValue, trueValue})
+            : this(falseValue, Color.FromRgba(0, 0, 0, 0), trueValue, Color.FromRgba(0, 0, 0, 0))
         {
         }
+
+        public CheckBox(string falseValue, Color falseBackgroundColor, string trueValue, Color trueBackgroundColor)
+            : base(new List<SingleSelect_Choice>() { new SingleSelect_Choice(falseValue, falseBackgroundColor), new SingleSelect_Choice(trueValue, trueBackgroundColor) })
+        {
+        }
+
 
         public bool Checked
         {
