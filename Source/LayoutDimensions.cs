@@ -1,4 +1,6 @@
-﻿namespace VisiPlacement
+﻿using System.Drawing;
+
+namespace VisiPlacement
 {
     public class LayoutDimensions
     {

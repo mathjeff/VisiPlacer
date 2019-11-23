@@ -7,14 +7,16 @@ namespace VisiPlacement
 {
     public class Specific_TextLayout : SpecificLayout
     {
-        public Specific_TextLayout(TextItem_Configurer textItem, double width, double height, double fontSize, LayoutScore score)
+        public Specific_TextLayout(TextItem_Configurer textItem, double width, double height, double fontSize, LayoutScore score, String text, Size desiredSize)
         {
             this.textItem = textItem;
             this.width = width;
             this.height = height;
             this.fontSize = fontSize;
             this.score = score;
-            this.TextForDebugging = textItem.Text;
+            this.TextForDebugging = text;
+            this.DesiredSizeForDebugging = desiredSize;
+
         }
         // sets the properties on the textblock as required by this layout
         public void PrepareTextview()
@@ -51,6 +53,7 @@ namespace VisiPlacement
         }
         public bool Cropped { get; set; }
         public String TextForDebugging { get; set; }
+        public Size DesiredSizeForDebugging { get; set; }
 
         public override View DoLayout(Size displaySize)
         {
@@ -80,8 +83,7 @@ namespace VisiPlacement
 
         public override SpecificLayout Clone()
         {
-            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score);
-            clone.TextForDebugging = this.TextForDebugging;
+            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score, this.TextForDebugging, this.DesiredSizeForDebugging);
             return clone;
         }
 

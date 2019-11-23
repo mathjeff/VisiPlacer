@@ -78,7 +78,7 @@ namespace VisiPlacement
                 System.Diagnostics.Debug.WriteLine("num text measurements = " + TextLayout.NumMeasures);
             }
             DateTime startTime = DateTime.Now;
-            this.textItem_text = this.TextItem_Configurer.Text;
+            this.TextItem_Text = this.TextItem_Configurer.Text;
             //ErrorReporter.ReportParadox("avg num computations per query = " + (double)numComputations / (double)numQueries);
             numQueries++;
 
@@ -267,7 +267,7 @@ namespace VisiPlacement
                     width = height = 0;
                 }
             }
-            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(desiredSize, availableSize, this.Text));
+            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(desiredSize, availableSize, this.TextToFit), this.textItem_text, desiredSize);
             specificLayout.Cropped = cropped;
 
             // diagnostics
@@ -347,13 +347,14 @@ namespace VisiPlacement
             if (this.Text != this.textItem_text)
             {
                 this.considerAnnouncingChanges();
-                this.textItem_text = this.Text;
-                this.layoutsByWidth = new Dictionary<double, Size>();
+                this.TextItem_Text = this.Text;
             }
         }
 
         private void considerAnnouncingChanges()
         {
+            if (this.LoggingEnabled)
+                System.Diagnostics.Debug.WriteLine("considerAnnouncingChanges textItem_text = " + this.textItem_text + " Text = " + this.Text);
             if (this.Get_ChangedSinceLastRender())
                 return;
             bool mustRedraw = false;
@@ -366,8 +367,9 @@ namespace VisiPlacement
                 View view = this.TextItem_Configurer.View;
                 Size currentSize = new Size(view.Width, view.Height);
                 Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize);
-                this.textItem_text = this.Text;
-                Specific_TextLayout layoutForNewText = this.ComputeDimensions(new Size(this.TextItem_Configurer.View.Width, this.TextItem_Configurer.View.Height));
+                this.TextItem_Text = this.Text;
+                this.layoutsByWidth = new Dictionary<double, Size>();
+                Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize);
                 if (!layoutForNewText.Cropped)
                 {
                     if (!layoutForCurrentText.Cropped)
@@ -381,6 +383,8 @@ namespace VisiPlacement
                         // This layout suddenly no longer needs to be cropped. That might be something that the user cares about
                         // This might allow us to increase the font size, for example
                         mustRedraw = true;
+                        if (this.LoggingEnabled)
+                            System.Diagnostics.Debug.WriteLine("TextLayout needs more space: no longer needs to be cropped");
                     }
                 }
                 else
@@ -389,15 +393,25 @@ namespace VisiPlacement
                     {
                         // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
                         mustRedraw = true;
+                        if (this.LoggingEnabled)
+                            System.Diagnostics.Debug.WriteLine("TextLayout needs more space: no longer has enough space");
                     }
                     else
                     {
+                        if (this.LoggingEnabled)
+                            System.Diagnostics.Debug.WriteLine("TextLayout was cropped and still cropped");
                         // If the text layout was cropped before and after then we might need to ask the engine for more space,
                         // but it would annoy the user to keep redoing the layout and probably see no change
                         // So, we don't bother asking for more space since we probably already had as much space as we could get anyway
                         mustRedraw = false;
                     }
                 }
+                if (this.LoggingEnabled)
+                {
+                    System.Diagnostics.Debug.WriteLine("TextLayout calculating: Have size: " + currentSize + ". Old text: " + layoutForCurrentText.TextForDebugging +
+                        ". Old target: " + layoutForCurrentText.DesiredSizeForDebugging + ". New text: " + layoutForNewText.TextForDebugging + ". New target: " + layoutForNewText.DesiredSizeForDebugging);
+                }
+
             }
 
             this.AnnounceChange(mustRedraw);
@@ -411,6 +425,18 @@ namespace VisiPlacement
                 if (numQueries < 0)
                     return -1;
                 return numComputations / numQueries;
+            }
+        }
+
+        private String TextItem_Text
+        {
+            set
+            {
+                if (this.textItem_text != value)
+                {
+                    this.textItem_text = value;
+                    this.layoutsByWidth = new Dictionary<double, Size>();
+                }
             }
         }
 

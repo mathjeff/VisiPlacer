@@ -7,24 +7,14 @@ using Xamarin.Forms;
 // a ScoreShifted_LayoutSet is a LayoutChoice_Set that adds a specified score to its layout
 namespace VisiPlacement
 {
-    public class ScoreShifted_Layout : LayoutChoice_Set
+    public class ScoreShifted_Layout : ContainerLayout
     {
         public ScoreShifted_Layout(LayoutChoice_Set layoutOptions, LayoutScore scoreToAdd)
         {
-            this.layoutOptions = layoutOptions;
-            this.scoreToAdd = scoreToAdd;
-        }
-        public override SpecificLayout GetBestLayout(LayoutQuery query)
-        {
-            LayoutQuery subQuery = query.Clone();
-            subQuery.MinScore = query.MinScore.Minus(this.scoreToAdd);
-            SpecificLayout result = this.layoutOptions.GetBestLayout(subQuery);
-            if (result != null)
-                result = new Specific_ContainerLayout(null, result.Size, result.Score.Plus(this.scoreToAdd), result, new Thickness(0));
-            return this.prepareLayoutForQuery(result, query);
+            this.SubLayout = layoutOptions;
+            this.BonusScore = scoreToAdd;
         }
 
-        private LayoutChoice_Set layoutOptions;
         private LayoutScore scoreToAdd;
     }
 }
