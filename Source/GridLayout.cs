@@ -1345,6 +1345,13 @@ namespace VisiPlacement
         // TODO this should probably save this.Score in cases where it computes the score - we just have to worry about setting this.subLayouts correctly too
         protected override bool isScoreAtLeast(LayoutQuery query)
         {
+            if (query.MinScore.Equals(LayoutScore.Minimum))
+            {
+                // It is required to always be true that our score is at least the minimum possible score
+                // Also, the minimum possible score uses negative infinity as a component,
+                // so if several of our sublayouts report the minimum score as their own score, then it would introduce some errors when we try to add and subtract them
+                return true;
+            }
             LayoutScore targetScore = query.MinScore;
             if (this.score != null)
                 return (this.score.CompareTo(targetScore) >= 0);
@@ -1373,8 +1380,16 @@ namespace VisiPlacement
                 LayoutScore averageRequiredExtraScore = requiredExtraScore.Times(1.0 / unscoredLayouts.Count);
                 List<LayoutAndSize> nextUnscoredLayouts = new List<LayoutAndSize>();
 
-                foreach (LayoutAndSize layoutAndSize in unscoredLayouts)
+                for (int i = 0; i < unscoredLayouts.Count; i++)
                 {
+                    LayoutAndSize layoutAndSize = unscoredLayouts[i];
+                    if (nextUnscoredLayouts.Count == 0 && i == unscoredLayouts.Count - 1 && i > 0)
+                    {
+                        // If all other layouts were able to reach the target successfully, then we can recompute a new target score before running the last query
+                        nextUnscoredLayouts.Add(layoutAndSize);
+                        break;
+                    }
+
                     MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery();
                     subQuery.MaxWidth = layoutAndSize.Size.Width;
                     subQuery.MaxHeight = layoutAndSize.Size.Height;
