@@ -43,6 +43,21 @@ namespace VisiPlacement
                 return new LayoutScore(-10000, 1);
             }
         }
+        public static LayoutScore Min(LayoutScore a, LayoutScore b)
+        {
+            if (a.CompareTo(b) < 0)
+                return a;
+            else
+                return b;
+        }
+        public static LayoutScore Max(LayoutScore a, LayoutScore b)
+        {
+            if (a.CompareTo(b) > 0)
+                return a;
+            else
+                return b;
+        }
+
         // this score indicates that some items are not centered
         public static LayoutScore Get_UnCentered_LayoutScore(double numItems)
         {

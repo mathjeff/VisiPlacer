@@ -153,6 +153,15 @@ namespace VisiPlacement
                 debugQuery.Debug = true;
                 SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
             }
+            if (query.MinScore.Equals(LayoutScore.Minimum))
+            {
+                if (layout == null)
+                {
+                    ErrorReporter.ReportParadox("Layout " + this + " returned illegal null layout for query " + query);
+                    return this.GetBestLayout(query);
+                }
+            }
+
             if (query.MaximizesScore())
             {
                 SemiFixed_GridLayout shrunken = null;
@@ -481,6 +490,7 @@ namespace VisiPlacement
         // I need to revamp the GetBestLayout function so that it processes constraints in different orders based on the query
         private SemiFixed_GridLayout GetBestLayout(LayoutQuery query, SemiFixed_GridLayout semiFixedLayout)
         {
+            bool isMinScore = query.MinScore.Equals(LayoutScore.Minimum);
             SemiFixed_GridLayout bestLayout = null;
             IEnumerable<SemiFixed_GridLayout> layouts;
             layouts = this.GetLayoutsToConsider(query, semiFixedLayout);
@@ -491,6 +501,22 @@ namespace VisiPlacement
                     bestLayout = layout;
                 }
             }
+
+            if (isMinScore)
+            {
+                if (bestLayout == null)
+                {
+                    ErrorReporter.ReportParadox("Layout " + this + " returned illegal null layout for query " + query);
+                    List<SemiFixed_GridLayout> layoutList = new List<SemiFixed_GridLayout>(layouts);
+                    System.Diagnostics.Debug.WriteLine("Identified these " + layoutList.Count + " layouts: " + layoutList);
+                    foreach (SemiFixed_GridLayout layout in layouts)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Accepts " + layout + "? " + query.Accepts(layout));
+                    }
+                    this.GetBestLayout(query);
+                }
+            }
+
             return bestLayout;
         }
 
@@ -1276,7 +1302,7 @@ namespace VisiPlacement
             get
             {
                 if (this.score == null)
-                    this.SetScore(this.ComputeScore());
+                    this.ComputeScore();
                 return this.score;
             }
         }
@@ -1311,6 +1337,7 @@ namespace VisiPlacement
                     }
                 }
             }
+            this.SetScore(totalScore);
             return totalScore;
         }
 
@@ -1318,9 +1345,9 @@ namespace VisiPlacement
         // TODO this should probably save this.Score in cases where it computes the score - we just have to worry about setting this.subLayouts correctly too
         protected override bool isScoreAtLeast(LayoutQuery query)
         {
-            LayoutScore score = query.MinScore;
+            LayoutScore targetScore = query.MinScore;
             if (this.score != null)
-                return (this.score.CompareTo(score) >= 0);
+                return (this.score.CompareTo(targetScore) >= 0);
             // Make a list of how much space we're giving to each sublayout
             List<LayoutAndSize> unscoredLayouts = new List<LayoutAndSize>();
             int rowNumber, columnNumber;
@@ -1338,15 +1365,10 @@ namespace VisiPlacement
             }
             // look for any sublayouts that can increase the score by at least the required average amount
             LayoutScore currentScore = this.bonusScore;
-            bool sufficient = false;
-            while (true)
+            bool seemsSufficient = true;
+            while (unscoredLayouts.Count > 0)
             {
-                LayoutScore requiredExtraScore = score.Minus(currentScore);
-                if (unscoredLayouts.Count <= 0)
-                {
-                    sufficient = (requiredExtraScore.CompareTo(LayoutScore.Zero) <= 0);
-                    break;
-                }
+                LayoutScore requiredExtraScore = targetScore.Minus(currentScore);
 
                 LayoutScore averageRequiredExtraScore = requiredExtraScore.Times(1.0 / unscoredLayouts.Count);
                 List<LayoutAndSize> nextUnscoredLayouts = new List<LayoutAndSize>();
@@ -1356,7 +1378,8 @@ namespace VisiPlacement
                     MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery();
                     subQuery.MaxWidth = layoutAndSize.Size.Width;
                     subQuery.MaxHeight = layoutAndSize.Size.Height;
-                    subQuery.MinScore = averageRequiredExtraScore;
+                    // loosen the score requirements slightly in case of rounding error
+                    subQuery.MinScore = LayoutScore.Min(averageRequiredExtraScore.Times(0.9999), averageRequiredExtraScore.Times(1.0001));
                     SpecificLayout result = layoutAndSize.Layout.GetBestLayout(subQuery);
                     if (result != null)
                         currentScore = currentScore.Plus(result.Score);
@@ -1367,19 +1390,24 @@ namespace VisiPlacement
                 if (nextUnscoredLayouts.Count >= unscoredLayouts.Count)
                 {
                     // no sublayout could make at least an average increase, therefore we can't increase the total up to the target
-                    sufficient = false;
+                    seemsSufficient = false;
                     break;
                 }
                 unscoredLayouts = nextUnscoredLayouts;
             }
             if (query.Debug)
             {
-                bool rightAnswer = (this.Score.CompareTo(score) >= 0);
-                if (rightAnswer != sufficient)
+                bool rightAnswer = (this.Score.CompareTo(targetScore) >= 0);
+                if (rightAnswer != seemsSufficient)
                     ErrorReporter.ReportParadox("incorrect answer from SemiFixed_GridLayout.isScoreAtLeast");
                 return rightAnswer;
             }
-            return sufficient;
+            if (!seemsSufficient)
+                return false;
+            // If our above calculations indicated that our score is sufficient, then we've computed a score for each child layout, which is essentially all of the work required to compute our score
+            // Nowever, we may have added the results together in a non-canonical order and may still encounter rounding errors
+            // Now we recalculate the score in the standard order and compare that to our target
+            return this.Score.CompareTo(targetScore) >= 0;
         }
         public int NumForcedDimensions
         {
