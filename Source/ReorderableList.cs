@@ -10,6 +10,9 @@ namespace VisiPlacement
     // A ReorderableList is a list that can be reordered
     public class ReorderableList<T> : ContainerLayout
     {
+        public event ReorderedItems Reordered;
+        public delegate void ReorderedItems(List<T> choices);
+
         public ReorderableList(IEnumerable<T> items, LayoutProvider<T> layoutProvider)
         {
             // get the items and layouts
@@ -114,6 +117,9 @@ namespace VisiPlacement
 
             // update positions in grid
             this.putLayouts();
+
+            if (this.Reordered != null)
+                this.Reordered.Invoke(this.Items);
         }
 
         public List<T> Items { get; set; }
