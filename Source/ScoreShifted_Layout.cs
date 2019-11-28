@@ -14,7 +14,5 @@ namespace VisiPlacement
             this.SubLayout = layoutOptions;
             this.BonusScore = scoreToAdd;
         }
-
-        private LayoutScore scoreToAdd;
     }
 }
