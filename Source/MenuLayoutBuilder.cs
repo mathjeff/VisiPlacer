@@ -12,12 +12,12 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, LayoutChoice_Set layout)
         {
-            this.AddLayout(name, new StackEntry(layout));
+            this.AddLayout(new StackEntry(layout, name, null));
             return this;
         }
-        public MenuLayoutBuilder AddLayout(string name, StackEntry entry)
+        public MenuLayoutBuilder AddLayout(StackEntry entry)
         {
-            this.AddLayout(name, new ConstantValueProvider<StackEntry>(entry));
+            this.AddLayout(entry.Name, new ConstantValueProvider<StackEntry>(entry));
             return this;
         }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
@@ -61,7 +61,7 @@ namespace VisiPlacement
                 LayoutChoice_Set sourceLayout = this.buttonLayouts_by_button[button];
                 StackEntry destination = this.buttonDestinations[sourceLayout].Get();
                 // update the view
-                this.layoutStack.AddEntry(destination);
+                this.layoutStack.AddLayout(destination);
             }
         }
 

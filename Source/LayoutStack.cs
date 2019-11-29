@@ -11,44 +11,29 @@ namespace VisiPlacement
 {
     public class LayoutStack : ContainerLayout
     {
-        public LayoutStack(bool addBackButton = false)
+        public LayoutStack()
         {
-            this.addBackButton = addBackButton;
-            if (addBackButton)
-            {
-                Button backButton = new Button();
-                this.backButtonLayout = new ButtonLayout(backButton, "<-");
-                backButton.Pressed += BackButton_Pressed;
-            }
+            BoundProperty_List rowHeights = new BoundProperty_List(3);
+            rowHeights.BindIndices(0, 1);
+            rowHeights.BindIndices(0, 2);
+            rowHeights.SetPropertyScale(0, 28);
+            rowHeights.SetPropertyScale(1, 1); // extra unused space for visual separation
+            rowHeights.SetPropertyScale(2, 3);
+            this.mainGrid = GridLayout.New(rowHeights, new BoundProperty_List(1), LayoutScore.Zero);
+            this.SubLayout = this.mainGrid;
         }
 
-        private void BackButton_Pressed(object sender, EventArgs e)
+        public void AddLayout(LayoutChoice_Set newLayout, String name)
         {
-            this.GoBack();
+            this.AddLayout(new StackEntry(newLayout, name, null));
         }
-
-        private void BackButton_Clicked(object sender, EventArgs e)
+        public void AddLayout(LayoutChoice_Set newLayout, String name, OnBack_Listener listener)
         {
-            this.GoBack();
+            this.AddLayout(new StackEntry(newLayout, name, listener));
         }
-
-        public void AddLayout(LayoutChoice_Set newLayout)
+        public void AddLayout(StackEntry entry)
         {
-            StackEntry entry = new StackEntry();
-            entry.layout = newLayout;
-            this.layouts.AddLast(entry);
-            this.updateSubLayout();
-        }
-        public void AddLayout(LayoutChoice_Set newLayout, OnBack_Listener listener)
-        {
-            StackEntry entry = new StackEntry();
-            entry.layout = newLayout;
-            entry.listeners.AddLast(listener);
-            this.AddEntry(entry);
-        }
-        public void AddEntry(StackEntry entry)
-        {
-            this.layouts.AddLast(entry);
+            this.layoutEntries.Add(entry);
             this.updateSubLayout();
         }
         public bool GoBack()
@@ -57,13 +42,15 @@ namespace VisiPlacement
         }
         public bool RemoveLayout()
         {
-            if (this.layouts.Count > 1)
+            if (this.layoutEntries.Count > 1)
             {
-                StackEntry entry = this.layouts.Last();
-                this.layouts.RemoveLast();
-                foreach (OnBack_Listener listener in entry.listeners)
+                StackEntry entry = this.layoutEntries.Last();
+                this.layoutEntries.RemoveAt(this.layoutEntries.Count - 1);
+                this.backButton_layouts.RemoveAt(this.backButton_layouts.Count - 1);
+                this.buttons.RemoveAt(this.buttons.Count - 1);
+                foreach (OnBack_Listener listener in entry.Listeners)
                 {
-                    listener.OnBack(entry.layout);
+                    listener.OnBack(entry.Layout);
                 }
                 this.updateSubLayout();
                 return true;
@@ -72,18 +59,18 @@ namespace VisiPlacement
         }
         public bool Contains(LayoutChoice_Set layout)
         {
-            foreach (StackEntry entry in this.layouts)
+            foreach (StackEntry entry in this.layoutEntries)
             {
-                if (entry.layout == layout)
+                if (entry.Layout == layout)
                     return true;
             }
             return false;
         }
         private void updateSubLayout()
         {
-            if (this.layouts.Count > 0)
+            if (this.layoutEntries.Count > 0)
             {
-                this.setSublayout(this.layouts.Last().layout);
+                this.setSublayout(this.layoutEntries.Last().Layout);
             }
             else
             {
@@ -92,38 +79,86 @@ namespace VisiPlacement
         }
         private void setSublayout(LayoutChoice_Set layout)
         {
-            if (this.addBackButton)
+            if (this.layoutEntries.Count > 1)
             {
-                this.SubLayout = new Vertical_GridLayout_Builder().AddLayout(layout).AddLayout(this.backButtonLayout).BuildAnyLayout();
+                this.mainGrid.PutLayout(layout, 0, 0);
+                this.mainGrid.PutLayout(this.backButtons(this.layoutEntries), 0, 2);
+                this.SubLayout = this.mainGrid;
             }
             else
             {
                 this.SubLayout = layout;
             }
         }
-        private LinkedList<StackEntry> layouts = new LinkedList<StackEntry>();
-        private bool addBackButton;
-        private LayoutChoice_Set backButtonLayout;
+        private LayoutChoice_Set backButtons(List<StackEntry> layouts)
+        {
+            Horizontal_GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            Horizontal_GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            if (layouts.Count >= 3)
+            {
+                int oldestButton_index = layouts.Count - 3;
+                abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(oldestButton_index, layouts[oldestButton_index].Name));
+            }
+
+            for (int i = 0; i < layouts.Count - 1; i++)
+            {
+                StackEntry entry = layouts[i];
+                ButtonLayout nameLayout = this.JumpBack_ButtonLayout(i, entry.Name);
+                fullBuilder.AddLayout(nameLayout);
+                if (i == layouts.Count - 2)
+                    abbreviatedBuilder.AddLayout(nameLayout);
+            }
+            return new LayoutUnion(abbreviatedBuilder.BuildAnyLayout(), fullBuilder.BuildAnyLayout());
+        }
+        private ButtonLayout JumpBack_ButtonLayout(int toIndex, string text)
+        {
+            if (toIndex >= this.backButton_layouts.Count)
+            {
+                Button button = new Button();
+                button.Text = text;
+                button.Clicked += Button_Clicked;
+                this.buttons.Add(button);
+                this.backButton_layouts.Add(new ButtonLayout(button));
+            }
+            return this.backButton_layouts[toIndex];
+        }
+
+        private void Button_Clicked(object sender, EventArgs e)
+        {
+            Button button = sender as Button;
+            if (button == null)
+                return;
+            int buttonIndex = this.buttons.IndexOf(button);
+            if (buttonIndex < 0)
+                return;
+            this.goBackTo(buttonIndex);
+        }
+
+        private void goBackTo(int index)
+        {
+            while (this.layoutEntries.Count > index + 1)
+                this.GoBack();
+        }
+
+        private List<StackEntry> layoutEntries = new List<StackEntry>();
+        private List<Button> buttons = new List<Button>();
+        private List<ButtonLayout> backButton_layouts = new List<ButtonLayout>();
+        private GridLayout mainGrid;
     }
 
     public class StackEntry
     {
-        public StackEntry()
+        public StackEntry(LayoutChoice_Set layout, string name, OnBack_Listener listener)
         {
-        }
-        public StackEntry(LayoutChoice_Set layout)
-        {
-            this.layout = layout;
-        }
-        public StackEntry(LayoutChoice_Set layout, OnBack_Listener listener)
-        {
-            this.layout = layout;
-            this.listeners.AddLast(listener);
+            this.Layout = layout;
+            if (listener != null)
+                this.Listeners.AddLast(listener);
+            this.Name = name;
         }
 
-        public LayoutChoice_Set layout;
-        public LinkedList<OnBack_Listener> listeners = new LinkedList<OnBack_Listener>();
-
+        public LayoutChoice_Set Layout;
+        public LinkedList<OnBack_Listener> Listeners = new LinkedList<OnBack_Listener>();
+        public string Name;
     }
 
     public interface OnBack_Listener

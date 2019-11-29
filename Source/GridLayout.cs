@@ -1622,8 +1622,8 @@ namespace VisiPlacement
                 if (this.score.CompareTo(totalScore) != 0)
                 {
                     ErrorReporter.ReportParadox("Score discrepancy in " + this + "; previously computed " + this.score + "; recomputed " + totalScore);
-                    LayoutScore recomputed = this.ComputeScore();
-                    ErrorReporter.ReportParadox("Recomputed score = " + recomputed);
+                    //LayoutScore recomputed = this.ComputeScore();
+                    //ErrorReporter.ReportParadox("Recomputed score = " + recomputed);
                 }
             }
             if (!dryRun)

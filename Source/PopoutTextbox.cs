@@ -11,6 +11,7 @@ namespace VisiPlacement
     {
         public PopoutTextbox(string title, LayoutStack layoutStack)
         {
+            this.title = title;
             this.layoutStack = layoutStack;
 
             Button button = new Button();
@@ -27,7 +28,7 @@ namespace VisiPlacement
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            this.layoutStack.AddLayout(this.detailsLayout, this);
+            this.layoutStack.AddLayout(new StackEntry(this.detailsLayout, this.title, this));
         }
 
         public void OnBack(LayoutChoice_Set other)
@@ -62,5 +63,6 @@ namespace VisiPlacement
         private Editor textBox;
         private LayoutChoice_Set detailsLayout;
         private LayoutStack layoutStack;
+        private string title;
     }
 }

@@ -46,20 +46,20 @@ namespace VisiPlacement
             this.AnnounceChange(true);
         }
         // for convenience
-        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set layoutOption2)
+        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set tieWinner)
         {
             LinkedList<LayoutChoice_Set> options = new LinkedList<LayoutChoice_Set>();
             options.AddLast(layoutOption1);
-            options.AddLast(layoutOption2);
+            options.AddLast(tieWinner);
             this.Set_LayoutChoices(options);
         }
         // for convenience
-        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set layoutOption2, LayoutChoice_Set layoutOption3)
+        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set layoutOption2, LayoutChoice_Set tieWinner)
         {
             LinkedList<LayoutChoice_Set> options = new LinkedList<LayoutChoice_Set>();
             options.AddLast(layoutOption1);
             options.AddLast(layoutOption2);
-            options.AddLast(layoutOption3);
+            options.AddLast(tieWinner);
             this.Set_LayoutChoices(options);
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
