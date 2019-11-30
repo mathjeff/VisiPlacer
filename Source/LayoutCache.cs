@@ -65,7 +65,7 @@ namespace VisiPlacement
                 if (this.true_queryResults.TryGetValue(query, out result) || this.inferred_queryResults.TryGetValue(query, out result))
                 {
                     if (result != null)
-                        return this.prepareLayoutForQuery(result.Clone(), query);
+                        return result;
                     return null;
                 }
             }
@@ -82,8 +82,11 @@ namespace VisiPlacement
                     SpecificLayout correct_subLayout = this.Query_SubLayout(debugQuery);
                     if (broadened.Query.PreferredLayout(broadened.Response, correct_subLayout) != broadened.Response)
                     {
-                        ErrorReporter.ReportParadox("Error; incorrect result for broadened query");
-                        this.Find_LargerQuery(query);
+                        ErrorReporter.ReportParadox("Error; incorrect result for broadened query: broadened query " + broadened.Query + " returned " + broadened.Response +
+                            " whereas the response from the sublayout for debug query " + debugQuery + " is " + correct_subLayout);
+                        LayoutQuery debugQuery2 = broadened.Query.DebugClone();
+                        debugQuery2.ProposedSolution_ForDebugging = correct_subLayout;
+                        this.GetBestLayout(debugQuery2);
                     }
                 }
                 return this.inferredLayout(query, broadened.Response);
@@ -127,16 +130,29 @@ namespace VisiPlacement
             if (shrunken != null)
             {
                 // First, see if we can improve past what we currently have
-                LayoutQuery strictlyImprovedQuery = query.Clone();
-                strictlyImprovedQuery.OptimizePastExample(shrunken.Response);
+                LayoutQuery strictlyImprovedQuery = query;
+                bool allowCache = false;
+                if (query.MaximizesScore())
+                {
+                    strictlyImprovedQuery = query.Clone();
+                    strictlyImprovedQuery.OptimizePastExample(shrunken.Response);
+                    // Ask the sublayout for this result (or use the cache if we've already asked)
+                    if (!strictlyImprovedQuery.Accepts(shrunken.Response))
+                    {
+                        // Technically it's possible that strictlyImprovedQuery might accept shrunken.Response if strictlyImprovedQuery had score of +/- infinity
+                        allowCache = true;
+                    }
+                }
+                else
+                {
+                    strictlyImprovedQuery.OptimizeUsingExample(shrunken.Response);
+                }
 
                 // Ask the sublayout for this result (or use the cache if we've already asked)
-                if (!this.true_queryResults.TryGetValue(strictlyImprovedQuery, out result))
-                {
-                    // TODO: if we get here, then also re-check for a relevant broadened queries
-                    // We might be able to use one to prove that the answer to this query is null
+                if (allowCache)
+                    result = this.GetBestLayout_Quickly(strictlyImprovedQuery);
+                else
                     result = this.Query_SubLayout(strictlyImprovedQuery);
-                }
 
                 if (result == null)
                     result = shrunken.Response;      // couldn't improve past the previously found best layout
@@ -144,7 +160,7 @@ namespace VisiPlacement
             }
             else
             {
-                result = this.Query_SubLayout(query.Clone());
+                result = this.Query_SubLayout(query);
             }
 
             if (result != null)
@@ -161,20 +177,24 @@ namespace VisiPlacement
             }
 
             // record that this is the exact answer to this query
-            LayoutQuery_And_Response queryAndResponse = new LayoutQuery_And_Response(query.Clone(), result);
+            LayoutQuery_And_Response queryAndResponse = new LayoutQuery_And_Response(query, result);
             this.orderedResponses.Add(queryAndResponse);
 
 
-            this.debugCheck(queryAndResponse);
+            //this.debugCheck(queryAndResponse);
 
             if (result != null)
                 result = result.Clone();
-            return this.prepareLayoutForQuery(result, query);
+            return result;
         }
 
         private SpecificLayout Query_SubLayout(LayoutQuery query)
         {
             numComputations++;
+            if (this.true_queryResults.Count == 30)
+            {
+                System.Diagnostics.Debug.WriteLine("Lots of queries being sent to " + this.layoutToManage);
+            }
             if (!query.Debug)
             {
                 if (this.true_queryResults.ContainsKey(query))
@@ -185,12 +205,14 @@ namespace VisiPlacement
             {
                 if (this.true_queryResults.ContainsKey(query))
                     ErrorReporter.ReportParadox("Error, layoutCache query results were saved before it completed?");
-                this.true_queryResults[query.Clone()] = result;
+                query.OnAnswered();
+                this.true_queryResults[query] = result;
             }
             return result;
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            query = query.Clone();
             if (this.running)
             {
                 ErrorReporter.ReportParadox("LayoutCache being called before it returns?");
@@ -200,10 +222,21 @@ namespace VisiPlacement
             if (numQueries % 10000 == 0)
                 System.Diagnostics.Debug.WriteLine("Overall LayoutCache miss rate: " + numComputations + " of " + numQueries + " = " + ((double)numComputations / (double)numQueries));
 
-            SpecificLayout fastResult = this.GetBestLayout_Quickly(query.Clone());
+            // A layout of size 0 in one dimension doesn't get any points for being nonzero in the other dimension
+            if (query.MaxHeight == 0)
+            {
+                query.MaxWidth = 0;
+            }
+            else
+            {
+                if (query.MaxWidth == 0)
+                    query.MaxHeight = 0;
+            }
+
+            SpecificLayout fastResult = this.GetBestLayout_Quickly(query);
             if (query.Debug)
             {
-                SpecificLayout correctResult = this.Query_SubLayout(query.Clone());
+                SpecificLayout correctResult = this.Query_SubLayout(query);
                 if (correctResult != null && !query.Accepts(correctResult))
                 {
                     ErrorReporter.ReportParadox("Error: LayoutCache was given an incorrect response by its sublayout");
@@ -212,11 +245,13 @@ namespace VisiPlacement
                 if (query.PreferredLayout(correctResult, fastResult) != correctResult)
                 {
                     ErrorReporter.ReportParadox("Error: layout cache returned incorrect (superior) result");
+                    query.ProposedSolution_ForDebugging = fastResult;
                     correct = false;
                 }
                 if (query.PreferredLayout(fastResult, correctResult) != fastResult)
                 {
                     ErrorReporter.ReportParadox("Error: layout cache returned incorrect (inferior) result");
+                    query.ProposedSolution_ForDebugging = correctResult;
                     correct = false;
                 }
                 if (!correct)
@@ -224,11 +259,15 @@ namespace VisiPlacement
                     this.GetBestLayout_Quickly(query.Clone());
                     this.Query_SubLayout(query.Clone());
                 }
+                this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
                 this.running = false;
                 return this.prepareLayoutForQuery(correctResult, query);
             }
             this.running = false;
-            return fastResult;
+            //this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
+            if (fastResult != null)
+                fastResult = fastResult.Clone();
+            return this.prepareLayoutForQuery(fastResult, query);
         }
 
         // Attempts to find a query having results that are accepted by this query
@@ -266,18 +305,25 @@ namespace VisiPlacement
                 SpecificLayout otherResult = queryAndResponse.Response;
 
                 // check whether the answer to the previous query must also be the answer to the current query
-                bool encompassedInputs = true;
-                bool encompassedOutputs = true;
+                bool otherEncompassesInputs = true;
+                bool otherEncompassesOutputs = true;
                 bool inputAccepted = true;
+                bool thisEncompassesInputs = true;
                 // If we're looking for the min width or min height, then tightening the score means we can't necessarily use the other result as the best result
                 if (query.MaximizesScore())
                 {
                     if (otherQuery.MaxWidth < query.MaxWidth)
-                        encompassedInputs = false;
+                        otherEncompassesInputs = false;
+                    if (otherQuery.MaxWidth > query.MaxWidth)
+                        thisEncompassesInputs = false;
+                    
                     if (otherQuery.MaxHeight < query.MaxHeight)
-                        encompassedInputs = false;
+                        otherEncompassesInputs = false;
+                    if (otherQuery.MaxHeight > query.MaxHeight)
+                        thisEncompassesInputs = false;
+
                     if (otherQuery.MinScore.CompareTo(query.MinScore) > 0)
-                        encompassedOutputs = false;
+                        otherEncompassesOutputs = false;
 
                     if (otherResult == null || otherResult.Width > query.MaxWidth)
                         inputAccepted = false;
@@ -287,11 +333,17 @@ namespace VisiPlacement
                 if (query.MinimizesWidth())
                 {
                     if (otherQuery.MaxWidth < query.MaxWidth)
-                        encompassedOutputs = false;
+                        otherEncompassesOutputs = false;
+
                     if (otherQuery.MaxHeight < query.MaxHeight)
-                        encompassedInputs = false;
+                        otherEncompassesInputs = false;
+                    if (otherQuery.MaxHeight > query.MaxHeight)
+                        thisEncompassesInputs = false;
+
                     if (otherQuery.MinScore.CompareTo(query.MinScore) > 0)
-                        encompassedInputs = false;
+                        otherEncompassesInputs = false;
+                    if (otherQuery.MinScore.CompareTo(query.MinScore) < 0)
+                        thisEncompassesInputs = false;
 
                     if (otherResult == null || otherResult.Score.CompareTo(query.MinScore) < 0)
                         inputAccepted = false;
@@ -301,25 +353,31 @@ namespace VisiPlacement
                 if (query.MinimizesHeight())
                 {
                     if (otherQuery.MaxWidth < query.MaxWidth)
-                        encompassedInputs = false;
+                        otherEncompassesInputs = false;
+                    if (otherQuery.MaxWidth > query.MaxWidth)
+                        thisEncompassesInputs = false;
+
                     if (otherQuery.MaxHeight < query.MaxHeight)
-                        encompassedOutputs = false;
+                        otherEncompassesOutputs = false;
+
                     if (otherQuery.MinScore.CompareTo(query.MinScore) > 0)
-                        encompassedInputs = false;
+                        otherEncompassesInputs = false;
+                    if (otherQuery.MinScore.CompareTo(query.MinScore) < 0)
+                        thisEncompassesInputs = false;
 
                     if (otherResult == null || otherResult.Width > query.MaxWidth)
                         inputAccepted = false;
                     if (otherResult == null || otherResult.Score.CompareTo(query.MinScore) < 0)
                         inputAccepted = false;
                 }
-                if (encompassedInputs)
+                if (otherEncompassesInputs)
                 {
                     if (query.SameType(otherQuery) && query.Accepts(otherResult))
                     {
                         // The previous query had looser inputs but its result was still in our range, so we know its result will be right for us too
                         return queryAndResponse;
                     }
-                    if (query.SameType(otherQuery) && inputAccepted && encompassedOutputs)
+                    if (query.SameType(otherQuery) && inputAccepted && otherEncompassesOutputs)
                     {
                         if (!query.Accepts(otherResult))
                         {
@@ -328,10 +386,26 @@ namespace VisiPlacement
                             return new LayoutQuery_And_Response(otherQuery, null);
                         }
                     }
-                    if (encompassedOutputs && otherResult == null)
+                    if (otherEncompassesOutputs && otherResult == null)
                     {
                         // The previous query had looser inputs and looser outputs but no solution, so the current query will also have no solution
                         return queryAndResponse;
+                    }
+                    if (query.SameType(otherQuery) && thisEncompassesInputs)
+                    {
+                        if (otherResult != null)
+                        {
+                            // If we already asked the same question then we already know what the best answer is
+                            // We just have to double-check whether the best answer is good enough
+                            if (query.Accepts(otherResult))
+                            {
+                                return queryAndResponse;
+                            }
+                            else
+                            {
+                                return new LayoutQuery_And_Response(otherQuery, null);
+                            }
+                        }
                     }
                 }
             }
@@ -358,9 +432,9 @@ namespace VisiPlacement
         private SpecificLayout inferredLayout(LayoutQuery query, SpecificLayout response)
         {
             this.inferred_queryResults[query] = response;
-            LayoutQuery_And_Response pair = new LayoutQuery_And_Response(query.Clone(), response);
+            LayoutQuery_And_Response pair = new LayoutQuery_And_Response(query, response);
             this.orderedResponses.Add(pair);
-            this.debugCheck(pair);
+            //this.debugCheck(pair);
             return response;
         }
 
@@ -369,8 +443,9 @@ namespace VisiPlacement
             // make sure that each query likes its response at least as much as all others
             SpecificLayout result = queryAndResponse.Response;
             LayoutQuery query = queryAndResponse.Query;
-            foreach (LayoutQuery_And_Response other in this.orderedResponses)
+            for (int i = 0; i < this.orderedResponses.Count; i++) 
             {
+                LayoutQuery_And_Response other = this.orderedResponses[i];
                 if (other.Query.PreferredLayout(other.Response, result) != other.Response)
                 {
                     ErrorReporter.ReportParadox("New response is a better solution to previous query than preexisting response.\n" +
@@ -382,15 +457,17 @@ namespace VisiPlacement
                     LayoutQuery query2 = other.Query.Clone();
                     query2.Debug = true;
                     query2.ProposedSolution_ForDebugging = result;
-                    this.layoutToManage.GetBestLayout(query2);
+                    SpecificLayout oldQueryNewDebugResult = this.GetBestLayout(query2.Clone());
                     LayoutQuery query1 = query.Clone();
                     query1.Debug = true;
-                    this.layoutToManage.GetBestLayout(query1);
-                    System.Diagnostics.Debug.WriteLine("done debugging LayoutCache discrepancy");
+                    SpecificLayout newQueryDebugResult = this.GetBestLayout(query1.Clone());
+                    System.Diagnostics.Debug.WriteLine("Results from LayoutCache discrepancy: Old query new result = " + oldQueryNewDebugResult + ", New query new result = " + newQueryDebugResult);
+                    this.layoutToManage.GetBestLayout(query2.Clone());
+                    this.layoutToManage.GetBestLayout(query1.Clone());
                 }
                 if (query.PreferredLayout(result, other.Response) != result)
                 {
-                    ErrorReporter.ReportParadox("New response is a work solution to new query than previous response.\n" +
+                    ErrorReporter.ReportParadox("New response is a worse solution to new query than previous response.\n" +
                         "Layout      : " + this.layoutToManage + "\n" +
                         "Old query   : " + other.Query + "\n" +
                         "Old response: " + other.Response + "\n" +
@@ -400,11 +477,13 @@ namespace VisiPlacement
                     LayoutQuery query1 = query.Clone();
                     query1.Debug = true;
                     query1.ProposedSolution_ForDebugging = other.Response;
-                    this.layoutToManage.GetBestLayout(query1);
+                    SpecificLayout newQueryDebugResult = this.GetBestLayout(query1);
                     LayoutQuery query2 = other.Query.Clone();
                     query2.Debug = true;
-                    this.layoutToManage.GetBestLayout(query2);
-                    System.Diagnostics.Debug.WriteLine("done debugging LayoutCache discrepancy");
+                    SpecificLayout oldQueryNewDebugResult = this.GetBestLayout(query2);
+                    System.Diagnostics.Debug.WriteLine("Results from LayoutCache discrepancy: Old query new result = " + oldQueryNewDebugResult + ", New query new result = " + newQueryDebugResult);
+                    this.GetBestLayout(query1.Clone());
+                    this.GetBestLayout(query2.Clone());
                 }
             }
 

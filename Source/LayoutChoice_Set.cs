@@ -58,7 +58,7 @@ namespace VisiPlacement
                 if (layout == null)
                 {
                     ErrorReporter.ReportParadox("Layout " + this + " returned illegal null layout for query " + query);
-                    return this.GetBestLayout(query);
+                    return this.GetBestLayout(query.DebugClone());
                 }
             }
 
@@ -96,13 +96,15 @@ namespace VisiPlacement
                 if (numMatches > 1)
                     ErrorReporter.ReportParadox("Error: the returned layout contained multiple ancestors matching this one");
 
-                layout.SourceQuery_ForDebugging = query.Clone();
+                layout.SourceQuery_ForDebugging = query;
             }
 
             if (this.parents.Count < 1 && !(this is ViewManager))
             {
                 throw new InvalidOperationException("No parents assigned to " + this);
             }
+
+            query.OnAnswered();
 
             return layout;
         }

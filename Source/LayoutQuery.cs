@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace VisiPlacement
@@ -14,7 +15,6 @@ namespace VisiPlacement
             this.maxHeight = double.PositiveInfinity;
             this.debugID = nextID;
             nextID++;
-
         }
         // returns whichever layout it likes better
         public abstract LayoutDimensions PreferredLayout(LayoutDimensions tieWinner, LayoutDimensions tieLoser);
@@ -38,12 +38,19 @@ namespace VisiPlacement
             dimensions2.Width = tieLoser.Width;
             dimensions2.Height = tieLoser.Height;
             dimensions2.Score = tieLoser.Score;
+            // TODO: when asking a MaxScore_LayoutQuery which layout it likes better, consider calling isScoreAtLeast instead of computing all the scores
             if (this.PreferredLayout(dimensions1, dimensions2) == dimensions1)
                 return tieWinner;
             else
                 return tieLoser;
         }
         public abstract LayoutQuery Clone();
+        public LayoutQuery DebugClone()
+        {
+            LayoutQuery clone = this.Clone();
+            clone.Debug = true;
+            return clone;
+        }
         // returns a stricter query given that this example is one of the options
         public abstract void OptimizeUsingExample(SpecificLayout example);
         // returns a stricter query that won't even be satisfied by this example
@@ -60,6 +67,7 @@ namespace VisiPlacement
             this.MinScore = original.MinScore;
             if (original.Debug)
                 this.Debug = true;
+            this.Cost = original.Cost;
             this.ProposedSolution_ForDebugging = original.ProposedSolution_ForDebugging;
             return this;
         }
@@ -202,6 +210,18 @@ namespace VisiPlacement
             return true;
         }
 
+        public void OnAnswered()
+        {
+            this.Cost = LayoutQuery.nextID - this.debugID;
+            if (this.Cost > 200)
+            {
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    System.Diagnostics.Debug.WriteLine("Expensive layout query: " + this + " required " + this.Cost + " queries");
+                }
+            }
+        }
+
         public override string ToString()
         {
             return this.GetType().Name + ": (" + this.MaxWidth + ", " + this.MaxHeight + ", " + this.minScore + ")";
@@ -209,6 +229,7 @@ namespace VisiPlacement
         private double maxWidth, maxHeight;
         private LayoutScore minScore;
         private SpecificLayout proposedSolution_forDebugging;
+        public int Cost { get; set; }
         public int debugID;
     }
 }

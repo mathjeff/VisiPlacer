@@ -35,8 +35,8 @@ namespace VisiPlacement
                 foreach (LayoutChoice_Set layout in layoutOptions)
                 {
                     LayoutChoice_Set layoutToAdd = layout;
-                    if (layoutOptions.Count() > 1 && !(layout is LayoutCache))
-                        layoutToAdd = new LayoutCache(layout);
+                    if (layoutOptions.Count() > 1)
+                        layoutToAdd = LayoutCache.For(layout);
                     this.layoutOptions.AddLast(layoutToAdd);
                     layoutToAdd.AddParent(this);
                 }
@@ -46,20 +46,20 @@ namespace VisiPlacement
             this.AnnounceChange(true);
         }
         // for convenience
-        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set tieWinner)
-        {
-            LinkedList<LayoutChoice_Set> options = new LinkedList<LayoutChoice_Set>();
-            options.AddLast(layoutOption1);
-            options.AddLast(tieWinner);
-            this.Set_LayoutChoices(options);
-        }
-        // for convenience
-        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set layoutOption2, LayoutChoice_Set tieWinner)
+        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set layoutOption2)
         {
             LinkedList<LayoutChoice_Set> options = new LinkedList<LayoutChoice_Set>();
             options.AddLast(layoutOption1);
             options.AddLast(layoutOption2);
-            options.AddLast(tieWinner);
+            this.Set_LayoutChoices(options);
+        }
+        // for convenience
+        public LayoutUnion(LayoutChoice_Set layoutOption1, LayoutChoice_Set layoutOption2, LayoutChoice_Set layoutOption3)
+        {
+            LinkedList<LayoutChoice_Set> options = new LinkedList<LayoutChoice_Set>();
+            options.AddLast(layoutOption1);
+            options.AddLast(layoutOption2);
+            options.AddLast(layoutOption3);
             this.Set_LayoutChoices(options);
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
@@ -69,6 +69,7 @@ namespace VisiPlacement
             if (debugResult != null)
                 debugResult = debugResult.Clone();
             LinkedList<LayoutChoice_Set> good_sourceLayouts = new LinkedList<LayoutChoice_Set>();
+            LayoutQuery originalQuery = query.Clone();
             foreach (LayoutChoice_Set layoutSet in this.layoutOptions)
             {
                 SpecificLayout currentLayout;
@@ -104,11 +105,14 @@ namespace VisiPlacement
                     }
 
                     // make the query more strict, so we will only ever get dimensions that are at least as good as this
-                    query.OptimizeUsingExample(best_specificLayout);
+                    if (query.MaximizesScore())
+                        query.OptimizePastExample(best_specificLayout);
+                    else
+                        query.OptimizeUsingExample(best_specificLayout);
                 }
             }
-            query.ProposedSolution_ForDebugging = debugResult;
-            return this.prepareLayoutForQuery(best_specificLayout, query);
+            originalQuery.ProposedSolution_ForDebugging = debugResult;
+            return this.prepareLayoutForQuery(best_specificLayout, originalQuery);
         }
 
         private LinkedList<LayoutChoice_Set> layoutOptions;

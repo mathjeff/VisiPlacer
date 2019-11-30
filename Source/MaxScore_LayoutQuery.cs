@@ -22,7 +22,7 @@ namespace VisiPlacement
         public override void OptimizePastDimensions(LayoutDimensions example)
         {
             LayoutScore minScore = example.Score.Plus(LayoutScore.Tiny);
-            if (this.MinScore.CompareTo(example.Score) < 0)
+            if (this.MinScore.CompareTo(minScore) < 0)
                 this.MinScore = minScore;
             if (!this.Accepts(this.ProposedSolution_ForDebugging))
                 this.ProposedSolution_ForDebugging = null;

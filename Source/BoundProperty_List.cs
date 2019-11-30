@@ -76,9 +76,12 @@ namespace VisiPlacement
             for (i = 0; i < minValues.Count; i++)
             {
                 propertyIndex = indices[i];
-                double currentRatio = minValues[i] / this.scales[propertyIndex];
-                if (currentRatio > groupRatio)
-                    groupRatio = currentRatio;
+                if (this.scales[propertyIndex] != 0)
+                {
+                    double currentRatio = minValues[i] / this.scales[propertyIndex];
+                    if (currentRatio > groupRatio)
+                        groupRatio = currentRatio;
+                }
             }
             bool changed = false;
             // now set each value accordingly
@@ -101,8 +104,12 @@ namespace VisiPlacement
         {
             if (scales[propertyIndex] == 0)
                 throw new ArgumentException("cannot set the value of a property having zero weight");
+            if (double.IsNaN(value))
+                throw new ArgumentException("illegal value: " + value + " to set for index " + propertyIndex);
             int groupIndex = this.GetGroupIndexFromPropertyIndex(propertyIndex);
             double groupRatio = value / this.scales[propertyIndex];
+            if (double.IsNaN(groupRatio))
+                throw new ArgumentException("Cannot set value " + value + " for property " + propertyIndex + " having scale of " + this.scales[propertyIndex]);
             // rescale the entire group so each value is its scale times the group ratio
             List<int> indices = this.indicesByGroup[groupIndex];
             foreach (int index in indices)
@@ -120,11 +127,10 @@ namespace VisiPlacement
 
         public void Set_GroupTotal(int groupIndex, double totalValue)
         {
-            double totalWeight = this.GetGroupWeight(groupIndex);
-            double groupRatio = totalValue / totalWeight;
+            double totalWeight = this.GetGroupScale(groupIndex);
+            if (totalWeight == 0)
+                totalWeight = 1;
             List<int> indices = this.indicesByGroup[groupIndex];
-            double remainingValue = totalValue;
-            double remainingWeight = totalWeight;
             foreach (int index in indices)
             {
                 double currentWeight = scales[index];
@@ -200,17 +206,30 @@ namespace VisiPlacement
                 return this.values.Length;
             }
         }
+        public int NumInfiniteProperties
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < this.values.Length; i++)
+                {
+                    if (double.IsInfinity(this.values[i]))
+                        count++;
+                }
+                return count;
+            }
+        }
 
         // computes the weight of the property with the given index, divided by the weight of the group it is in
         public double GetFraction(int propertyIndex)
         {
             double weight = this.scales[propertyIndex];
             int groupIndex = this.GetGroupIndexFromPropertyIndex(propertyIndex);
-            double groupWeight = this.GetGroupWeight(groupIndex);
+            double groupWeight = this.GetGroupScale(groupIndex);
             return weight / groupWeight;
         }
         // computes the weight of the group at groupIndex
-        public double GetGroupWeight(int groupIndex)
+        public double GetGroupScale(int groupIndex)
         {
             double weight = 0;
             foreach (int index in this.indicesByGroup[groupIndex])
@@ -230,6 +249,23 @@ namespace VisiPlacement
                 total += this.Get_GroupTotal(i);
             }
             return total;
+        }
+        public double GetTotalWeight()
+        {
+            double total = 0;
+            int i;
+            // The reason for adding these values in this order is to ensure that the rounding error is exactly zero when we update the total value of a group
+            for (i = 0; i < this.NumGroups; i++)
+            {
+                total += this.GetGroupScale(i);
+            }
+            return total;
+        }
+
+        public void TryToRescaleToTotalValue(double total)
+        {
+            if (this.GetTotalValue() != 0)
+                this.RescaleToTotalValue(total);
         }
 
         public void RescaleToTotalValue(double total)

@@ -169,6 +169,8 @@ namespace VisiPlacement
             foreach (View view in focusedViews)
                 view.Focus();
 
+            System.Diagnostics.Debug.WriteLine("ViewManager completed layout at " + DateTime.Now);
+
             if (this.LayoutCompleted != null)
             {
                 ViewManager_LayoutStats stats = new ViewManager_LayoutStats();

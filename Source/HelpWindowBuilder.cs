@@ -18,34 +18,31 @@ namespace VisiPlacement
             return this;
         }
 
+        private LayoutChoice_Set MakeSublayout(double fontSize)
+        {
+            if (messages.Count() > 1)
+            {
+                GridLayout gridLayout = GridLayout.New(new BoundProperty_List(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
+                foreach (string message in this.messages)
+                {
+                    string section = "    " + message;
+                    gridLayout.AddLayout(new TextblockLayout(section, fontSize));
+                }
+                return gridLayout;
+            }
+            else
+            {
+                return new TextblockLayout(messages.First(), fontSize);
+            }
+        }
         public LayoutChoice_Set Build()
         {
             List<LayoutChoice_Set> fontChoices = new List<LayoutChoice_Set>();
-            int fontSize;
-            for (fontSize = 20; fontSize >= 16; fontSize -= 4)
-            {
-                if (messages.Count() > 1)
-                {
-                    GridLayout gridLayout = GridLayout.New(new BoundProperty_List(this.messages.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
-                    foreach (string message in this.messages)
-                    {
-                        string section = "    " + message;
-                        gridLayout.AddLayout(new TextblockLayout(section, fontSize));
-                    }
-                    fontChoices.Add(gridLayout);
-                }
-                else
-                {
-                    fontChoices.Add(new TextblockLayout(messages.First(), fontSize));
-                }
-            }
-            List<LayoutChoice_Set> allChoices = new List<LayoutChoice_Set>();
-            foreach (LayoutChoice_Set fontChoice in fontChoices)
-            {
-                allChoices.Add(fontChoice);
-                allChoices.Add(ScrollLayout.New(fontChoice));
-            }
-            return new LayoutUnion(allChoices);
+            LayoutChoice_Set large = this.MakeSublayout(20);
+            fontChoices.Add(ScrollLayout.New(large));
+            LayoutChoice_Set small = this.MakeSublayout(16);
+            fontChoices.Add(small);
+            return new LayoutUnion(fontChoices);
         }
 
         private LinkedList<string> messages = new LinkedList<string>();

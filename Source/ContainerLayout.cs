@@ -93,15 +93,15 @@ namespace VisiPlacement
             Specific_ContainerLayout result;
 
             // Determine whether there's room for the border
-            LayoutQuery subQuery = query.Clone();
             double borderWidth = this.BorderThickness.Left + this.BorderThickness.Right;
             double borderHeight = this.BorderThickness.Top + this.BorderThickness.Bottom;
+            LayoutQuery subQuery = query.Clone();
             subQuery.MaxWidth = subQuery.MaxWidth - borderWidth;
             subQuery.MaxHeight = subQuery.MaxHeight - borderHeight;
             if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
             {
-                // If there is no room for the border, then that violates a requirement and we return the worst possible score
-                result = this.makeSpecificLayout(this.view, new Size(0, 0), LayoutScore.Minimum, null, new Thickness(0));
+                // If there is no room for the border, then even the border would be cropped
+                result = this.makeSpecificLayout(this.view, new Size(0, 0), LayoutScore.Get_CutOff_LayoutScore(1), null, new Thickness(0));
                 if (query.Accepts(result))
                     return this.prepareLayoutForQuery(result, query);
                 return null;

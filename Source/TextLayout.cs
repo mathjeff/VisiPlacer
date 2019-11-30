@@ -211,7 +211,8 @@ namespace VisiPlacement
                 }
                 firstIteration = false;
             }
-            System.Diagnostics.Debug.WriteLine("Spent " + numIterations + " iterations in Get_NonCropping_MinWidthLayout with query = " + query + " and text length = " + this.TextLength);
+            if (this.LoggingEnabled)
+                System.Diagnostics.Debug.WriteLine("Spent " + numIterations + " iterations in Get_NonCropping_MinWidthLayout with query = " + query + " and text length = " + this.TextLength);
             if (!query.Accepts(bestAllowedDimensions))
                 return null;
             return bestAllowedDimensions;
@@ -479,12 +480,6 @@ namespace VisiPlacement
                     block = "M";
 
                 Size blockSize = this.FormatParagraph(block, desiredWidth, allowSplittingWords);
-                /*Size oldSize = this.FormatParagraph_Old(block, desiredWidth, allowSplittingWords);
-                if (oldSize.Width != blockSize.Width || oldSize.Height != blockSize.Height)
-                {
-                    System.Diagnostics.Debug.WriteLine("Formatted " + text + " into " + blockSize + ", not " + oldSize);
-                    this.FormatParagraph(block, desiredWidth, allowSplittingWords);
-                }*/
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }

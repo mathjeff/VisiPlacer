@@ -214,7 +214,7 @@ namespace VisiPlacement
                 {
                     LayoutScore interpolatedScore = leftScore.Times(leftFraction).Plus(rightScore.Times(rightFraction));
                     double y = query.MinScore.DividedBy(interpolatedScore.Times(1.0 / interpolatedY));
-                    if (!double.IsInfinity(y))
+                    if (!double.IsInfinity(y) && !double.IsNaN(y))
                     {
                         LayoutScore score = interpolatedScore.Times(y / interpolatedY);
                         if (score.CompareTo(query.MinScore) < 0)
@@ -333,6 +333,10 @@ namespace VisiPlacement
         public Specific_ScrollLayout(View view, Size size, LayoutScore score, SpecificLayout sublayout)
             : base(view, size, score, sublayout, new Thickness())
         {
+            if (double.IsInfinity(this.SubLayout.Height))
+            {
+                ErrorReporter.ReportParadox("Infinite Specific_ScrollLayout height: " + this);
+            }
         }
 
         protected override Size chooseSize(Size availableSize)
