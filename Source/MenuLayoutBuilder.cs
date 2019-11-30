@@ -20,6 +20,11 @@ namespace VisiPlacement
             this.AddLayout(entry.Name, new ConstantValueProvider<StackEntry>(entry));
             return this;
         }
+        public MenuLayoutBuilder AddLayout(string name, StackEntry entry)
+        {
+            this.AddLayout(name, new ConstantValueProvider<StackEntry>(entry));
+            return this;
+        }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
         {
             this.layoutNames.AddLast(name);
