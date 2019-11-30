@@ -53,6 +53,7 @@ namespace VisiPlacement
                         this.debugLayout = GridLayout.New(new BoundProperty_List(2), new BoundProperty_List(1), LayoutScore.Zero);
                         this.debugLayout.AddLayout(new LayoutDuration_Layout(this));
                         this.debugLayout.AddLayout(this.callerHolder);
+                        this.debugLayout.AddParent(this);
                     }
                     else
                     {

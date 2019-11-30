@@ -1333,7 +1333,7 @@ namespace VisiPlacement
                         query.MaxHeight = Math.Max(height, 0);
                         SpecificLayout layout = subLayout.GetBestLayout(query);
                         totalScore = totalScore.Plus(layout.Score);
-                        this.sub_specificLayouts[columnNumber, rowNumber] = this.prepareLayoutForQuery(layout, query);
+                        this.sub_specificLayouts[columnNumber, rowNumber] = layout;
                     }
                 }
             }

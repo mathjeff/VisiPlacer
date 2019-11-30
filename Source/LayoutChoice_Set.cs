@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 // A LayoutChoice_Set describes different layouts for a view's child views.
 // The LayoutChoice_Set can be asked to choose the best layout (such as the highest-scoring layout) fitting inside a certain size.
@@ -96,6 +97,11 @@ namespace VisiPlacement
                     ErrorReporter.ReportParadox("Error: the returned layout contained multiple ancestors matching this one");
 
                 layout.SourceQuery_ForDebugging = query.Clone();
+            }
+
+            if (this.parents.Count < 1 && !(this is ViewManager))
+            {
+                throw new InvalidOperationException("No parents assigned to " + this);
             }
 
             return layout;
