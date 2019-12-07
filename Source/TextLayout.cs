@@ -479,6 +479,12 @@ namespace VisiPlacement
                     block = "M";
 
                 Size blockSize = this.FormatParagraph(block, desiredWidth, allowSplittingWords);
+                /*Size oldSize = this.FormatParagraph_Old(block, desiredWidth, allowSplittingWords);
+                if (oldSize.Width != blockSize.Width || oldSize.Height != blockSize.Height)
+                {
+                    System.Diagnostics.Debug.WriteLine("Formatted " + text + " into " + blockSize + ", not " + oldSize);
+                    this.FormatParagraph(block, desiredWidth, allowSplittingWords);
+                }*/
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }
@@ -489,19 +495,20 @@ namespace VisiPlacement
             if (text == null || text == "")
                 return new Size();
 
-            if (desiredWidth == 0 && allowSplittingWords)
-            {
-                return this.formatAsSingleColumn(text);
-            }
-            Size singleLine_size = this.getBlockSize(text);
-            if (singleLine_size.Width <= desiredWidth)
-                return singleLine_size;
+            // previous unsplittable unit in the current line
+            String prevComponentInLine = "";
+            // current size of the current line
+            Size lineSize = new Size();
+            // total size of the paragraph
+            Size totalSize = new Size();
 
+            // the unsplittable units that we're going to measure
             string[] components;
+            int i;
             if (allowSplittingWords)
             {
                 components = new string[text.Length];
-                for (int i = 0; i < text.Length; i++)
+                for (i = 0; i < text.Length; i++)
                 {
                     components[i] = text.Substring(i, 1);
                 }
@@ -511,67 +518,56 @@ namespace VisiPlacement
                 components = text.Split(' ');
             }
 
-            string currentLine_text = "";
-            List<string> lines = new List<string>();
-            double maxWidth = 0;
-            double currentHeight = 0;
-            double currentWidth = 0;
-            double totalHeight = 0;
-            double maxLineHeight = 0;
-            for (int i = 0; i < components.Length; i++)
+            // loop until done
+            i = 0;
+            while (i < components.Length)
             {
-                string component = components[i];
-
-                string proposedLine = currentLine_text;
-                if (proposedLine != "")
-                    proposedLine = proposedLine + " ";
-                proposedLine = proposedLine + component;
-
-                Size blockSize = this.getBlockSize(proposedLine);
-                bool tooLong = (blockSize.Width > desiredWidth && currentLine_text != "");
-                if (tooLong)
+                // current unit that we want to add
+                String currentComponent = components[i];
+                // the text that we're considering making be the ending of this line
+                String currentExpandedComponent;
+                if (allowSplittingWords)
                 {
-                    // go to the next line
-                    lines.Add(currentLine_text);
-                    maxLineHeight = Math.Max(currentHeight, maxLineHeight);
-                    totalHeight += currentHeight;
-                    currentHeight = 0;
-                    maxWidth = Math.Max(currentWidth, maxWidth);
-                    currentWidth = 0;
-                    currentLine_text = "";
-                    i--;
+                    currentExpandedComponent = prevComponentInLine + currentComponent;
                 }
                 else
                 {
-                    // extend the current line
-                    currentHeight = blockSize.Height;
-                    currentWidth = blockSize.Width;
-                    currentLine_text = proposedLine;
+                    if (prevComponentInLine != "")
+                    {
+                        currentExpandedComponent = prevComponentInLine + " " + currentComponent;
+                    }
+                    else
+                    {
+                        if (currentComponent == "")
+                            currentComponent = " ";
+                        currentExpandedComponent = currentComponent;
+                    }
+                }
+                // the size of the new text
+                Size currentCharsSize = this.getBlockSize(currentExpandedComponent);
+                // the size of the existing ending of the line
+                Size prevCharSize = this.getBlockSize(prevComponentInLine);
+                // the new size of the current line if we add this text to this line
+                Size new_lineSize = new Size(lineSize.Width + currentCharsSize.Width - prevCharSize.Width, Math.Max(lineSize.Height, currentCharsSize.Height));
+                if (new_lineSize.Width > desiredWidth && prevComponentInLine != "")
+                {
+                    // line wrap
+                    totalSize.Width = Math.Max(totalSize.Width, lineSize.Width);
+                    totalSize.Height += lineSize.Height;
+                    prevComponentInLine = "";
+                    lineSize = new Size();
+                }
+                else
+                {
+                    // extend current line
+                    lineSize = new_lineSize;
+                    prevComponentInLine = currentComponent;
+                    i++;
                 }
             }
-            // include the last line
-            lines.Add(currentLine_text);
-            maxLineHeight = Math.Max(currentHeight, maxLineHeight);
-            totalHeight += currentHeight;
-            maxWidth = Math.Max(currentWidth, maxWidth);
-
-
-            //string finalText = string.Join("\n", lines);
-            Size finalSize = new Size(maxWidth, maxLineHeight * lines.Count);
-            return finalSize;
-        }
-
-        private Size formatAsSingleColumn(string text)
-        {
-            double maxWidth = 0;
-            double totalHeight = 0;
-            for (int i = 0; i < text.Length; i++)
-            {
-                Size size = this.getBlockSize(text.Substring(i, 1));
-                maxWidth = Math.Max(size.Width, maxWidth);
-                totalHeight += size.Height;
-            }
-            return new Size(maxWidth, totalHeight);
+            totalSize.Width = Math.Max(totalSize.Width, lineSize.Width);
+            totalSize.Height += lineSize.Height;
+            return totalSize;
         }
 
         private Size getBlockSize(String text)
@@ -585,7 +581,24 @@ namespace VisiPlacement
                 this.sizeCache = new Dictionary<string, Size>();
             if (!this.sizeCache.TryGetValue(text, out size))
             {
-                size = this.computeLineSize(text);
+                if (text.Length > 2)
+                {
+                    size = new Size();
+                    String prevCharacter = "";
+                    for (int i = 0; i < text.Length; i++)
+                    {
+                        String currentCharacter = text.Substring(i, 1);
+                        Size prevSize = this.getBlockSize(prevCharacter);
+                        Size currentSize = this.getBlockSize(prevCharacter + currentCharacter);
+                        size.Height = Math.Max(size.Height, currentSize.Height);
+                        size.Width += currentSize.Width - prevSize.Width;
+                        prevCharacter = currentCharacter;
+                    }
+                }
+                else
+                {
+                    size = this.computeLineSize(text);
+                }
                 this.sizeCache[text] = size;
             }
             return size;

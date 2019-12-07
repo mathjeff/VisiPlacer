@@ -1596,6 +1596,7 @@ namespace VisiPlacement
                     nextX = nextUnscaledX * horizontalScale;
                     double width = nextX - x;
                     columnWidths.Add(width);
+                    
 
 
                     LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
