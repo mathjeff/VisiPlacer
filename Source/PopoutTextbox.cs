@@ -21,7 +21,7 @@ namespace VisiPlacement
             ButtonLayout buttonLayout = ButtonLayout.WithoutBevel(button);
 
             this.textBox = new Editor();
-            this.detailsLayout = new TitledControl(title, new TextboxLayout(this.textBox));
+            this.detailsLayout = new TitledControl(title, ScrollLayout.New(new TextboxLayout(this.textBox)));
 
             this.SubLayout = new TitledControl(title, buttonLayout);
         }
