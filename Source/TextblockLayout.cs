@@ -40,6 +40,10 @@ namespace VisiPlacement
             Label textBlock = this.makeTextBlock(text);
             this.Initialize(textBlock, fontSize, allowCropping, allowSplittingWords);
         }
+        public TextblockLayout(Label textBlock, double fontSize, bool allowCropping, bool allowSplittingWords)
+        {
+            this.Initialize(textBlock, fontSize, allowCropping, allowSplittingWords);
+        }
         public TextblockLayout(string text, TextAlignment horizontalTextAlignment)
         {
             Label textBlock = this.makeTextBlock(text);
