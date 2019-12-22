@@ -11,17 +11,23 @@ namespace VisiPlacement
 {
     public class LayoutStack : ContainerLayout
     {
-        public LayoutStack()
+        public LayoutStack(bool showBackButtons = true)
         {
-            BoundProperty_List rowHeights = new BoundProperty_List(3);
-            rowHeights.BindIndices(0, 1);
-            rowHeights.BindIndices(0, 2);
-            rowHeights.SetPropertyScale(0, 28);
-            rowHeights.SetPropertyScale(1, 1); // extra unused space for visual separation
-            rowHeights.SetPropertyScale(2, 3);
-            this.mainGrid = GridLayout.New(rowHeights, new BoundProperty_List(1), LayoutScore.Zero);
-            this.SubLayout = this.mainGrid;
+            this.showBackButtons = showBackButtons;
+            if (showBackButtons)
+            {
+                BoundProperty_List rowHeights = new BoundProperty_List(3);
+                rowHeights.BindIndices(0, 1);
+                rowHeights.BindIndices(0, 2);
+                rowHeights.SetPropertyScale(0, 28);
+                rowHeights.SetPropertyScale(1, 1); // extra unused space for visual separation
+                rowHeights.SetPropertyScale(2, 3);
+                this.mainGrid = GridLayout.New(rowHeights, new BoundProperty_List(1), LayoutScore.Zero);
+                this.SubLayout = this.mainGrid;
+            }
         }
+
+
 
         public void AddLayout(LayoutChoice_Set newLayout, String name)
         {
@@ -79,7 +85,7 @@ namespace VisiPlacement
         }
         private void setSublayout(LayoutChoice_Set layout)
         {
-            if (this.layoutEntries.Count > 1)
+            if (this.showBackButtons && this.layoutEntries.Count > 1)
             {
                 this.mainGrid.PutLayout(layout, 0, 0);
                 this.mainGrid.PutLayout(this.backButtons(this.layoutEntries), 0, 2);
@@ -144,6 +150,7 @@ namespace VisiPlacement
         private List<Button> buttons = new List<Button>();
         private List<ButtonLayout> backButton_layouts = new List<ButtonLayout>();
         private GridLayout mainGrid;
+        private bool showBackButtons;
     }
 
     public class StackEntry
