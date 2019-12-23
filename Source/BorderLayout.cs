@@ -3,53 +3,47 @@
 namespace VisiPlacement
 {
     // a layout that contains one sublayout within it
-    public class ContainerLayout : LayoutChoice_Set
+    public class BorderLayout : ContainerLayout
     {
-        public ContainerLayout()
+        public BorderLayout()
         {
             this.Initialize();
-            this.BonusScore = LayoutScore.Zero;
         }
-        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, LayoutScore bonusScore)
+        public BorderLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness)
         {
             this.Initialize();
             this.View = view;
             this.SubLayout = subLayout;
-            this.BonusScore = bonusScore;
+            this.BorderThickness = borderThickness;
         }
-        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, LayoutScore bonusScore, bool fillAvailableSpace)
+        public BorderLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, bool fillAvailableSpace)
         {
             this.Initialize();
             this.View = view;
             this.SubLayout = subLayout;
-            this.BonusScore = bonusScore;
+            this.BorderThickness = borderThickness;
             this.ChildFillsAvailableSpace = fillAvailableSpace;
-        }
-        // Returns a ContainerLayout that wraps a ScrollView whose content size will always match the ScrollView's size.
-        // The reason someone might want this is if something may later temporarily show overtop of this view (like a keyboard) then
-        // the ScrollView might scroll its content to still be visible.
-        public static ContainerLayout SameSize_Scroller(ScrollView view, LayoutChoice_Set subLayout)
-        {
-            ContainerLayout containerLayout = new ContainerLayout();
-            containerLayout.view = view;
-            containerLayout.SubLayout = subLayout;
-            return containerLayout;
         }
 
         private void Initialize()
         {
             this.ChildFillsAvailableSpace = true;
         }
-        public void CopyFrom(ContainerLayout original)
+        public void CopyFrom(BorderLayout original)
         {
             this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
             base.CopyFrom(original);
         }
         private View view;
-        protected virtual View View
+        protected override View View
         {
             get
             {
+                if (this.view == null)
+                {
+                    if (!this.BorderThickness.Equals(new Thickness(0)))
+                        this.view = new ContainerView();
+                }
                 return this.view;
             }
             set
@@ -57,33 +51,18 @@ namespace VisiPlacement
                 this.view = value;
             }
         }
-        public bool ChildFillsAvailableSpace { get; set; }
-        public LayoutChoice_Set SubLayout 
-        {
-            get
-            {
-                return this.subLayout;
-            }
-            set
-            {
-                if (value == this.subLayout)
-                    return;
-                if (this.subLayout != null)
-                    this.subLayout.RemoveParent(this);
-                this.subLayout = value;
-                if (this.subLayout != null)
-                    this.subLayout.AddParent(this);
-                this.AnnounceChange(true);
-            }
-        }
-        public LayoutScore BonusScore { get; set; }
-
+        public Thickness BorderThickness { get; set; }
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
             Specific_ContainerLayout result;
 
+            // Determine whether there's room for the border
+            double borderWidth = this.BorderThickness.Left + this.BorderThickness.Right;
+            double borderHeight = this.BorderThickness.Top + this.BorderThickness.Bottom;
             LayoutQuery subQuery = query.Clone();
+            subQuery.MaxWidth = subQuery.MaxWidth - borderWidth;
+            subQuery.MaxHeight = subQuery.MaxHeight - borderHeight;
             if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
             {
                 // If there is no room for the border, then even the border would be cropped
@@ -93,14 +72,14 @@ namespace VisiPlacement
                 return null;
             }
 
+
             // Query sublayout if it exists
             if (this.SubLayout != null)
             {
-                subQuery.MinScore = subQuery.MinScore.Minus(this.BonusScore);
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
-                    result = this.makeSpecificLayout(this.view, new Size(best_subLayout.Width, best_subLayout.Height), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, new Size());
+                    result = this.makeSpecificLayout(this.view, new Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, this.BorderThickness);
                     result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;
@@ -117,12 +96,6 @@ namespace VisiPlacement
             return result;
         }
 
-        protected Specific_ContainerLayout makeSpecificLayout(View view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
-        {
-            return new Specific_ContainerLayout(view, size, score, subLayout, border);
-        }
-
-        LayoutChoice_Set subLayout;
     }
 
 }

@@ -68,7 +68,7 @@ namespace VisiPlacement
 
             // add a view behind the button to change its normal background color without changing its color when selected
             ContentView buttonBackground = new ContentView();
-            ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, new Thickness(), LayoutScore.Zero, false);
+            ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, LayoutScore.Zero, false);
 
             if (includeBevel)
             {
@@ -78,21 +78,21 @@ namespace VisiPlacement
                 ContentView insideBevel = new ContentView();
                 insideBevel.Padding = innerBevelThickness;
                 insideBevel.BackgroundColor = Color.DarkGray;// Color.FromRgb(0.4, 0.4, 0.4);
-                ContainerLayout middleLayout = new ContainerLayout(insideBevel, backgroundLayout, innerBevelThickness, LayoutScore.Zero, false);
+                ContainerLayout middleLayout = new BorderLayout(insideBevel, backgroundLayout, innerBevelThickness, false);
 
                 // add a bevel to the border
                 Thickness outerBevelThickness = new Thickness(1);
                 ContentView outsideBevel = new ContentView();
                 outsideBevel.Padding = outerBevelThickness;
                 outsideBevel.BackgroundColor = Color.LightGray;// Color.FromRgb(0.63, 0.63, 0.63);
-                ContainerLayout outsideLayout = new ContainerLayout(outsideBevel, middleLayout, outerBevelThickness, LayoutScore.Zero, false);
+                ContainerLayout outsideLayout = new BorderLayout(outsideBevel, middleLayout, outerBevelThickness, false);
 
                 // add some extra space around it
                 Thickness spacingThickness = new Thickness(1);
                 ContentView spacing = new ContentView();
                 spacing.Padding = spacingThickness;
                 spacing.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
-                ContainerLayout spacingLayout = new ContainerLayout(spacing, outsideLayout, spacingThickness, LayoutScore.Zero, false);
+                ContainerLayout spacingLayout = new BorderLayout(spacing, outsideLayout, spacingThickness, false);
 
                 this.SubLayout = spacingLayout;
 
