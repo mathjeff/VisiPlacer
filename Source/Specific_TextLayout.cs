@@ -91,6 +91,10 @@ namespace VisiPlacement
         {
             return new LinkedList<SpecificLayout>();
         }
+        public override string ToString()
+        {
+            return "Specific_TextLayout: " + this.Dimensions + " with text '" + this.TextForDebugging + "'";
+        }
 
         private TextItem_Configurer textItem;
         private double fontSize;

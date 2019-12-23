@@ -105,7 +105,7 @@ namespace VisiPlacement
         {
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
-            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight));
+            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight), query.Debug);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
             return null;
@@ -116,10 +116,10 @@ namespace VisiPlacement
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
             // first check whether this query will accept a cropped layout
-            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0));
+            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0), query.Debug);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
-            specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight));
+            specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight), query.Debug);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout.GetBestLayout(query), query);
             return null;
@@ -130,7 +130,7 @@ namespace VisiPlacement
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
             // first check whether this query will accept a cropped layout
-            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0));
+            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0), query.Debug);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
             // not satisfied with cropping so we need to try harder to do a nice-looking layout
@@ -144,7 +144,7 @@ namespace VisiPlacement
         private Specific_TextLayout Get_NonCropping_MinWidthLayout(LayoutQuery query)
         {
 
-            Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity), query.Debug);
             double pixelSize = 1;
             double maxRejectedWidth = 0;
             int numIterations = 0;
@@ -154,7 +154,7 @@ namespace VisiPlacement
             {
                 numIterations++;
                 // given the current width, compute the required height
-                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity));
+                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), query.Debug);
                 if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
                 {
                     // this layout fits in the required dimensions
@@ -190,7 +190,7 @@ namespace VisiPlacement
                     if (firstIteration)
                     {
                         // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
-                        Size desiredSize = this.formatText(maxWidth);
+                        Size desiredSize = this.formatText(maxWidth, query.Debug);
                         if (desiredSize.Width > maxWidth)
                             maxRejectedWidth = desiredSize.Width - pixelSize / 2;
                         maxWidth = desiredSize.Width;
@@ -218,7 +218,7 @@ namespace VisiPlacement
             return bestAllowedDimensions;
         }
 
-        private Size formatText(double maxWidth)
+        private Size formatText(double maxWidth, bool debug)
         {
             // check the cache
             Size size;
@@ -229,18 +229,18 @@ namespace VisiPlacement
                 return size;
             }
             // recompute and save into cache
-            size = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords);
+            size = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug);
             this.layoutsByWidth[maxWidth] = size;
             return size;
         }
 
         // compute the best dimensions fitting within the given size
-        private Specific_TextLayout ComputeDimensions(Size availableSize)
+        private Specific_TextLayout ComputeDimensions(Size availableSize, bool debug)
         {
             DateTime start = DateTime.Now;
             numComputations++;
 
-            Size desiredSize = this.formatText(availableSize.Width);
+            Size desiredSize = this.formatText(availableSize.Width, debug);
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
                 ErrorReporter.ReportParadox("Illegal size " + desiredSize + " returned by textFormatter.FormatText");
@@ -367,10 +367,10 @@ namespace VisiPlacement
             {
                 View view = this.TextItem_Configurer.View;
                 Size currentSize = new Size(view.Width, view.Height);
-                Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize);
+                Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, false);
                 this.TextItem_Text = this.Text;
                 this.layoutsByWidth = new Dictionary<double, Size>();
-                Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize);
+                Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize, false);
                 if (!layoutForNewText.Cropped)
                 {
                     if (!layoutForCurrentText.Cropped)
@@ -467,10 +467,16 @@ namespace VisiPlacement
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         // The returned size might have larger width than desiredWidth if needed for the text to fit
-        public Size FormatText(String text, double desiredWidth, bool allowSplittingWords)
+        public Size FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug)
         {
+            Size result;
             if (text == null || text == "")
-                return new Size();
+            {
+                result = new Size();
+                if (debug)
+                    System.Diagnostics.Debug.WriteLine("Formatted empty text '" + text + "' into size " + result);
+                return result;
+            }
             string[] blocks = text.Split('\n');
             double maxWidth = 0, totalHeight = 0;
             for (int i = 0; i < blocks.Length; i++)
@@ -483,7 +489,13 @@ namespace VisiPlacement
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }
-            return new Size(maxWidth, totalHeight);
+            result = new Size(maxWidth, totalHeight);
+            if (debug)
+            {
+                System.Diagnostics.Debug.WriteLine("Formatted text '" + text + "'" + " using desiredWith = " + desiredWidth +
+                    " and allowSplittingWords = " + allowSplittingWords + " into size " + result);
+            }
+            return result;
         }
         public Size FormatParagraph(String text, double desiredWidth, bool allowSplittingWords)
         {
