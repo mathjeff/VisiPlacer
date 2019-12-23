@@ -8,21 +8,18 @@ namespace VisiPlacement
         public ContainerLayout()
         {
             this.Initialize();
-            this.BonusScore = LayoutScore.Zero;
         }
-        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, LayoutScore bonusScore)
+        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout)
         {
             this.Initialize();
             this.View = view;
             this.SubLayout = subLayout;
-            this.BonusScore = bonusScore;
         }
-        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, LayoutScore bonusScore, bool fillAvailableSpace)
+        public ContainerLayout(ContentView view, LayoutChoice_Set subLayout, bool fillAvailableSpace)
         {
             this.Initialize();
             this.View = view;
             this.SubLayout = subLayout;
-            this.BonusScore = bonusScore;
             this.ChildFillsAvailableSpace = fillAvailableSpace;
         }
         // Returns a ContainerLayout that wraps a ScrollView whose content size will always match the ScrollView's size.
@@ -76,36 +73,15 @@ namespace VisiPlacement
                 this.AnnounceChange(true);
             }
         }
-        public LayoutScore BonusScore { get; set; }
-
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
             Specific_ContainerLayout result;
 
-            LayoutQuery subQuery = query.Clone();
-            if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
-            {
-                // If there is no room for the border, then even the border would be cropped
-                result = this.makeSpecificLayout(this.view, new Size(0, 0), LayoutScore.Get_CutOff_LayoutScore(1), null, new Thickness(0));
-                if (query.Accepts(result))
-                    return this.prepareLayoutForQuery(result, query);
-                return null;
-            }
-
             // Query sublayout if it exists
             if (this.SubLayout != null)
             {
-                subQuery.MinScore = subQuery.MinScore.Minus(this.BonusScore);
-                SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
-                if (best_subLayout != null)
-                {
-                    result = this.makeSpecificLayout(this.view, new Size(best_subLayout.Width, best_subLayout.Height), best_subLayout.Score.Plus(this.BonusScore), best_subLayout, new Size());
-                    result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
-                    this.prepareLayoutForQuery(result, query);
-                    return result;
-                }
-                return null;
+                return this.SubLayout.GetBestLayout(query);
             }
             // if there is no subLayout, for now we just return an empty size
             Specific_ContainerLayout empty = this.makeSpecificLayout(this.view, new Size(), LayoutScore.Zero, null, new Thickness());

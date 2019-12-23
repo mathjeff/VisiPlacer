@@ -14,5 +14,21 @@ namespace VisiPlacement
             this.SubLayout = layoutOptions;
             this.BonusScore = scoreToAdd;
         }
+
+        public LayoutScore BonusScore { get; set; }
+
+        public override SpecificLayout GetBestLayout(LayoutQuery query)
+        {
+            LayoutQuery parentQuery = query.Clone();
+            parentQuery.MinScore = parentQuery.MinScore.Minus(this.BonusScore);
+
+            SpecificLayout parentResult = base.GetBestLayout(parentQuery);
+            if (parentResult == null)
+                return null;
+            SpecificLayout result = this.makeSpecificLayout(this.View, parentResult.Size, parentResult.Score.Plus(this.BonusScore), parentResult, new Thickness());
+            this.prepareLayoutForQuery(result, query);
+            return result;
+
+        }
     }
 }
