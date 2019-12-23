@@ -86,7 +86,7 @@ namespace VisiPlacement
                 }
                 currentLayout = layoutSet.GetBestLayout(query.Clone());
 
-                if (currentLayout != null)
+                if (currentLayout != null && query.PreferredLayout(currentLayout, best_specificLayout) == currentLayout)
                 {
                     currentLayout = currentLayout.Clone();
                     // keep track of this query (which must be the best so far)

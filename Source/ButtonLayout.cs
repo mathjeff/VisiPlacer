@@ -30,7 +30,7 @@ namespace VisiPlacement
 
         public static LayoutChoice_Set HideIfEmpty(ButtonLayout buttonLayout)
         {
-            return new LayoutUnion(buttonLayout, new ContainerLayout());
+            return new LayoutUnion(new ContainerLayout(), buttonLayout);
         }
         
         private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)

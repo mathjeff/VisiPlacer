@@ -344,6 +344,7 @@ namespace VisiPlacement
             bool increaseScore = true;
             int numIterations = 0;
             LayoutScore maxExistentScore = null; // becomes non-null if we discover what it is
+            int index = semiFixedLayout.NumCoordinatesSetInCurrentDimension;
             while (currentCoordinate >= 0)
             {
                 numIterations++;
@@ -365,11 +366,25 @@ namespace VisiPlacement
                         subQuery.MinScore = query.MinScore;
                         subQuery.Debug = query.Debug;
                         //subQuery.ProposedSolution_ForDebugging = query.ProposedSolution_ForDebugging;
-                        
-
 
                         SemiFixed_GridLayout currentLayout = new SemiFixed_GridLayout(semiFixedLayout);
                         currentLayout.AddCoordinate(currentCoordinate);
+
+                        if (semiFixedLayout.NextCoordinateAffectsWidth != semiFixedLayout.SetWidthBeforeHeight)
+                        {
+                            // We've already finished setting the width or the height before this coordinate
+                            // So, it's safe to autoshrink this coordinate if the sublayouts are saying they don't need all the space
+                            if (semiFixedLayout.NextCoordinateAffectsWidth)
+                            {
+                                this.ShrinkWidth(currentLayout, index, query, LayoutScore.Zero, false);
+                                currentCoordinate = this.RoundWidthDown(currentLayout.Get_GroupWidth(index));
+                            }
+                            else
+                            {
+                                this.ShrinkHeight(currentLayout, index, query, LayoutScore.Zero, false);
+                                currentCoordinate = this.RoundHeightDown(currentLayout.Get_GroupHeight(index));
+                            }
+                        }
 
                         // recursively query the next dimension
                         newSublayouts = this.GetLayoutsToConsider(subQuery, currentLayout);
@@ -469,7 +484,6 @@ namespace VisiPlacement
                     double newCurrentCoordinate;
                     if (semiFixedLayout.NextCoordinateAffectsWidth)
                     {
-                        int index = semiFixedLayout.NumCoordinatesSetInCurrentDimension;
                         // determine max width to satisfy query
                         double maxAcceptibleWidth;
                         if (!double.IsPositiveInfinity(query.MaxWidth))
@@ -490,7 +504,7 @@ namespace VisiPlacement
                         }
                         // now shrink the width
                         double maxWidth = Math.Min(maxInterestingWidth, maxAcceptibleWidth);
-                        this.ShrinkWidth(currentSublayout, index, query, allowedScoreDecrease);
+                        this.ShrinkWidth(currentSublayout, index, query, allowedScoreDecrease, true);
                         // update some variables
                         if (currentSublayout.Get_GroupWidth(index) == currentCoordinate)
                         {
@@ -532,14 +546,13 @@ namespace VisiPlacement
                             currentSublayout.Set_GroupWidth(index, maxWidth);
                             // Now that we've forcibly decreased the width a little and lost some score, decrease the width more if it's possible without losing more score
                             if (!semiFixedLayout.SetWidthBeforeHeight)
-                                this.ShrinkWidth(currentSublayout, index, query, LayoutScore.Zero);
+                                this.ShrinkWidth(currentSublayout, index, query, LayoutScore.Zero, true);
                         }
 
                         newCurrentCoordinate = this.RoundWidthDown(currentSublayout.Get_GroupWidth(index));
                     }
                     else
                     {
-                        int index = semiFixedLayout.NumCoordinatesSetInCurrentDimension;
                         // determine max height to satisfy query
                         double maxAcceptibleHeight;
                         if (!double.IsPositiveInfinity(query.MaxHeight))
@@ -560,7 +573,7 @@ namespace VisiPlacement
                         }
                         // now shrink the height
                         double maxHeight = Math.Min(maxInterestingHeight, maxAcceptibleHeight);
-                        this.ShrinkHeight(currentSublayout, index, query, allowedScoreDecrease);
+                        this.ShrinkHeight(currentSublayout, index, query, allowedScoreDecrease, true);
                         // update some variables
                         if (currentSublayout.Get_GroupHeight(index) == currentCoordinate)
                         {
@@ -602,7 +615,7 @@ namespace VisiPlacement
                             currentSublayout.Set_GroupHeight(index, maxHeight);
                             // Now that we've forcibly decreased the height a little and lost some score, decrease the height more if it's possible without losing more score
                             if (semiFixedLayout.SetWidthBeforeHeight)
-                                this.ShrinkHeight(currentSublayout, index, query, LayoutScore.Zero);
+                                this.ShrinkHeight(currentSublayout, index, query, LayoutScore.Zero, true);
                         }
 
                         newCurrentCoordinate = this.RoundHeightDown(currentSublayout.Get_GroupHeight(index));
@@ -744,7 +757,7 @@ namespace VisiPlacement
 
         // shrinks the specified width a lot without decreasing the layout's score by any more than allowedScoreDecrease
         // sourceQuery is the LayoutQuery that caused this call to ShrinkWidth
-        private void ShrinkWidth(SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, LayoutQuery sourceQuery, LayoutScore totalAllowedScoreDecrease)
+        private void ShrinkWidth(SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, LayoutQuery sourceQuery, LayoutScore totalAllowedScoreDecrease, bool runAllSubqueries)
         {
             if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
             {
@@ -793,37 +806,43 @@ namespace VisiPlacement
                         GridLayout.NumComputations++;
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
 
-                        // figure out how far the view can shrink while keeping the same score
-                        LayoutQuery query2 = new MinWidth_LayoutQuery();
-                        query2.Debug = sourceQuery.Debug;
-                        query2.MaxWidth = query.MaxWidth;
-                        query2.MaxHeight = query.MaxHeight;
-                        query2.MinScore = bestLayout.Score.Minus(eachAllowedScoreDecrease);
-
-                        SpecificLayout layout2 = subLayout.GetBestLayout(query2);
-
-                        if (layout2 == null)
+                        SpecificLayout layout2;
+                        if (runAllSubqueries)
                         {
-                            ErrorReporter.ReportParadox("Error: min-width query did not find result from max-score query");
-                            LayoutQuery debugQuery1 = query2.Clone();
-                            debugQuery1.Debug = true;
-                            debugQuery1.ProposedSolution_ForDebugging = bestLayout;
-                            SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
+                            // figure out how far the view can shrink while keeping the same score
+                            LayoutQuery query2 = new MinWidth_LayoutQuery();
+                            query2.Debug = sourceQuery.Debug;
+                            query2.MaxWidth = query.MaxWidth;
+                            query2.MaxHeight = query.MaxHeight;
+                            query2.MinScore = bestLayout.Score.Minus(eachAllowedScoreDecrease);
 
-                            // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                            LayoutQuery debugQuery2 = query.Clone();
-                            debugQuery2.Debug = true;
-                            debugQuery2.ProposedSolution_ForDebugging = debugResult1;
-                            subLayout.GetBestLayout(debugQuery2.Clone());
+                            layout2 = subLayout.GetBestLayout(query2);
 
-                            LayoutQuery debugQuery3 = debugQuery1.Clone();
-                            debugQuery3.MinScore = LayoutScore.Minimum;
-                            SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
-                            ErrorReporter.ReportParadox("");
+                            if (layout2 == null)
+                            {
+                                ErrorReporter.ReportParadox("Error: min-width query did not find result from max-score query");
+                                LayoutQuery debugQuery1 = query2.Clone();
+                                debugQuery1.Debug = true;
+                                debugQuery1.ProposedSolution_ForDebugging = bestLayout;
+                                SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
+
+                                // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                                LayoutQuery debugQuery2 = query.Clone();
+                                debugQuery2.Debug = true;
+                                debugQuery2.ProposedSolution_ForDebugging = debugResult1;
+                                subLayout.GetBestLayout(debugQuery2.Clone());
+
+                                LayoutQuery debugQuery3 = debugQuery1.Clone();
+                                debugQuery3.MinScore = LayoutScore.Minimum;
+                                SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
+                                ErrorReporter.ReportParadox("");
+                            }
+                            if (!query2.Accepts(layout2))
+                                ErrorReporter.ReportParadox("Error: min-width query received an invalid response");
                         }
-                        if (!query2.Accepts(layout2))
+                        else
                         {
-                            ErrorReporter.ReportParadox("Error: min-width query received an invalid response");
+                            layout2 = bestLayout;
                         }
 
                         currentWidth = layout2.Width;
@@ -852,7 +871,7 @@ namespace VisiPlacement
         }
 
         // shrinks the specified height as much as possible without decreasing the layout's score
-        private void ShrinkHeight(SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, LayoutQuery sourceQuery, LayoutScore totalAllowedScoreDecrease)
+        private void ShrinkHeight(SemiFixed_GridLayout layout, int indexOf_propertyGroup_toShrink, LayoutQuery sourceQuery, LayoutScore totalAllowedScoreDecrease, bool runAllSubqueries)
         {
             if (totalAllowedScoreDecrease.CompareTo(LayoutScore.Zero) < 0)
             {
@@ -898,42 +917,47 @@ namespace VisiPlacement
                         GridLayout.NumComputations++;
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query.Clone());
 
-
-                        // figure out how far the view can shrink while keeping the same score
-                        LayoutQuery query2 = new MinHeight_LayoutQuery();
-                        query2.MaxWidth = query.MaxWidth;
-                        query2.MaxHeight = query.MaxHeight;
-                        query2.MinScore = bestLayout.Score.Minus(eachAllowedScoreDecrease);
-                        query2.Debug = sourceQuery.Debug;
-                        //query2.ProposedSolution_ForDebugging = sourceQuery.ProposedSolution_ForDebugging;
-
-                        SpecificLayout layout2 = subLayout.GetBestLayout(query2.Clone());
-
-                        // problem: if
-                        if (layout2 == null)
+                        SpecificLayout layout2;
+                        if (runAllSubqueries)
                         {
-                            ErrorReporter.ReportParadox("Error: min-height query did not find result from max-score query");
-                            // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                            LayoutQuery debugQuery1 = query2.Clone();
-                            debugQuery1.Debug = true;
-                            debugQuery1.ProposedSolution_ForDebugging = bestLayout;
-                            SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
+                            // figure out how far the view can shrink while keeping the same score
+                            LayoutQuery query2 = new MinHeight_LayoutQuery();
+                            query2.MaxWidth = query.MaxWidth;
+                            query2.MaxHeight = query.MaxHeight;
+                            query2.MinScore = bestLayout.Score.Minus(eachAllowedScoreDecrease);
+                            query2.Debug = sourceQuery.Debug;
+                            //query2.ProposedSolution_ForDebugging = sourceQuery.ProposedSolution_ForDebugging;
 
-                            // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                            LayoutQuery debugQuery2 = query.Clone();
-                            debugQuery2.Debug = true;
-                            debugQuery2.ProposedSolution_ForDebugging = debugResult1;
-                            subLayout.GetBestLayout(debugQuery2.Clone());
+                            layout2 = subLayout.GetBestLayout(query2);
+                            if (layout2 == null)
+                            {
+                                ErrorReporter.ReportParadox("Error: min-height query did not find result from max-score query");
+                                // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                                LayoutQuery debugQuery1 = query2.Clone();
+                                debugQuery1.Debug = true;
+                                debugQuery1.ProposedSolution_ForDebugging = bestLayout;
+                                SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
 
-                            LayoutQuery debugQuery3 = debugQuery1.Clone();
-                            debugQuery3.MinScore = LayoutScore.Minimum;
-                            SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
-                            ErrorReporter.ReportParadox("");
+                                // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                                LayoutQuery debugQuery2 = query.Clone();
+                                debugQuery2.Debug = true;
+                                debugQuery2.ProposedSolution_ForDebugging = debugResult1;
+                                subLayout.GetBestLayout(debugQuery2.Clone());
+
+                                LayoutQuery debugQuery3 = debugQuery1.Clone();
+                                debugQuery3.MinScore = LayoutScore.Minimum;
+                                SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
+                                ErrorReporter.ReportParadox("");
+                            }
+
+                            if (!query2.Accepts(layout2))
+                            {
+                                ErrorReporter.ReportParadox("Error: min-height query received an invalid response");
+                            }
                         }
-
-                        if (!query2.Accepts(layout2))
+                        else
                         {
-                            ErrorReporter.ReportParadox("Error: min-height query received an invalid response");
+                            layout2 = bestLayout;
                         }
 
                         currentHeight = layout2.Height;
