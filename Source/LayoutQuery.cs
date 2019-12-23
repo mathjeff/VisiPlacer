@@ -209,11 +209,11 @@ namespace VisiPlacement
                 return false;
             return true;
         }
-
+        public static int ExpensiveThreshold = 200;
         public void OnAnswered(LayoutChoice_Set layout)
         {
             this.Cost = LayoutQuery.nextID - this.debugID;
-            if (this.Cost > 200)
+            if (this.Cost >= ExpensiveThreshold)
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
