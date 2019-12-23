@@ -28,6 +28,14 @@ namespace VisiPlacement
             return null;
         }
 
+        public LayoutChoice_Set LayoutToManage
+        {
+            get
+            {
+                return this.layoutToManage;
+            }
+        }
+
         LayoutChoice_Set layoutToManage;
         double pixelWidth;
         double pixelHeight;

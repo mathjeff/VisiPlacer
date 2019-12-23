@@ -205,7 +205,7 @@ namespace VisiPlacement
             {
                 if (this.true_queryResults.ContainsKey(query))
                     ErrorReporter.ReportParadox("Error, layoutCache query results were saved before it completed?");
-                query.OnAnswered();
+                query.OnAnswered(this.layoutToManage);
                 this.true_queryResults[query] = result;
             }
             return result;

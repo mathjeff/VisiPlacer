@@ -210,14 +210,14 @@ namespace VisiPlacement
             return true;
         }
 
-        public void OnAnswered()
+        public void OnAnswered(LayoutChoice_Set layout)
         {
             this.Cost = LayoutQuery.nextID - this.debugID;
             if (this.Cost > 200)
             {
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    System.Diagnostics.Debug.WriteLine("Expensive layout query: " + this + " required " + this.Cost + " queries");
+                    System.Diagnostics.Debug.WriteLine("Expensive layout query: " + this + " in " + layout + " required " + this.Cost + " queries");
                 }
             }
         }

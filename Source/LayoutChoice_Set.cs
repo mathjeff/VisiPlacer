@@ -104,7 +104,7 @@ namespace VisiPlacement
                 throw new InvalidOperationException("No parents assigned to " + this);
             }
 
-            query.OnAnswered();
+            query.OnAnswered(this);
 
             return layout;
         }
