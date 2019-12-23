@@ -262,10 +262,11 @@ namespace VisiPlacement
             return total;
         }
 
-        public void TryToRescaleToTotalValue(double total)
+        public void TryToRescaleToTotalValue(double newTotal)
         {
-            if (this.GetTotalValue() != 0)
-                this.RescaleToTotalValue(total);
+            double currentTotal = this.GetTotalValue();
+            if (currentTotal != 0 && !double.IsInfinity(currentTotal))
+                this.RescaleToTotalValue(newTotal);
         }
 
         public void RescaleToTotalValue(double total)
