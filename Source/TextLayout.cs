@@ -450,9 +450,17 @@ namespace VisiPlacement
 
     }
 
+    enum TextFormatterType
+    {
+        UNDECIDED = 0,
+        UNIFORMS_MISC = 1,
+        INNATE = 2
+    }
 
     public class TextFormatter
     {
+        private static TextFormatterType textFormatterType = TextFormatterType.UNDECIDED;
+
         private static Dictionary<double, TextFormatter> formattersByFontSize = new Dictionary<double, TextFormatter>();
         public static TextFormatter ForSize(double size)
         {
@@ -611,16 +619,31 @@ namespace VisiPlacement
             return size;
         }
 
+        // TODO: can UniformsMisc be made to support UWP?
+        private void chooseTextFormatterType()
+        {
+            if (textFormatterType == TextFormatterType.UNDECIDED)
+            {
+                try
+                {
+                    Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, this.FontSize);
+                    textFormatterType = TextFormatterType.UNIFORMS_MISC;
+                }
+                catch (Exception e)
+                {
+                    textFormatterType = TextFormatterType.INNATE;
+                }
+            }
+        }
         // computes the size required by a TextBlock that plans to display this text all in a line
         private Size computeLineSize(String text)
         {
-#if true
-            return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, this.FontSize);
-#else
+            this.chooseTextFormatterType();
+            if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
+                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, this.FontSize);
             // Get enough width for the given text, and enough height to accomodate the line spacing
             double width = this.computeGlyphSize(text).Width;
             return new Size(width + this.leftMargin, this.fontLineHeight);
-#endif
         }
 
         public double FontSize
@@ -660,9 +683,12 @@ namespace VisiPlacement
             return this.textBlock;
         }
 
-        // computes the size of the letters in the given string, and doesn't add any extra margins
+        // Computes the size of the letters in the given string, and doesn't add any extra margins
+        // TODO: make this more accurate
         private Size computeGlyphSize(String text)
         {
+            if (text == null || text == "")
+                return new Size();
             SKPaint textBlock = this.getTextBlock();
             SKRect bounds = new SKRect();
             double width = textBlock.MeasureText(text, ref bounds);
