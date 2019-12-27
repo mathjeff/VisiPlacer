@@ -29,9 +29,9 @@ namespace VisiPlacement
 
 
 
-        public void AddLayout(LayoutChoice_Set newLayout, String name)
+        public void AddLayout(LayoutChoice_Set newLayout, String name, int backPriority = 1)
         {
-            this.AddLayout(new StackEntry(newLayout, name, null));
+            this.AddLayout(new StackEntry(newLayout, name, null, backPriority));
         }
         public void AddLayout(LayoutChoice_Set newLayout, String name, OnBack_Listener listener)
         {
@@ -98,26 +98,49 @@ namespace VisiPlacement
         }
         private LayoutChoice_Set backButtons(List<StackEntry> layouts)
         {
-            Horizontal_GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
-            Horizontal_GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
-            if (layouts.Count >= 3)
+            List<StackEntry> prevLayouts = layouts.GetRange(0, layouts.Count - 1);
+
+            int maxPriority = -1000;
+            foreach (StackEntry entry in prevLayouts)
             {
-                int oldestButton_index = layouts.Count - 3;
-                abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(oldestButton_index, layouts[oldestButton_index].Name));
+                maxPriority = Math.Max(maxPriority, entry.BackPriority);
+            }
+            List<StackEntry> interestingPrevLayouts = new List<StackEntry>();
+            foreach (StackEntry entry in prevLayouts)
+            {
+                if (entry.BackPriority == maxPriority)
+                    interestingPrevLayouts.Add(entry);
             }
 
-            for (int i = 0; i < layouts.Count - 1; i++)
+            Horizontal_GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            Horizontal_GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            if (interestingPrevLayouts.Count >= 2)
             {
-                StackEntry entry = layouts[i];
-                ButtonLayout nameLayout = this.JumpBack_ButtonLayout(i, entry.Name);
+                abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 2]));
+                abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 1]));
+            }
+
+            for (int i = 0; i < interestingPrevLayouts.Count; i++)
+            {
+                StackEntry entry = interestingPrevLayouts[i];
+                ButtonLayout nameLayout = this.JumpBack_ButtonLayout(entry);
                 fullBuilder.AddLayout(nameLayout);
-                if (i == layouts.Count - 2)
-                    abbreviatedBuilder.AddLayout(nameLayout);
             }
             return new LayoutUnion(abbreviatedBuilder.BuildAnyLayout(), fullBuilder.BuildAnyLayout());
         }
-        private ButtonLayout JumpBack_ButtonLayout(int toIndex, string text)
+        private ButtonLayout JumpBack_ButtonLayout(StackEntry stackEntry)
         {
+            int toIndex = -1;
+            for (int i = 0; i < this.layoutEntries.Count; i++)
+            {
+                if (this.layoutEntries[i] == stackEntry)
+                {
+                    toIndex = i;
+                    break;
+                }
+            }
+            String text = stackEntry.Name;
+
             if (toIndex >= this.backButton_layouts.Count)
             {
                 Button button = new Button();
@@ -155,17 +178,19 @@ namespace VisiPlacement
 
     public class StackEntry
     {
-        public StackEntry(LayoutChoice_Set layout, string name, OnBack_Listener listener)
+        public StackEntry(LayoutChoice_Set layout, string name, OnBack_Listener listener, int backPriority = 1)
         {
             this.Layout = layout;
             if (listener != null)
                 this.Listeners.AddLast(listener);
             this.Name = name;
+            this.BackPriority = backPriority;
         }
 
         public LayoutChoice_Set Layout;
         public LinkedList<OnBack_Listener> Listeners = new LinkedList<OnBack_Listener>();
         public string Name;
+        public int BackPriority;
     }
 
     public interface OnBack_Listener
