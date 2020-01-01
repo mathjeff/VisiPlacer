@@ -25,7 +25,7 @@ namespace VisiPlacement
             SpecificLayout parentResult = base.GetBestLayout(parentQuery);
             if (parentResult == null)
                 return null;
-            SpecificLayout result = this.makeSpecificLayout(this.View, parentResult.Size, parentResult.Score.Plus(this.BonusScore), parentResult, new Thickness());
+            SpecificLayout result = this.makeSpecificLayout(this.View, parentResult.Size, this.BonusScore, parentResult, new Thickness());
             this.prepareLayoutForQuery(result, query);
             return result;
 

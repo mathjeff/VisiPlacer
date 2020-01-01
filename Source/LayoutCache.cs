@@ -220,7 +220,14 @@ namespace VisiPlacement
             this.running = true;
             numQueries++;
             if (numQueries % 10000 == 0)
-                System.Diagnostics.Debug.WriteLine("Overall LayoutCache miss rate: " + numComputations + " of " + numQueries + " = " + ((double)numComputations / (double)numQueries));
+            {
+                double rate = (double)numComputations / (double)numQueries;
+                System.Diagnostics.Debug.WriteLine("Overall LayoutCache miss rate: " + numComputations + " of " + numQueries + " = " + rate);
+                if (rate < 0.02)
+                {
+                    System.Diagnostics.Debug.WriteLine("Surprisingly high layoutcache hit rate");
+                }
+            }
 
             // A layout of size 0 in one dimension doesn't get any points for being nonzero in the other dimension
             if (query.MaxHeight == 0)
@@ -276,7 +283,7 @@ namespace VisiPlacement
             // look for the best response we've seen so far for this query
             LayoutQuery_And_Response best = null;
 
-            foreach (LayoutQuery_And_Response candidate in this.orderedResponses)
+            /*foreach (LayoutQuery_And_Response candidate in this.orderedResponses)
             {
                 if (best == null)
                 {
@@ -288,7 +295,7 @@ namespace VisiPlacement
                     if (query.PreferredLayout(best.Response, candidate.Response) == candidate.Response)
                         best = candidate;
                 }
-            }
+            }*/
             return best;
         }
 

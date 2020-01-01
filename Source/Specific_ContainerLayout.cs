@@ -11,17 +11,17 @@ namespace VisiPlacement
         {
             this.Initialize();
         }
-        public Specific_ContainerLayout(View view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness borderThickness)
+        public Specific_ContainerLayout(View view, Size size, LayoutScore bonusScore, SpecificLayout subLayout, Thickness borderThickness)
         {
             this.Initialize();
             this.view = view;
             this.Size = size;
-            this.score = score;
+            this.bonusScore = bonusScore;
             this.BorderThickness = borderThickness;
             this.subLayout = subLayout;
         }
-        public Specific_ContainerLayout(View view, Size size, LayoutScore score, Thickness borderThickness)
-            : this(view, size, score, null, borderThickness)
+        public Specific_ContainerLayout(View view, Size size, LayoutScore bonusScore, Thickness borderThickness)
+            : this(view, size, bonusScore, null, borderThickness)
         {
         }
         private void Initialize()
@@ -97,7 +97,7 @@ namespace VisiPlacement
             base.CopyFrom(original);
             this.view = original.view;
             this.Size = original.Size;
-            this.score = original.score;
+            this.bonusScore = original.bonusScore;
             this.subLayout = original.subLayout;
             this.BorderThickness = original.BorderThickness;
             this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
@@ -121,7 +121,10 @@ namespace VisiPlacement
         {
             get
             {
-                return this.score;
+                LayoutScore result = this.bonusScore;
+                if (this.SubLayout != null)
+                    result = result.Plus(this.subLayout.Score);
+                return result;
             }
         }
         public override View View
@@ -182,7 +185,7 @@ namespace VisiPlacement
 
 
         public Thickness BorderThickness { get; set; }
-        private LayoutScore score;
+        private LayoutScore bonusScore;
         private View view;
         private SpecificLayout subLayout;
     }

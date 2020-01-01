@@ -22,7 +22,7 @@ namespace VisiPlacement
             SpecificLayout internalLayout = this.layoutToManage.GetBestLayout(query);
             if (internalLayout != null) {
                 Size size = new Size(Math.Ceiling(internalLayout.Width / this.pixelWidth) * this.pixelWidth, Math.Ceiling(internalLayout.Height / this.pixelHeight) * this.pixelHeight);
-                Specific_ContainerLayout result = new Specific_ContainerLayout(null, size, internalLayout.Score, internalLayout, new Thickness(0));
+                Specific_ContainerLayout result = new Specific_ContainerLayout(null, size, new LayoutScore(), internalLayout, new Thickness(0));
                 return this.prepareLayoutForQuery(result, query);
             }
             return null;

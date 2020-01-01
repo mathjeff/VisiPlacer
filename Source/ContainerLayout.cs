@@ -93,9 +93,9 @@ namespace VisiPlacement
             return result;
         }
 
-        protected Specific_ContainerLayout makeSpecificLayout(View view, Size size, LayoutScore score, SpecificLayout subLayout, Thickness border)
+        protected Specific_ContainerLayout makeSpecificLayout(View view, Size size, LayoutScore bonusScore, SpecificLayout subLayout, Thickness border)
         {
-            return new Specific_ContainerLayout(view, size, score, subLayout, border);
+            return new Specific_ContainerLayout(view, size, bonusScore, subLayout, border);
         }
 
         LayoutChoice_Set subLayout;
