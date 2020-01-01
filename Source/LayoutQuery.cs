@@ -219,6 +219,7 @@ namespace VisiPlacement
                 {
                     System.Diagnostics.Debug.WriteLine("Expensive layout query: " + this + " in " + layout + " required " + this.Cost + " queries");
                 }
+                ExpensiveThreshold *= 2;
             }
         }
 

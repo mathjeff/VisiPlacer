@@ -9,6 +9,7 @@ namespace VisiPlacement
     {
         public static int NumQueries = 0;
         public static int NumComputations = 0;
+        public static int ExpensiveThreshold = 1;
 
         public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore)
         {
@@ -637,10 +638,11 @@ namespace VisiPlacement
                 }
                 // keep track of the coordinates that we are considering
                 //results.Add(new SemiFixed_GridLayout(currentSublayout));
-                if (results.Count > 10)
+                if (results.Count > ExpensiveThreshold)
                 {
                     System.Diagnostics.Debug.WriteLine("Surprisingly slow query " + query + " in GridLayout " + this.DebugId + ": " + results.Count +
                         " results so far, currentCoordinate = " + currentCoordinate);
+                    ExpensiveThreshold *= 2;
                 }
                 // keep track of the best layout so far
                 if (GridLayout.PreferredLayout(query, currentSublayout, bestSublayout) == currentSublayout)
