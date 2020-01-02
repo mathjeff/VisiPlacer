@@ -156,7 +156,7 @@ namespace VisiPlacement
             // display stats
             DateTime endTime = DateTime.Now;
             TimeSpan duration = endTime.Subtract(startTime);
-            System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration);
+            System.Diagnostics.Debug.WriteLine("ViewManager DoLayout finished in " + duration + " (" + query.Cost + ") queries");
             System.Diagnostics.Debug.WriteLine("Text formatting time = " + TextLayout.TextTime + " for " + TextLayout.NumMeasures + " measures");
             int num_grid_postComputations = GridLayout.NumComputations;
             System.Diagnostics.Debug.WriteLine("Num grid computations = " + (num_grid_postComputations - num_grid_preComputations));
