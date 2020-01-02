@@ -199,7 +199,7 @@ namespace VisiPlacement
                 if (this.true_queryResults.ContainsKey(query))
                     ErrorReporter.ReportParadox("Error, layoutCache repeated a query that was already present");
             }
-            SpecificLayout result = this.layoutToManage.GetBestLayout(query.Clone());
+            SpecificLayout result = this.layoutToManage.GetBestLayout(query);
             if (!query.Debug)
             {
                 if (this.true_queryResults.ContainsKey(query))
@@ -211,7 +211,6 @@ namespace VisiPlacement
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            query = query.Clone();
             if (this.running)
             {
                 ErrorReporter.ReportParadox("LayoutCache being called before it returns?");
@@ -257,8 +256,8 @@ namespace VisiPlacement
                 }
                 if (!correct)
                 {
-                    this.GetBestLayout_Quickly(query.Clone());
-                    this.Query_SubLayout(query.Clone());
+                    this.GetBestLayout_Quickly(query);
+                    this.Query_SubLayout(query);
                 }
                 this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
                 this.running = false;

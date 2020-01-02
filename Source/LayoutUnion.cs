@@ -69,7 +69,7 @@ namespace VisiPlacement
             if (debugResult != null)
                 debugResult = debugResult.Clone();
             LinkedList<LayoutChoice_Set> good_sourceLayouts = new LinkedList<LayoutChoice_Set>();
-            LayoutQuery originalQuery = query.Clone();
+            LayoutQuery originalQuery = query;
             foreach (LayoutChoice_Set layoutSet in this.layoutOptions)
             {
                 SpecificLayout currentLayout;
@@ -79,12 +79,12 @@ namespace VisiPlacement
                     if (debugResult != null && debugResult.GetAncestors().Contains(layoutSet))
                     {
                         query.ProposedSolution_ForDebugging = debugResult;
-                        currentLayout = layoutSet.GetBestLayout(query.Clone());
+                        currentLayout = layoutSet.GetBestLayout(query);
                         query.ProposedSolution_ForDebugging = debugResult;
                         return this.prepareLayoutForQuery(currentLayout, query);
                     }
                 }
-                currentLayout = layoutSet.GetBestLayout(query.Clone());
+                currentLayout = layoutSet.GetBestLayout(query);
 
                 if (currentLayout != null && query.PreferredLayout(currentLayout, best_specificLayout) == currentLayout)
                 {
@@ -98,9 +98,8 @@ namespace VisiPlacement
                         if (query.PreferredLayout(query.ProposedSolution_ForDebugging, best_specificLayout) != query.ProposedSolution_ForDebugging)
                         {
                             ErrorReporter.ReportParadox("Error; query " + query + " prefers " + best_specificLayout + " over proposed debug solution " + query.ProposedSolution_ForDebugging);
-                            LayoutQuery debugQuery = query.Clone();
-                            debugQuery.Debug = true;
-                            layoutSet.GetBestLayout(query.Clone());
+                            LayoutQuery debugQuery = query.DebugClone();
+                            layoutSet.GetBestLayout(debugQuery);
                         }
                     }
 

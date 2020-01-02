@@ -908,7 +908,7 @@ namespace VisiPlacement
                             }
                         }
                         GridLayout.NumComputations++;
-                        SpecificLayout bestLayout = subLayout.GetBestLayout(query.Clone());
+                        SpecificLayout bestLayout = subLayout.GetBestLayout(query);
 
                         SpecificLayout layout2;
                         if (runAllSubqueries)

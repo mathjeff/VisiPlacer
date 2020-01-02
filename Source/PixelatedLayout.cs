@@ -20,7 +20,8 @@ namespace VisiPlacement
             double height = query.MaxHeight;
             if (this.pixelHeight > 0)
                 height = Math.Floor(query.MaxHeight / this.pixelHeight) * this.pixelHeight;
-            query = query.WithDimensions(width, height);
+            if (width != query.MaxWidth || height != query.MaxHeight)
+                query = query.WithDimensions(width, height);
             SpecificLayout internalLayout = this.layoutToManage.GetBestLayout(query);
             if (internalLayout != null) {
                 Size size = new Size(Math.Ceiling(internalLayout.Width / this.pixelWidth) * this.pixelWidth, Math.Ceiling(internalLayout.Height / this.pixelHeight) * this.pixelHeight);
