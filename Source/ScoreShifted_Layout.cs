@@ -19,8 +19,7 @@ namespace VisiPlacement
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            LayoutQuery parentQuery = query.Clone();
-            parentQuery.MinScore = parentQuery.MinScore.Minus(this.BonusScore);
+            LayoutQuery parentQuery = query.WithScore(query.MinScore.Minus(this.BonusScore));
 
             SpecificLayout parentResult = base.GetBestLayout(parentQuery);
             if (parentResult == null)

@@ -106,9 +106,9 @@ namespace VisiPlacement
 
                     // make the query more strict, so we will only ever get dimensions that are at least as good as this
                     if (query.MaximizesScore())
-                        query.OptimizePastExample(best_specificLayout);
+                        query = query.OptimizedPastExample(best_specificLayout);
                     else
-                        query.OptimizeUsingExample(best_specificLayout);
+                        query = query.OptimizedUsingExample(best_specificLayout);
                 }
             }
             originalQuery.ProposedSolution_ForDebugging = debugResult;

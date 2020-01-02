@@ -8,24 +8,48 @@ namespace VisiPlacement
 {
     class MinHeight_LayoutQuery : LayoutQuery
     {
+        public MinHeight_LayoutQuery(double maxWidth, double maxHeight, LayoutScore minScore)
+        {
+            this.setMaxWidth(maxWidth);
+            this.setMaxHeight(maxHeight);
+            this.setMinScore(minScore);
+        }
+        public MinHeight_LayoutQuery()
+        {
+        }
+
         public override LayoutQuery Clone()
+        {
+            return this.Clone((MinHeight_LayoutQuery)null);
+        }
+        public MinHeight_LayoutQuery Clone(MinHeight_LayoutQuery returnType)
         {
             MinHeight_LayoutQuery clone = new MinHeight_LayoutQuery();
             clone.CopyFrom(this);
             return clone;
         }
-        public override void OptimizeUsingExample(SpecificLayout example)
+        public override LayoutQuery OptimizedUsingExample(SpecificLayout example)
         {
+            MinHeight_LayoutQuery result = this;
             if (this.MaxHeight > example.Height)
-                this.MaxHeight = example.Height;
+            {
+                result = this.Clone((MinHeight_LayoutQuery)null);
+                result.setMaxHeight(example.Height);
+            }
+            return result;
         }
-        public override void OptimizePastDimensions(LayoutDimensions example)
+        public override LayoutQuery OptimizedPastDimensions(LayoutDimensions example)
         {
+            MinHeight_LayoutQuery result = this;
             double newHeight = example.Height * 0.9999999999;
             if (this.MaxHeight > newHeight)
-                this.MaxHeight = newHeight;
-            if (!this.Accepts(this.ProposedSolution_ForDebugging))
-                this.ProposedSolution_ForDebugging = null;
+            {
+                result = this.Clone((MinHeight_LayoutQuery)null);
+                result.setMaxHeight(newHeight);
+                if (!result.Accepts(result.ProposedSolution_ForDebugging))
+                    result.ProposedSolution_ForDebugging = null;
+            }
+            return result;
         }
         public override LayoutDimensions PreferredLayout(LayoutDimensions choice1, LayoutDimensions choice2)
         {

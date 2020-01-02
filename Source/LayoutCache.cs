@@ -134,8 +134,7 @@ namespace VisiPlacement
                 bool allowCache = false;
                 if (query.MaximizesScore())
                 {
-                    strictlyImprovedQuery = query.Clone();
-                    strictlyImprovedQuery.OptimizePastExample(shrunken.Response);
+                    strictlyImprovedQuery = query.OptimizedPastExample(shrunken.Response);
                     // Ask the sublayout for this result (or use the cache if we've already asked)
                     if (!strictlyImprovedQuery.Accepts(shrunken.Response))
                     {
@@ -145,7 +144,7 @@ namespace VisiPlacement
                 }
                 else
                 {
-                    strictlyImprovedQuery.OptimizeUsingExample(shrunken.Response);
+                    strictlyImprovedQuery = query.OptimizedUsingExample(shrunken.Response);
                 }
 
                 // Ask the sublayout for this result (or use the cache if we've already asked)
@@ -230,14 +229,9 @@ namespace VisiPlacement
             }
 
             // A layout of size 0 in one dimension doesn't get any points for being nonzero in the other dimension
-            if (query.MaxHeight == 0)
+            if ((query.MaxHeight == 0) != (query.MaxWidth == 0))
             {
-                query.MaxWidth = 0;
-            }
-            else
-            {
-                if (query.MaxWidth == 0)
-                    query.MaxHeight = 0;
+                query = query.WithDimensions(0, 0);
             }
 
             SpecificLayout fastResult = this.GetBestLayout_Quickly(query);

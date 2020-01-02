@@ -90,17 +90,13 @@ namespace VisiPlacement
             // The ScrollLayout's score won't be higher than that of its sublayout, so only check for high-scoring sublayouts
             if (minInterestingScore.CompareTo(query.MinScore) < 0)
                 minInterestingScore = query.MinScore;
-            MaxScore_LayoutQuery maxScore_layoutQuery = new MaxScore_LayoutQuery();
-            maxScore_layoutQuery.MinScore = minInterestingScore;
+            MaxScore_LayoutQuery maxScore_layoutQuery = new MaxScore_LayoutQuery(double.PositiveInfinity, double.PositiveInfinity, minInterestingScore);
             SpecificLayout maxScore_subLayout = this.subLayout.GetBestLayout(maxScore_layoutQuery);
             if (maxScore_subLayout == null)
             {
                 return null;
             }
-            MinHeight_LayoutQuery minHeightAwesomeQuery = new MinHeight_LayoutQuery();
-            minHeightAwesomeQuery.MaxWidth = maxScore_subLayout.Width;
-            minHeightAwesomeQuery.MaxHeight = maxScore_subLayout.Height;
-            minHeightAwesomeQuery.MinScore = maxScore_subLayout.Score;
+            MinHeight_LayoutQuery minHeightAwesomeQuery = new MinHeight_LayoutQuery(maxScore_subLayout.Width, maxScore_subLayout.Height, maxScore_subLayout.Score);
             SpecificLayout minHeightAwesomeSublayout = this.subLayout.GetBestLayout(minHeightAwesomeQuery);
             LayoutScore maxScore = maxScore_subLayout.Score;
             if (!query.MinimizesWidth() && minHeightAwesomeSublayout.Width <= query.MaxWidth)
@@ -111,17 +107,13 @@ namespace VisiPlacement
 
             // Next, find the layout of min height among those having min width among those having max score
             // Next, check for the layout of minimum width having maximum score
-            MinWidth_LayoutQuery minWidthAwesomeQuery = new MinWidth_LayoutQuery();
-            minWidthAwesomeQuery.MinScore = maxScore_subLayout.Score;
+            MinWidth_LayoutQuery minWidthAwesomeQuery = new MinWidth_LayoutQuery(double.PositiveInfinity, double.PositiveInfinity, maxScore_subLayout.Score);
             SpecificLayout minWidthAwesomeSublayoutIntermediate = this.subLayout.GetBestLayout(minWidthAwesomeQuery);
             if (minWidthAwesomeSublayoutIntermediate == null)
             {
                 ErrorReporter.ReportParadox("MinWidth query " + minWidthAwesomeQuery + " could not find the response from the MaxScore query for " + this);
             }
-            MinHeight_LayoutQuery minWidthMinHeightAwesomeQuery = new MinHeight_LayoutQuery();
-            minWidthMinHeightAwesomeQuery.MaxWidth = minWidthAwesomeSublayoutIntermediate.Width;
-            minWidthMinHeightAwesomeQuery.MaxHeight = minWidthAwesomeSublayoutIntermediate.Height;
-            minWidthMinHeightAwesomeQuery.MinScore = minWidthAwesomeSublayoutIntermediate.Score;
+            MinHeight_LayoutQuery minWidthMinHeightAwesomeQuery = new MinHeight_LayoutQuery(minWidthAwesomeSublayoutIntermediate.Width, minWidthAwesomeSublayoutIntermediate.Height, minWidthAwesomeSublayoutIntermediate.Score);
             SpecificLayout minWidthAwesomeSublayout = this.subLayout.GetBestLayout(minWidthMinHeightAwesomeQuery);
             if (minWidthAwesomeSublayout == null)
             {
@@ -153,12 +145,9 @@ namespace VisiPlacement
             }
 
             // Now find the min-height sublayout among min-width sublayouts having positive score
-            MinWidth_LayoutQuery minWidthPositiveQuery = new MinWidth_LayoutQuery();
-            minWidthPositiveQuery.MinScore = minInterestingScore;
+            MinWidth_LayoutQuery minWidthPositiveQuery = new MinWidth_LayoutQuery(double.PositiveInfinity, double.PositiveInfinity, minInterestingScore);
             SpecificLayout minWidthPositiveSublayout = this.subLayout.GetBestLayout(minWidthPositiveQuery);
-            MinHeight_LayoutQuery minHeightPositiveQuery = new MinHeight_LayoutQuery();
-            minHeightPositiveQuery.MaxWidth = minWidthPositiveSublayout.Width;
-            minHeightPositiveQuery.MinScore = minInterestingScore;
+            MinHeight_LayoutQuery minHeightPositiveQuery = new MinHeight_LayoutQuery(minWidthPositiveSublayout.Width, double.PositiveInfinity, minInterestingScore);
             SpecificLayout minHeightPositiveSublayout = this.subLayout.GetBestLayout(minHeightPositiveQuery);
             
             LayoutScore minScore = minHeightPositiveSublayout.Score;
@@ -307,13 +296,10 @@ namespace VisiPlacement
         private SpecificLayout makeLayout(Size size, LayoutScore score)
         {
             // get max scoring sublayout
-            MaxScore_LayoutQuery maxScoreQuery = new MaxScore_LayoutQuery();
-            maxScoreQuery.MaxWidth = size.Width;
+            MaxScore_LayoutQuery maxScoreQuery = new MaxScore_LayoutQuery(size.Width, double.PositiveInfinity, LayoutScore.Minimum);
             SpecificLayout maxScoringChild = this.subLayout.GetBestLayout(maxScoreQuery);
             // get min height sublayout
-            MinHeight_LayoutQuery minHeightQuery = new MinHeight_LayoutQuery();
-            minHeightQuery.MaxWidth = size.Width;
-            minHeightQuery.MinScore = maxScoringChild.Score;
+            MinHeight_LayoutQuery minHeightQuery = new MinHeight_LayoutQuery(size.Width, double.PositiveInfinity, maxScoringChild.Score);
             SpecificLayout minHeightChild = this.subLayout.GetBestLayout(minHeightQuery);
             // return results
             return new Specific_ScrollLayout(this.view, size, score, minHeightChild);

@@ -10,7 +10,7 @@ namespace VisiPlacement
         static int nextID;
         public LayoutQuery()
         {
-            this.MinScore = LayoutScore.Minimum;
+            this.minScore = LayoutScore.Minimum;
             this.maxWidth = double.PositiveInfinity;
             this.maxHeight = double.PositiveInfinity;
             this.debugID = nextID;
@@ -51,20 +51,33 @@ namespace VisiPlacement
             clone.Debug = true;
             return clone;
         }
-        // returns a stricter query given that this example is one of the options
-        public abstract void OptimizeUsingExample(SpecificLayout example);
-        // returns a stricter query that won't even be satisfied by this example
-        public void OptimizePastExample(SpecificLayout example)
+        public LayoutQuery WithDimensions(double width, double height)
         {
-            this.OptimizePastDimensions(example.Dimensions);
+            LayoutQuery result = this.Clone();
+            result.maxWidth = width;
+            result.maxHeight = height;
+            return result;
+        }
+        public LayoutQuery WithScore(LayoutScore score)
+        {
+            LayoutQuery result = this.Clone();
+            result.minScore = score;
+            return result;
+        }
+        // returns a stricter query given that this example is one of the options
+        public abstract LayoutQuery OptimizedUsingExample(SpecificLayout example);
+        // returns a stricter query that won't even be satisfied by this example
+        public LayoutQuery OptimizedPastExample(SpecificLayout example)
+        {
+            return this.OptimizedPastDimensions(example.Dimensions);
         }
         // returns a stricter query that won't even be satisfied by this example
-        public abstract void OptimizePastDimensions(LayoutDimensions dimensions);
-        public LayoutQuery CopyFrom(LayoutQuery original)
+        public abstract LayoutQuery OptimizedPastDimensions(LayoutDimensions dimensions);
+        protected LayoutQuery CopyFrom(LayoutQuery original)
         {
-            this.MaxWidth = original.MaxWidth;
-            this.MaxHeight = original.MaxHeight;
-            this.MinScore = original.MinScore;
+            this.setMaxWidth(original.maxWidth);
+            this.setMaxHeight(original.maxHeight);
+            this.setMinScore(original.minScore);
             if (original.Debug)
                 this.Debug = true;
             this.Cost = original.Cost;
@@ -123,14 +136,14 @@ namespace VisiPlacement
             {
                 return this.maxWidth;
             }
-            set
-            {
-                if (double.IsNaN(value))
-                    throw new ArgumentException("Illegal width: " + value);
-                this.maxWidth = value;
-                if (!this.Accepts(this.proposedSolution_forDebugging))
-                    this.proposedSolution_forDebugging = null;
-            }
+        }
+        protected void setMaxWidth(double value)
+        {
+            if (double.IsNaN(value))
+                throw new ArgumentException("Illegal width: " + value);
+            this.maxWidth = value;
+            if (!this.Accepts(this.proposedSolution_forDebugging))
+                this.proposedSolution_forDebugging = null;
         }
         public double MaxHeight
         {
@@ -138,14 +151,14 @@ namespace VisiPlacement
             {
                 return this.maxHeight;
             }
-            set
-            {
-                if (double.IsNaN(value))
-                    throw new ArgumentException("Illegal height: " + value);
-                this.maxHeight = value;
-                if (!this.Accepts(this.proposedSolution_forDebugging))
-                    this.proposedSolution_forDebugging = null;
-            }
+        }
+        protected void setMaxHeight(double value)
+        {
+            if (double.IsNaN(value))
+                throw new ArgumentException("Illegal height: " + value);
+            this.maxHeight = value;
+            if (!this.Accepts(this.proposedSolution_forDebugging))
+                this.proposedSolution_forDebugging = null;
         }
         public LayoutScore MinScore
         {
@@ -153,12 +166,12 @@ namespace VisiPlacement
             {
                 return this.minScore;
             }
-            set
-            {
-                this.minScore = value;
-                if (!this.Accepts(this.proposedSolution_forDebugging))
-                    this.proposedSolution_forDebugging = null;
-            }
+        }
+        protected void setMinScore(LayoutScore value)
+        {
+            this.minScore = value;
+            if (!this.Accepts(this.proposedSolution_forDebugging))
+                this.proposedSolution_forDebugging = null;
         }
         public bool Debug { get; set; } // whether we want to do extra work for this query to ensure the results are correct
         public SpecificLayout ProposedSolution_ForDebugging 

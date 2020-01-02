@@ -361,10 +361,7 @@ namespace VisiPlacement
                     if (query.MaximizesScore())
                     {
                         // maximize the score while keeping the size to the required value
-                        subQuery = new MaxScore_LayoutQuery();
-                        subQuery.MaxWidth = query.MaxWidth;
-                        subQuery.MaxHeight = query.MaxHeight;
-                        subQuery.MinScore = query.MinScore;
+                        subQuery = new MaxScore_LayoutQuery(query.MaxWidth, query.MaxHeight, query.MinScore);
                         subQuery.Debug = query.Debug;
                         //subQuery.ProposedSolution_ForDebugging = query.ProposedSolution_ForDebugging;
 
@@ -408,32 +405,34 @@ namespace VisiPlacement
                     if (newSublayout == null)
                     {
                         // If we didn't find any layout of this size that is valid, then relax the constraints but look for the thinnest one having enough score
-                        if (semiFixedLayout.NextCoordinateAffectsWidth)
-                            subQuery = new MinWidth_LayoutQuery();
-                        else
-                            subQuery = new MinHeight_LayoutQuery();
-                        subQuery.Debug = query.Debug;
-
                         // if we already have one solution and we are trying to maximize the score, then we only care about solutions that improve beyond that
-                        subQuery.MinScore = query.MinScore;
+                        LayoutScore minScore = query.MinScore;
                         if (query.MaximizesScore() && bestSublayout != null)
-                            subQuery.MinScore = subQuery.MinScore.Plus(LayoutScore.Tiny);
+                            minScore = minScore.Plus(LayoutScore.Tiny);
+                        double maxWidth, maxHeight;
                         if (semiFixedLayout.NextCoordinateAffectsWidth)
                         {
                             // bring the score to the required value and minimize the width
-                            subQuery.MaxWidth = query.MaxWidth;
+                            maxWidth = query.MaxWidth;
                             if (semiFixedLayout.NumUnsetCoordinatesInCurrentDimension > 1)
-                                subQuery.MaxWidth += currentCoordinate;
-                            subQuery.MaxHeight = query.MaxHeight;
+                                maxWidth += currentCoordinate;
+                            maxHeight = query.MaxHeight;
                         }
                         else
                         {
                             // bring the score to the required value and minimize the height
-                            subQuery.MaxWidth = query.MaxWidth;
-                            subQuery.MaxHeight = query.MaxHeight;
+                            maxWidth = query.MaxWidth;
+                            maxHeight = query.MaxHeight;
                             if (semiFixedLayout.NumUnsetCoordinatesInCurrentDimension > 1)
-                                subQuery.MaxHeight += currentCoordinate;
+                                maxHeight += currentCoordinate;
                         }
+
+                        if (semiFixedLayout.NextCoordinateAffectsWidth)
+                            subQuery = new MinWidth_LayoutQuery(maxWidth, maxHeight, minScore);
+                        else
+                            subQuery = new MinHeight_LayoutQuery(maxWidth, maxHeight, minScore);
+                        subQuery.Debug = query.Debug;
+
 
                         SemiFixed_GridLayout currentLayout = new SemiFixed_GridLayout(semiFixedLayout);
                         // start by setting the maximum coordinate, and decrease it until it gets to zero
@@ -653,7 +652,7 @@ namespace VisiPlacement
                     if (query.Accepts(bestSublayout))
                     {
                         // if we've found a layout that works, then any future layouts we find must be at least as good as this one
-                        query.OptimizeUsingExample(bestSublayout);
+                        query = query.OptimizedUsingExample(bestSublayout);
                     }
                     results.Add(bestSublayout);
                 }
@@ -785,10 +784,8 @@ namespace VisiPlacement
                     if (subLayout != null)
                     {
                         // ask the view for the highest-scoring size that fits within the specified dimensions
-                        LayoutQuery query = new MaxScore_LayoutQuery();
+                        LayoutQuery query = new MaxScore_LayoutQuery(layout.GetWidthCoordinate(columnNumber), layout.GetHeightCoordinate(rowNumber), LayoutScore.Minimum);
                         query.Debug = sourceQuery.Debug;
-                        query.MaxWidth = layout.GetWidthCoordinate(columnNumber);
-                        query.MaxHeight = layout.GetHeightCoordinate(rowNumber);
                         if (query.Debug)
                         {
                             SemiFixed_GridLayout converted = sourceQuery.ProposedSolution_ForDebugging as SemiFixed_GridLayout;
@@ -812,11 +809,8 @@ namespace VisiPlacement
                         if (runAllSubqueries)
                         {
                             // figure out how far the view can shrink while keeping the same score
-                            LayoutQuery query2 = new MinWidth_LayoutQuery();
+                            LayoutQuery query2 = new MinWidth_LayoutQuery(query.MaxWidth, query.MaxHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
                             query2.Debug = sourceQuery.Debug;
-                            query2.MaxWidth = query.MaxWidth;
-                            query2.MaxHeight = query.MaxHeight;
-                            query2.MinScore = bestLayout.Score.Minus(eachAllowedScoreDecrease);
 
                             layout2 = subLayout.GetBestLayout(query2);
 
@@ -834,8 +828,7 @@ namespace VisiPlacement
                                 debugQuery2.ProposedSolution_ForDebugging = debugResult1;
                                 subLayout.GetBestLayout(debugQuery2.Clone());
 
-                                LayoutQuery debugQuery3 = debugQuery1.Clone();
-                                debugQuery3.MinScore = LayoutScore.Minimum;
+                                LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
                                 SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
                                 ErrorReporter.ReportParadox("");
                             }
@@ -897,10 +890,8 @@ namespace VisiPlacement
                     if (subLayout != null)
                     {
                         // ask the view for the highest-scoring size that fits within the specified dimensions
-                        LayoutQuery query = new MaxScore_LayoutQuery();
+                        LayoutQuery query = new MaxScore_LayoutQuery(layout.GetWidthCoordinate(columnNumber), layout.GetHeightCoordinate(rowNumber), LayoutScore.Minimum);
                         query.Debug = sourceQuery.Debug;
-                        query.MaxWidth = layout.GetWidthCoordinate(columnNumber);
-                        query.MaxHeight = layout.GetHeightCoordinate(rowNumber);
                         if (query.Debug)
                         {
                             SemiFixed_GridLayout converted = sourceQuery.ProposedSolution_ForDebugging as SemiFixed_GridLayout;
@@ -923,10 +914,7 @@ namespace VisiPlacement
                         if (runAllSubqueries)
                         {
                             // figure out how far the view can shrink while keeping the same score
-                            LayoutQuery query2 = new MinHeight_LayoutQuery();
-                            query2.MaxWidth = query.MaxWidth;
-                            query2.MaxHeight = query.MaxHeight;
-                            query2.MinScore = bestLayout.Score.Minus(eachAllowedScoreDecrease);
+                            LayoutQuery query2 = new MinHeight_LayoutQuery(query.MaxWidth, query.MaxHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
                             query2.Debug = sourceQuery.Debug;
                             //query2.ProposedSolution_ForDebugging = sourceQuery.ProposedSolution_ForDebugging;
 
@@ -946,8 +934,7 @@ namespace VisiPlacement
                                 debugQuery2.ProposedSolution_ForDebugging = debugResult1;
                                 subLayout.GetBestLayout(debugQuery2.Clone());
 
-                                LayoutQuery debugQuery3 = debugQuery1.Clone();
-                                debugQuery3.MinScore = LayoutScore.Minimum;
+                                LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
                                 SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
                                 ErrorReporter.ReportParadox("");
                             }
@@ -1059,17 +1046,14 @@ namespace VisiPlacement
                     if (currentLayout != null)
                     {
                         // ask the subview for the best layout that fits in these dimensions. Hopefully, it will generate a result that is no larger than needed
-                        LayoutQuery query = new MaxScore_LayoutQuery();
-                        query.MaxWidth = width;
-                        query.MaxHeight = height;
+                        LayoutQuery query = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum);
                         query.Debug = enableDebugging;
                         SpecificLayout subLayout = currentLayout.GetBestLayout(query);
                         double requiredWidth = this.RoundWidthUp(subLayout.Width);
                         double requiredHeight = this.RoundHeightUp(subLayout.Height);
                         if (query.Debug)
                         {
-                            query.MaxWidth = requiredWidth;
-                            query.MaxHeight = requiredHeight;
+                            query = new MaxScore_LayoutQuery(requiredWidth, requiredHeight, LayoutScore.Minimum);
                             SpecificLayout recheckedLayout = currentLayout.GetBestLayout(query);
                             if (query.PreferredLayout(subLayout, recheckedLayout) != subLayout)
                                 ErrorReporter.ReportParadox("Error; sublayout cannot re-find its own response");
@@ -1106,10 +1090,7 @@ namespace VisiPlacement
                     if (newScore.CompareTo(previousScore) < 0)
                     {
                         ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
-                        query.MaxWidth = previousLayout.Width;
-                        query.MaxHeight = previousLayout.Height;
-                        query.MinScore = previousLayout.Score;
+                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
                         query.Debug = true;
                         query.ProposedSolution_ForDebugging = previousLayout;
                         this.GetBestLayout(query);
@@ -1135,10 +1116,7 @@ namespace VisiPlacement
                         ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                         if (!enableDebugging)
                             this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
-                        query.MaxWidth = previousLayout.Width;
-                        query.MaxHeight = previousLayout.Height;
-                        query.MinScore = previousLayout.Score;
+                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
                         query.Debug = true;
                         query.ProposedSolution_ForDebugging = previousLayout;
                         this.GetBestLayout(query);
@@ -1166,10 +1144,7 @@ namespace VisiPlacement
                 ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                 if (!enableDebugging)
                     this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
-                MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
-                query.MaxWidth = previousLayout.Width;
-                query.MaxHeight = previousLayout.Height;
-                query.MinScore = previousLayout.Score;
+                MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
                 query.Debug = true;
                 query.ProposedSolution_ForDebugging = previousLayout;
                 this.GetBestLayout(query);
@@ -1597,9 +1572,7 @@ namespace VisiPlacement
                     LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
                     if (subLayout != null)
                     {
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
-                        query.MaxWidth = Math.Max(width, 0);
-                        query.MaxHeight = Math.Max(height, 0);
+                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(Math.Max(width, 0), Math.Max(height, 0), LayoutScore.Minimum);
                         SpecificLayout layout = subLayout.GetBestLayout(query);
                         totalScore = totalScore.Plus(layout.Score);
                         this.sub_specificLayouts[columnNumber, rowNumber] = layout;
@@ -1664,11 +1637,8 @@ namespace VisiPlacement
                         break;
                     }
 
-                    MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery();
-                    subQuery.MaxWidth = layoutAndSize.Size.Width;
-                    subQuery.MaxHeight = layoutAndSize.Size.Height;
                     // loosen the score requirements slightly in case of rounding error
-                    subQuery.MinScore = LayoutScore.Min(averageRequiredExtraScore.Times(0.9999), averageRequiredExtraScore.Times(1.0001));
+                    MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery(layoutAndSize.Size.Width, layoutAndSize.Size.Height, LayoutScore.Min(averageRequiredExtraScore.Times(0.9999), averageRequiredExtraScore.Times(1.0001)));
                     SpecificLayout result = layoutAndSize.Layout.GetBestLayout(subQuery);
                     if (result != null)
                         currentScore = currentScore.Plus(result.Score);
@@ -1883,9 +1853,7 @@ namespace VisiPlacement
                     View subview = null;
                     if (subLayout != null)
                     {
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery();
-                        query.MaxWidth = unscaledWidth;
-                        query.MaxHeight = unscaledHeight;
+                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(unscaledWidth, unscaledHeight, LayoutScore.Minimum);
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
                         totalScore = totalScore.Plus(bestLayout.Score);
                         subview = bestLayout.DoLayout(new Size(width, height));

@@ -60,9 +60,7 @@ namespace VisiPlacement
             // Determine whether there's room for the border
             double borderWidth = this.BorderThickness.Left + this.BorderThickness.Right;
             double borderHeight = this.BorderThickness.Top + this.BorderThickness.Bottom;
-            LayoutQuery subQuery = query.Clone();
-            subQuery.MaxWidth = subQuery.MaxWidth - borderWidth;
-            subQuery.MaxHeight = subQuery.MaxHeight - borderHeight;
+            LayoutQuery subQuery = query.WithDimensions(query.MaxWidth - borderWidth, query.MaxHeight - borderHeight);
             if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
             {
                 // If there is no room for the border, then even the border would be cropped

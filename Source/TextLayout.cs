@@ -629,7 +629,7 @@ namespace VisiPlacement
                     Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, this.FontSize);
                     textFormatterType = TextFormatterType.UNIFORMS_MISC;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     textFormatterType = TextFormatterType.INNATE;
                 }

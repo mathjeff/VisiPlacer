@@ -14,11 +14,13 @@ namespace VisiPlacement
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            query = query.Clone();
+            double width = query.MaxWidth;
             if (this.pixelWidth > 0)
-                query.MaxWidth = Math.Floor(query.MaxWidth / this.pixelWidth) * this.pixelWidth;
+                width = Math.Floor(query.MaxWidth / this.pixelWidth) * this.pixelWidth;
+            double height = query.MaxHeight;
             if (this.pixelHeight > 0)
-                query.MaxHeight = Math.Floor(query.MaxHeight / this.pixelHeight) * this.pixelHeight;
+                height = Math.Floor(query.MaxHeight / this.pixelHeight) * this.pixelHeight;
+            query = query.WithDimensions(width, height);
             SpecificLayout internalLayout = this.layoutToManage.GetBestLayout(query);
             if (internalLayout != null) {
                 Size size = new Size(Math.Ceiling(internalLayout.Width / this.pixelWidth) * this.pixelWidth, Math.Ceiling(internalLayout.Height / this.pixelHeight) * this.pixelHeight);
