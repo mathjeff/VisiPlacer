@@ -9,7 +9,7 @@ namespace VisiPlacement
     {
         public static int NumQueries = 0;
         public static int NumComputations = 0;
-        public static int ExpensiveThreshold = 1;
+        public static int ExpensiveThreshold = 10;
 
         public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore)
         {
@@ -520,7 +520,6 @@ namespace VisiPlacement
                                         ErrorReporter.ReportParadox("GridLayout incorrectly believes unable to decrease the width without decreasing the score");
                                     }
                                 }
-
                                 break;
                             }
                         }
@@ -1956,9 +1955,9 @@ namespace VisiPlacement
         public CompositeGridLayout(int numRows, int numColumns, LayoutScore bonusScore)
         {
             this.numRows = numRows;
-            this.numTopRows = (this.numRows +  1) / 2;
+            this.numTopRows = Math.Max(this.numRows / 4, 1);
             this.numColumns = numColumns;
-            this.numLeftColumns = (this.numColumns + 1) / 2;
+            this.numLeftColumns = Math.Max(this.numColumns / 4, 1);
             int actualNumRows = Math.Min(numRows, 2);
             int actualNumColumns = Math.Min(numColumns, 2);
             this.Initialize(new BoundProperty_List(actualNumRows), new BoundProperty_List(actualNumColumns), bonusScore);
