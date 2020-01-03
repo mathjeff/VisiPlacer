@@ -122,9 +122,15 @@ namespace VisiPlacement
             Dictionary<View, SpecificLayout> preParents = this.findAncestors(this.specificLayout);
 
             // recompute the new desired layout
-            LayoutQuery query = new MaxScore_LayoutQuery(this.displaySize.Width, this.displaySize.Height, LayoutScore.Minimum);
+            // generally we expect the overall score to be positive, so we start by hypothesizing
+            // that there exists a layout with positive score, and only checking negative-scoring layouts if no positive-scoring layout is found
+            LayoutQuery query = new MaxScore_LayoutQuery(this.displaySize.Width, this.displaySize.Height, LayoutScore.Zero);
             DateTime getBestLayout_startDate = DateTime.Now;
             this.specificLayout = this.GetSublayout().GetBestLayout(query);
+            if (this.specificLayout == null)
+                query = query.WithScore(LayoutScore.Minimum);
+            this.specificLayout = this.GetSublayout().GetBestLayout(query);
+
             DateTime getBestLayout_endDate = DateTime.Now;
 
             // find the parent of each view after the relayout, to help us know which parents to disconnect
