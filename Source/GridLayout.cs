@@ -355,16 +355,11 @@ namespace VisiPlacement
                     // if we get here, we must increase the score of the layout without increasing the size too much
 
                     // If we want to eventually find the layout with max score, then start by checking for that
-                    LayoutQuery subQuery;
                     List<SemiFixed_GridLayout> newSublayouts = new List<SemiFixed_GridLayout>();
                     SemiFixed_GridLayout newSublayout = null;
                     if (query.MaximizesScore())
                     {
                         // maximize the score while keeping the size to the required value
-                        subQuery = new MaxScore_LayoutQuery(query.MaxWidth, query.MaxHeight, query.MinScore);
-                        subQuery.Debug = query.Debug;
-                        //subQuery.ProposedSolution_ForDebugging = query.ProposedSolution_ForDebugging;
-
                         SemiFixed_GridLayout currentLayout = new SemiFixed_GridLayout(semiFixedLayout);
                         currentLayout.AddCoordinate(currentCoordinate);
 
@@ -385,13 +380,13 @@ namespace VisiPlacement
                         }
 
                         // recursively query the next dimension
-                        newSublayouts = this.GetLayoutsToConsider(subQuery, currentLayout);
+                        newSublayouts = this.GetLayoutsToConsider(query, currentLayout);
                         foreach (SemiFixed_GridLayout other in newSublayouts)
                         {
                             results.Add(new SemiFixed_GridLayout(other));
                         }
 
-                        newSublayout = GridLayout.PreferredLayout(subQuery, newSublayouts);
+                        newSublayout = GridLayout.PreferredLayout(query, newSublayouts);
                         if (newSublayout != null)
                         {
                             currentSublayout = newSublayout;
@@ -427,6 +422,7 @@ namespace VisiPlacement
                                 maxHeight += currentCoordinate;
                         }
 
+                        LayoutQuery subQuery;
                         if (semiFixedLayout.NextCoordinateAffectsWidth)
                             subQuery = new MinWidth_LayoutQuery(maxWidth, maxHeight, minScore);
                         else
@@ -459,11 +455,14 @@ namespace VisiPlacement
                             break;
                         }
 
-                        if (currentSublayout.Width >= query.MaxWidth && currentSublayout.Height >= query.MaxHeight)
+                        int numInfiniteWidths = currentSublayout.NumInfiniteWidths;
+                        int numInfiniteHeights = currentSublayout.NumInfiniteHeights;
+                        bool usesAllWidth = (currentSublayout.Width >= subQuery.MaxWidth) && (numInfiniteWidths == 0 || numInfiniteWidths == currentSublayout.GetNumWidthProperties());
+                        bool usesAllHeight = (currentSublayout.Height >= subQuery.MaxHeight) && (numInfiniteHeights == 0 || numInfiniteHeights == currentSublayout.GetNumHeightProperties());
+                        if (usesAllWidth && usesAllHeight)
                         {
-                            // This code actually isn't quite correct
                             // If the layout that we found uses at least as much space as allowed, then it must also have at least as much score as possible
-                            //maxExistentScore = currentSublayout.Score;
+                            maxExistentScore = currentSublayout.Score;
                         }
                     }
                 }
