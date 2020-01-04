@@ -1592,7 +1592,7 @@ namespace VisiPlacement
                 // so if several of our sublayouts report the minimum score as their own score, then it would introduce some errors when we try to add and subtract them
                 return true;
             }
-            if (this.Width <= 0 || this.Height <= 0)
+            if ((this.Width <= 0 || this.Height <= 0) && this.score == null)
             {
                 // If we don't have any space then our children won't have any space either, and it should be fast to directly compute our score
                 this.ComputeScore();
