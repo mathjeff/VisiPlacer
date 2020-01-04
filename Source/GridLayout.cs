@@ -401,8 +401,6 @@ namespace VisiPlacement
                         {
                             newSublayout = new SemiFixed_GridLayout(newSublayout);
                             currentSublayout = newSublayout;
-                            if (GridLayout.PreferredLayout(query, bestSublayout, currentSublayout) == currentSublayout)
-                                bestSublayout = new SemiFixed_GridLayout(currentSublayout);
                         }
                     }
 
@@ -654,17 +652,19 @@ namespace VisiPlacement
                 }
                 // keep track of the best layout so far
                 if (GridLayout.PreferredLayout(query, currentSublayout, bestSublayout) == currentSublayout)
-                    bestSublayout = new SemiFixed_GridLayout(currentSublayout);
-
-                if (bestSublayout != null)
                 {
-                    if (query.Accepts(bestSublayout))
+                    bestSublayout = new SemiFixed_GridLayout(currentSublayout);
+                    if (bestSublayout != null)
                     {
-                        // if we've found a layout that works, then any future layouts we find must be at least as good as this one
-                        query = query.OptimizedUsingExample(bestSublayout);
+                        if (query.Accepts(bestSublayout))
+                        {
+                            // if we've found a layout that works, then any future layouts we find must be at least as good as this one
+                            query = query.OptimizedUsingExample(bestSublayout);
+                        }
+                        results.Add(bestSublayout);
                     }
-                    results.Add(bestSublayout);
                 }
+
 
                 if (!query.MaximizesScore() && query.Accepts(currentSublayout))
                 {
@@ -761,7 +761,7 @@ namespace VisiPlacement
                     this.GetBestLayout(query);
                 }
             }
-
+            query.OnAnswered(bestLayout);
             return bestLayout;
         }
 
