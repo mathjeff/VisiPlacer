@@ -1532,7 +1532,10 @@ namespace VisiPlacement
 
         public override String ToString()
         {
-            return "SemiFixed_GridLayout: (" + String.Join(",", this.columnWidths.Values) + ") x (" + String.Join(",", this.rowHeights.Values) + "): (" + this.score.ToString() + ")";
+            string score = "?";
+            if (this.score != null)
+               score = this.score.ToString();
+            return "SemiFixed_GridLayout: (" + String.Join(",", this.columnWidths.Values) + ") x (" + String.Join(",", this.rowHeights.Values) + "): (" + score + ")";
         }
         public void InvalidateScore()
         {
