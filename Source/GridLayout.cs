@@ -467,7 +467,7 @@ namespace VisiPlacement
                         int numInfiniteHeights = currentSublayout.NumInfiniteHeights;
                         bool usesAllWidth = (currentSublayout.Width >= subQuery.MaxWidth) && (numInfiniteWidths == 0 || numInfiniteWidths == currentSublayout.GetNumWidthProperties());
                         bool usesAllHeight = (currentSublayout.Height >= subQuery.MaxHeight) && (numInfiniteHeights == 0 || numInfiniteHeights == currentSublayout.GetNumHeightProperties());
-                        bool offeredExtraSpace = (subQuery.MaxWidth > query.MaxWidth || subQuery.MaxHeight > query.MaxHeight);
+                        bool offeredExtraSpace = (subQuery.MaxWidth > query.MaxWidth || double.IsPositiveInfinity(subQuery.MaxWidth) || subQuery.MaxHeight > query.MaxHeight || double.IsPositiveInfinity(subQuery.MaxHeight));
                         if (usesAllWidth && usesAllHeight && offeredExtraSpace)
                         {
                             // If the layout that we found uses at least as much space as allowed, then it must also have at least as much score as possible
