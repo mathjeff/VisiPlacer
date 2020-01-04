@@ -3,20 +3,20 @@
 namespace VisiPlacement
 {
     // a layout that contains one sublayout within it
-    public class BorderLayout : ContainerLayout
+    public class MustBorderLayout : ContainerLayout
     {
-        public BorderLayout()
+        public MustBorderLayout()
         {
             this.Initialize();
         }
-        public BorderLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness)
+        public MustBorderLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness)
         {
             this.Initialize();
             this.View = view;
             this.SubLayout = subLayout;
             this.BorderThickness = borderThickness;
         }
-        public BorderLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, bool fillAvailableSpace)
+        public MustBorderLayout(ContentView view, LayoutChoice_Set subLayout, Thickness borderThickness, bool fillAvailableSpace)
         {
             this.Initialize();
             this.View = view;
@@ -29,7 +29,7 @@ namespace VisiPlacement
         {
             this.ChildFillsAvailableSpace = true;
         }
-        public void CopyFrom(BorderLayout original)
+        public void CopyFrom(MustBorderLayout original)
         {
             this.ChildFillsAvailableSpace = original.ChildFillsAvailableSpace;
             base.CopyFrom(original);
@@ -63,13 +63,8 @@ namespace VisiPlacement
             LayoutQuery subQuery = query.WithDimensions(query.MaxWidth - borderWidth, query.MaxHeight - borderHeight);
             if (subQuery.MaxWidth < 0 || subQuery.MaxHeight < 0)
             {
-                // If there is no room for the border, then even the border would be cropped
-                result = this.makeSpecificLayout(this.view, new Size(0, 0), LayoutScore.Get_CutOff_LayoutScore(1), null, new Thickness(0));
-                if (query.Accepts(result))
-                    return this.prepareLayoutForQuery(result, query);
                 return null;
             }
-
 
             // Query sublayout if it exists
             if (this.SubLayout != null)

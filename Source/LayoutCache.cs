@@ -211,11 +211,6 @@ namespace VisiPlacement
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
-            if (this.running)
-            {
-                ErrorReporter.ReportParadox("LayoutCache being called before it returns?");
-            }
-            this.running = true;
             numQueries++;
             if (numQueries % 10000 == 0)
             {
@@ -260,10 +255,8 @@ namespace VisiPlacement
                     this.Query_SubLayout(query);
                 }
                 this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
-                this.running = false;
                 return this.prepareLayoutForQuery(correctResult, query);
             }
-            this.running = false;
             //this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
             if (fastResult != null)
                 fastResult = fastResult.Clone();
@@ -544,6 +537,5 @@ namespace VisiPlacement
         List<LayoutQuery_And_Response> orderedResponses; // all responses that were returned by this LayoutCache that required querying the sublayout as part of their computation
         static int numComputations = 0;
         static int numQueries = 0;
-        public bool running;
     }
 }

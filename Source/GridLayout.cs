@@ -377,18 +377,29 @@ namespace VisiPlacement
                                 this.ShrinkHeight(currentLayout, index, query, LayoutScore.Zero, false);
                                 currentCoordinate = this.RoundHeightDown(currentLayout.Get_GroupHeight(index));
                             }
+
+                            if (prevCoordinateShouldBeRight)
+                            {
+                                if (currentCoordinate < debugAnswer.GetCoordinate(semiFixedLayout.NextDimensionToSet))
+                                {
+                                    // We're passing the answer. Have we found it yet?
+                                    if (query.PreferredLayout(bestSublayout, debugAnswer) == debugAnswer)
+                                    {
+                                        ErrorReporter.ReportParadox("Incorrectly passed the answer at dim " + semiFixedLayout.NextDimensionToSet + "; skipping to value " + currentCoordinate);
+                                    }
+                                }
+                            }
+
                         }
 
                         // recursively query the next dimension
                         newSublayouts = this.GetLayoutsToConsider(query, currentLayout);
-                        foreach (SemiFixed_GridLayout other in newSublayouts)
-                        {
-                            results.Add(new SemiFixed_GridLayout(other));
-                        }
+                        results.AddRange(newSublayouts);
 
                         newSublayout = GridLayout.PreferredLayout(query, newSublayouts);
                         if (newSublayout != null)
                         {
+                            newSublayout = new SemiFixed_GridLayout(newSublayout);
                             currentSublayout = newSublayout;
                             if (GridLayout.PreferredLayout(query, bestSublayout, currentSublayout) == currentSublayout)
                                 bestSublayout = new SemiFixed_GridLayout(currentSublayout);
@@ -436,10 +447,8 @@ namespace VisiPlacement
 
                         // recursively query the next dimension
                         newSublayouts = this.GetLayoutsToConsider(subQuery, currentLayout);
-                        foreach (SemiFixed_GridLayout other in newSublayouts)
-                        {
-                            results.Add(new SemiFixed_GridLayout(other));
-                        }
+                        results.AddRange(newSublayouts);
+                        
 
                         currentSublayout = GridLayout.PreferredLayout(subQuery, newSublayouts);
                         if (currentSublayout == null)
@@ -454,12 +463,14 @@ namespace VisiPlacement
                             }
                             break;
                         }
+                        currentSublayout = new SemiFixed_GridLayout(currentSublayout);
 
                         int numInfiniteWidths = currentSublayout.NumInfiniteWidths;
                         int numInfiniteHeights = currentSublayout.NumInfiniteHeights;
                         bool usesAllWidth = (currentSublayout.Width >= subQuery.MaxWidth) && (numInfiniteWidths == 0 || numInfiniteWidths == currentSublayout.GetNumWidthProperties());
                         bool usesAllHeight = (currentSublayout.Height >= subQuery.MaxHeight) && (numInfiniteHeights == 0 || numInfiniteHeights == currentSublayout.GetNumHeightProperties());
-                        if (usesAllWidth && usesAllHeight)
+                        bool offeredExtraSpace = (subQuery.MaxWidth > query.MaxWidth || subQuery.MaxHeight > query.MaxHeight);
+                        if (usesAllWidth && usesAllHeight && offeredExtraSpace)
                         {
                             // If the layout that we found uses at least as much space as allowed, then it must also have at least as much score as possible
                             maxExistentScore = currentSublayout.Score;
@@ -486,12 +497,12 @@ namespace VisiPlacement
                         // determine max width to satisfy query
                         double maxAcceptibleWidth;
                         if (!double.IsPositiveInfinity(query.MaxWidth))
-                            maxAcceptibleWidth = currentSublayout.Get_GroupWidth(index) - (currentSublayout.Width - query.MaxWidth);
+                            maxAcceptibleWidth = semiFixedLayout.Get_GroupWidth(index) - (semiFixedLayout.Width - query.MaxWidth);
                         else
                             maxAcceptibleWidth = double.PositiveInfinity;
                         // determine max width required for us to be making progress
                         double maxInterestingWidth;
-                        if (maxExistentScore != null && maxExistentScore.Equals(currentSublayout.Score) && query.Accepts(currentSublayout))
+                        if (maxExistentScore != null && !query.MinimizesWidth() && maxExistentScore.Equals(currentSublayout.Score) && query.Accepts(currentSublayout))
                             maxInterestingWidth = currentCoordinate;
                         else
                             maxInterestingWidth = currentCoordinate - this.pixelSize;
@@ -554,12 +565,12 @@ namespace VisiPlacement
                         // determine max height to satisfy query
                         double maxAcceptibleHeight;
                         if (!double.IsPositiveInfinity(query.MaxHeight))
-                            maxAcceptibleHeight = currentSublayout.Get_GroupHeight(index) - (currentSublayout.Height - query.MaxHeight);
+                            maxAcceptibleHeight = semiFixedLayout.Get_GroupHeight(index) - (semiFixedLayout.Height - query.MaxHeight);
                         else
                             maxAcceptibleHeight = double.PositiveInfinity;
                         // determine max height required for us to be making progress
                         double maxInterestingHeight;
-                        if (maxExistentScore != null && maxExistentScore.Equals(currentSublayout.Score) && query.Accepts(currentSublayout))
+                        if (maxExistentScore != null && !query.MinimizesHeight() && maxExistentScore.Equals(currentSublayout.Score) && query.Accepts(currentSublayout))
                             maxInterestingHeight = currentCoordinate;
                         else
                             maxInterestingHeight = currentCoordinate - this.pixelSize;

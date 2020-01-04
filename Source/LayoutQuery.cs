@@ -54,8 +54,16 @@ namespace VisiPlacement
         public LayoutQuery WithDimensions(double width, double height)
         {
             LayoutQuery result = this.Clone();
-            result.maxWidth = width;
-            result.maxHeight = height;
+            result.setMaxWidth(width);
+            result.setMaxHeight(height);
+            return result;
+        }
+        public LayoutQuery WithDimensions(double width, double height, LayoutScore score)
+        {
+            LayoutQuery result = this.Clone();
+            result.setMaxWidth(width);
+            result.setMaxHeight(height);
+            result.setMinScore(score);
             return result;
         }
         public LayoutQuery WithScore(LayoutScore score)

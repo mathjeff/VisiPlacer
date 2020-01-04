@@ -78,23 +78,23 @@ namespace VisiPlacement
                 ContentView insideBevel = new ContentView();
                 insideBevel.Padding = innerBevelThickness;
                 insideBevel.BackgroundColor = Color.DarkGray;// Color.FromRgb(0.4, 0.4, 0.4);
-                ContainerLayout middleLayout = new BorderLayout(insideBevel, backgroundLayout, innerBevelThickness, false);
+                ContainerLayout middleLayout = new MustBorderLayout(insideBevel, backgroundLayout, innerBevelThickness, false);
 
                 // add a bevel to the border
                 Thickness outerBevelThickness = new Thickness(1);
                 ContentView outsideBevel = new ContentView();
                 outsideBevel.Padding = outerBevelThickness;
                 outsideBevel.BackgroundColor = Color.LightGray;// Color.FromRgb(0.63, 0.63, 0.63);
-                ContainerLayout outsideLayout = new BorderLayout(outsideBevel, middleLayout, outerBevelThickness, false);
+                ContainerLayout outsideLayout = new MustBorderLayout(outsideBevel, middleLayout, outerBevelThickness, false);
 
                 // add some extra space around it
                 Thickness spacingThickness = new Thickness(1);
                 ContentView spacing = new ContentView();
                 spacing.Padding = spacingThickness;
                 spacing.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
-                ContainerLayout spacingLayout = new BorderLayout(spacing, outsideLayout, spacingThickness, false);
+                ContainerLayout spacingLayout = new MustBorderLayout(spacing, outsideLayout, spacingThickness, false);
 
-                this.SubLayout = spacingLayout;
+                this.SubLayout = new LayoutUnion(spacingLayout, new ScoreShifted_Layout(null, LayoutScore.Get_CutOff_LayoutScore(1)));
 
                 button.TextColor = Color.LightGray;
             }
