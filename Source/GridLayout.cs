@@ -327,27 +327,6 @@ namespace VisiPlacement
                     return results;
                 }
             }
-            if (!query.MaximizesScore())
-            {
-                // if we can use 0's for all of the remaining coordinates, then do that
-                SemiFixed_GridLayout candidateWithZeros = new SemiFixed_GridLayout(semiFixedLayout);
-                while (candidateWithZeros.NumUnsetCoordinatesInCurrentDimension > 0)
-                {
-                    candidateWithZeros.AddCoordinate(0);
-                }
-                if (query.Accepts(candidateWithZeros))
-                {
-                    results.Add(candidateWithZeros);
-                    return results;
-                }
-            }
-
-            
-            // We're going to have to check the small candidate eventually, and if we check it early here then it's easier for the children's LayoutCaches to work
-            SemiFixed_GridLayout smallCandidate = new SemiFixed_GridLayout(semiFixedLayout);
-            smallCandidate.AddCoordinate(0);
-            List<SemiFixed_GridLayout> smallResults = this.GetLayoutsToConsider(query, smallCandidate);
-            results.AddRange(smallResults);
 
             SemiFixed_GridLayout bestSublayout = null;
             SemiFixed_GridLayout currentSublayout = null;
