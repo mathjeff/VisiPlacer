@@ -210,6 +210,15 @@ namespace VisiPlacement
                     this.GetBestLayout(query);
                 }
             }
+            if (layout != null)
+            {
+                if (layout.score == null)
+                {
+                    // Any layout we return to our caller is likely to need to know what its score is, for example for use by a LayoutCache
+                    // So we make sure to compute the score before returning it
+                    layout.SetScore(layout.Score);
+                }
+            }
 
             return this.prepareLayoutForQuery(layout, query);
         }
