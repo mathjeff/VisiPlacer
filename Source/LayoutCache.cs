@@ -135,39 +135,25 @@ namespace VisiPlacement
                         return shrunken.Response;
                 }
             }
+            /* TODO: Figure out why this block doesn't improve performance
             // if we couldn't immediately return a result using the cache, we can still put a bound on the results we might get
             // They have to be at least as good as the sample we found
             if (shrunken != null)
             {
                 // First, see if we can improve past what we currently have
-                LayoutQuery strictlyImprovedQuery = query;
-                bool allowCache = false;
-                if (query.MaximizesScore())
-                {
-                    strictlyImprovedQuery = query.OptimizedPastExample(shrunken.Response);
-                    // Ask the sublayout for this result (or use the cache if we've already asked)
-                    if (!strictlyImprovedQuery.Accepts(shrunken.Response))
-                    {
-                        // Technically it's possible that strictlyImprovedQuery might accept shrunken.Response if strictlyImprovedQuery had score of +/- infinity
-                        allowCache = true;
-                    }
-                }
-                else
-                {
-                    strictlyImprovedQuery = query.OptimizedUsingExample(shrunken.Response);
-                }
+                LayoutQuery strictlyImprovedQuery = query.OptimizedPastExample(shrunken.Response);
+                bool allowCache = !strictlyImprovedQuery.Accepts(shrunken.Response);
 
                 // Ask the sublayout for this result (or use the cache if we've already asked)
                 if (allowCache)
                     result = this.GetBestLayout_Quickly(strictlyImprovedQuery);
                 else
                     result = this.Query_SubLayout(strictlyImprovedQuery);
-
                 if (result == null)
-                    result = shrunken.Response;      // couldn't improve past the previously found best layout
+                    result = shrunken.Response;
                 return this.inferredLayout(query, result);
             }
-            else
+            else*/
             {
                 result = this.Query_SubLayout(query);
             }
@@ -282,7 +268,7 @@ namespace VisiPlacement
             // look for the best response we've seen so far for this query
             LayoutQuery_And_Response best = null;
 
-            /*foreach (LayoutQuery_And_Response candidate in this.orderedResponses)
+            foreach (LayoutQuery_And_Response candidate in this.orderedResponses)
             {
                 if (best == null)
                 {
@@ -294,7 +280,7 @@ namespace VisiPlacement
                     if (query.PreferredLayout(best.Response, candidate.Response) == candidate.Response)
                         best = candidate;
                 }
-            }*/
+            }
             return best;
         }
 
