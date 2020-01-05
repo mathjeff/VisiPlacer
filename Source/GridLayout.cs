@@ -767,7 +767,7 @@ namespace VisiPlacement
                     this.GetBestLayout(query);
                 }
             }
-            query.OnAnswered(bestLayout);
+            query.OnAnswered(this);
             return bestLayout;
         }
 

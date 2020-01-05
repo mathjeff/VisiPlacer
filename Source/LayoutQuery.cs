@@ -237,7 +237,7 @@ namespace VisiPlacement
                 return false;
             return true;
         }
-        public static int ExpensiveThreshold = 200;
+        public static int ExpensiveThreshold = 80;
         public void OnAnswered(LayoutChoice_Set layout)
         {
             this.Cost = LayoutQuery.nextID - this.debugID;
