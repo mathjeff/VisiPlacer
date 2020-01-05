@@ -550,10 +550,13 @@ namespace VisiPlacement
 
                                 break;
                             }
+                            // Note that we have to step currentCoordinate on its own rather than running ShrinkWidth
+                            // because ShrinkWidth assumes that no other coordinates change
                             currentSublayout.Set_GroupWidth(index, maxWidth);
-                            // Now that we've forcibly decreased the width a little and lost some score, decrease the width more if it's possible without losing more score
-                            if (!semiFixedLayout.SetWidthBeforeHeight)
-                                this.ShrinkWidth(currentSublayout, index, query, LayoutScore.Zero, true);
+                            // We don't want to run ShrinkWidth here because we probably introduced cropping
+                            // It's probably fast to prove that this new layout isn't a solution, and probably slow to run ShrinkWidth
+                            //if (!semiFixedLayout.SetWidthBeforeHeight)
+                            //    this.ShrinkWidth(currentSublayout, index, query, LayoutScore.Zero, true);
                         }
 
                         newCurrentCoordinate = this.RoundWidthDown(currentSublayout.Get_GroupWidth(index));
@@ -619,10 +622,13 @@ namespace VisiPlacement
 
                                 break;
                             }
+                            // Note that we have to step currentCoordinate on its own rather than running ShrinkHeight
+                            // because ShrinkHeight assumes that no other coordinates change
                             currentSublayout.Set_GroupHeight(index, maxHeight);
-                            // Now that we've forcibly decreased the height a little and lost some score, decrease the height more if it's possible without losing more score
-                            if (semiFixedLayout.SetWidthBeforeHeight)
-                                this.ShrinkHeight(currentSublayout, index, query, LayoutScore.Zero, true);
+                            // We don't want to run ShrinkHeight here because we probably introduced cropping
+                            // It's probably fast to prove that this new layout isn't a solution, and probably slow to run ShrinkHeight
+                            //if (semiFixedLayout.SetWidthBeforeHeight)
+                            //    this.ShrinkHeight(currentSublayout, index, query, LayoutScore.Zero, true);
                         }
 
                         newCurrentCoordinate = this.RoundHeightDown(currentSublayout.Get_GroupHeight(index));

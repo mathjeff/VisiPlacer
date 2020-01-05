@@ -69,7 +69,7 @@ namespace VisiPlacement
         public LayoutQuery WithScore(LayoutScore score)
         {
             LayoutQuery result = this.Clone();
-            result.minScore = score;
+            result.setMinScore(score);
             return result;
         }
         // returns a stricter query given that this example is one of the options
@@ -180,6 +180,13 @@ namespace VisiPlacement
             this.minScore = value;
             if (!this.Accepts(this.proposedSolution_forDebugging))
                 this.proposedSolution_forDebugging = null;
+            /*if (this.maxWidth > 0 && this.maxHeight > 0)
+            {
+                if (this.minScore.CompareTo(LayoutScore.Get_CutOff_LayoutScore(1)) <= 0 && this.minScore.CompareTo(LayoutScore.Minimum) > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Considering cropping: " + this);
+                }
+            }*/
         }
         public bool Debug { get; set; } // whether we want to do extra work for this query to ensure the results are correct
         public SpecificLayout ProposedSolution_ForDebugging 
