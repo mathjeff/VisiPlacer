@@ -72,6 +72,12 @@ namespace VisiPlacement
             LayoutQuery originalQuery = query;
             foreach (LayoutChoice_Set layoutSet in this.layoutOptions)
             {
+                if (best_specificLayout != null)
+                {
+                    // make the query more strict, so we will only ever get dimensions that are at least as good as this
+                    // TODO: figure out why it's not better to use OptimizedPastExample
+                    query = query.OptimizedUsingExample(best_specificLayout);
+                }
                 SpecificLayout currentLayout;
                 if (query.Debug)
                 {
@@ -102,10 +108,6 @@ namespace VisiPlacement
                             layoutSet.GetBestLayout(debugQuery);
                         }
                     }
-
-                    // make the query more strict, so we will only ever get dimensions that are at least as good as this
-                    // TODO: figure out why it's not better to use OptimizedPastExample
-                    query = query.OptimizedUsingExample(best_specificLayout);
                 }
             }
             originalQuery.ProposedSolution_ForDebugging = debugResult;
