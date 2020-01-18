@@ -837,6 +837,7 @@ namespace VisiPlacement
                             }
                             if (!query2.Accepts(layout2))
                                 ErrorReporter.ReportParadox("Error: min-width query received an invalid response");
+                            actualScoreDecrease = actualScoreDecrease.Plus(bestLayout.Score.Minus(layout2.Score));
                         }
                         else
                         {
@@ -852,8 +853,6 @@ namespace VisiPlacement
                                 break;
                             }
                         }
-
-                        actualScoreDecrease = actualScoreDecrease.Plus(bestLayout.Score.Minus(layout2.Score));
                     }
                 }
                 minWidths.Add(maxRequiredWidth);
@@ -946,6 +945,7 @@ namespace VisiPlacement
                             {
                                 ErrorReporter.ReportParadox("Error: min-height query received an invalid response");
                             }
+                            actualScoreDecrease = actualScoreDecrease.Plus(bestLayout.Score.Minus(layout2.Score));
                         }
                         else
                         {
@@ -962,7 +962,6 @@ namespace VisiPlacement
                             }
                         }
 
-                        actualScoreDecrease = actualScoreDecrease.Plus(bestLayout.Score.Minus(layout2.Score));
                     }
                 }
                 minHeights.Add(maxRequiredHeight);
