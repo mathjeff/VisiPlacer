@@ -656,6 +656,7 @@ namespace VisiPlacement
                             query = query.OptimizedUsingExample(bestSublayout);
                         }
                         results.Add(bestSublayout);
+                        //System.Diagnostics.Debug.WriteLine("Gridlayout currentSublayout: " + currentSublayout + " with score " + currentSublayout.Score);
                     }
                 }
 
@@ -1564,7 +1565,8 @@ namespace VisiPlacement
         // TODO this should probably be deduplicated with isScoreAtLeast()
         private LayoutScore ComputeScore()
         {
-            this.sub_specificLayouts = new SpecificLayout[this.elements.GetLength(0), this.elements.GetLength(1)];
+            if (this.sub_specificLayouts == null)
+                this.sub_specificLayouts = new SpecificLayout[this.elements.GetLength(0), this.elements.GetLength(1)];
             LayoutScore totalScore = this.bonusScore;
             int rowNumber, columnNumber;
             double width, height;
@@ -1577,10 +1579,19 @@ namespace VisiPlacement
                     LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
                     if (subLayout != null)
                     {
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(Math.Max(width, 0), Math.Max(height, 0), LayoutScore.Minimum);
-                        SpecificLayout layout = subLayout.GetBestLayout(query);
+                        SpecificLayout previousLayout = this.sub_specificLayouts[columnNumber, rowNumber];
+                        SpecificLayout layout;
+                        if (previousLayout == null || previousLayout.Width != width || previousLayout.Height != height)
+                        {
+                            MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum);
+                            layout = subLayout.GetBestLayout(query);
+                            this.sub_specificLayouts[columnNumber, rowNumber] = layout;
+                        }
+                        else
+                        {
+                            layout = previousLayout;
+                        }
                         totalScore = totalScore.Plus(layout.Score);
-                        this.sub_specificLayouts[columnNumber, rowNumber] = layout;
                     }
                 }
             }
