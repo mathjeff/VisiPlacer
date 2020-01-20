@@ -14,6 +14,10 @@ namespace VisiPlacement
             this.maxWidth = double.PositiveInfinity;
             this.maxHeight = double.PositiveInfinity;
             this.debugID = nextID;
+            /*if (this.debugID >= 26 && this.debugID <= 78)
+            {
+                System.Diagnostics.Debug.WriteLine("Hi");
+            }*/
             nextID++;
         }
         // returns whichever layout it likes better
@@ -237,7 +241,7 @@ namespace VisiPlacement
                 return false;
             return true;
         }
-        public static int ExpensiveThreshold = 80;
+        public static int ExpensiveThreshold = 50;
         public void OnAnswered(LayoutChoice_Set layout)
         {
             this.Cost = LayoutQuery.nextID - this.debugID;

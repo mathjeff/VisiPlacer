@@ -248,7 +248,7 @@ namespace VisiPlacement
         }
 
         // given some constraints and coordinates, returns a list of coordinates that are worth considering
-        private List<SemiFixed_GridLayout> GetLayoutsToConsider(LayoutQuery query, SemiFixed_GridLayout semiFixedLayout)
+        private List<SemiFixed_GridLayout> GetLayoutsToConsider(LayoutQuery query, SemiFixed_GridLayout semiFixedLayout, int maxInterestingCount = int.MaxValue)
         {
             SemiFixed_GridLayout debugAnswer = null;
             bool prevCoordinateShouldBeRight = false;
@@ -271,7 +271,13 @@ namespace VisiPlacement
                 // we've finally pinned a value to each coordinate; now we return the layout if it satisfies the criteria
 
                 if (query.Accepts(semiFixedLayout))
+                {
                     results.Add(semiFixedLayout);
+                    /*if (semiFixedLayout.Score.CompareTo(LayoutScore.Zero) < 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Found cropped grid: " + semiFixedLayout);
+                    }*/
+                }
                 if (prevCoordinateShouldBeRight && results.Count < 1)
                 {
                     ErrorReporter.ReportParadox("GridLayout did not find expected solution " + debugAnswer + " to query " + query);
@@ -336,6 +342,8 @@ namespace VisiPlacement
             int index = semiFixedLayout.NumCoordinatesSetInCurrentDimension;
             while (currentCoordinate >= 0)
             {
+                if (results.Count >= maxInterestingCount)
+                    break;
                 numIterations++;
                 GridLayout.NumComputations++;
                 if (increaseScore)
@@ -478,6 +486,7 @@ namespace VisiPlacement
                     }
                     // if we get here, we wish to decrease the size of the layout
                     double newCurrentCoordinate;
+                    bool probablyIntroducedCropping = false;
                     if (semiFixedLayout.NextCoordinateAffectsWidth)
                     {
                         // determine max width to satisfy query
@@ -545,6 +554,7 @@ namespace VisiPlacement
                             // It's probably fast to prove that this new layout isn't a solution, and probably slow to run ShrinkWidth
                             //if (!semiFixedLayout.SetWidthBeforeHeight)
                             //    this.ShrinkWidth(currentSublayout, index, query, LayoutScore.Zero, true);
+                            probablyIntroducedCropping = true;
                         }
 
                         newCurrentCoordinate = this.RoundWidthDown(currentSublayout.Get_GroupWidth(index));
@@ -620,6 +630,7 @@ namespace VisiPlacement
                         }
 
                         newCurrentCoordinate = this.RoundHeightDown(currentSublayout.Get_GroupHeight(index));
+                        probablyIntroducedCropping = true;
                     }
                     if (prevCoordinateShouldBeRight)
                     {
@@ -635,6 +646,25 @@ namespace VisiPlacement
                     }
                     currentCoordinate = newCurrentCoordinate;
 
+                    if (probablyIntroducedCropping)
+                    {
+                        // double check that there's still room
+                        double newWidth = query.MaxWidth;
+                        double newHeight = query.MaxHeight;
+                        if (semiFixedLayout.NextCoordinateAffectsWidth)
+                            newWidth += currentCoordinate;
+                        else
+                            newHeight += currentCoordinate;
+                        LayoutQuery expandedQuery = query.WithDimensions(newWidth, newHeight);
+
+                        SemiFixed_GridLayout currentLayout = new SemiFixed_GridLayout(semiFixedLayout);
+                        currentLayout.AddCoordinate(currentCoordinate);
+
+                        if (this.GetLayoutsToConsider(expandedQuery, currentLayout, 1).Count < 1)
+                        {
+                            break;
+                        }
+                    }
                 }
                 // keep track of the coordinates that we are considering
                 //results.Add(new SemiFixed_GridLayout(currentSublayout));
