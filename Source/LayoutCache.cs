@@ -158,11 +158,7 @@ namespace VisiPlacement
                 result = this.Query_SubLayout(query);
             }
 
-            if (result != null)
-            {
-                result = result.Clone();
-            }
-            else
+            if (result == null)
             {
                 if (shrunken != null && query.Accepts(shrunken.Response))
                 {
@@ -186,7 +182,7 @@ namespace VisiPlacement
         private SpecificLayout Query_SubLayout(LayoutQuery query)
         {
             numComputations++;
-            if (this.true_queryResults.Count == 30)
+            if (this.true_queryResults.Count == 20)
             {
                 System.Diagnostics.Debug.WriteLine("Lots of queries being sent to " + this.layoutToManage);
             }
