@@ -3,7 +3,7 @@ using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    public class ButtonLayout : ContainerLayout
+    public class ButtonLayout : LayoutUnion
     {
         public ButtonLayout(Button button)
         {
@@ -44,25 +44,23 @@ namespace VisiPlacement
                     sublayout = TextLayout.New_Croppable(new ButtonText_Configurer(button), fontSize, scoreIfEmpty);
                 else
                     sublayout = new TextLayout(new ButtonText_Configurer(button), fontSize, scoreIfEmpty);
-
-                this.sublayoutOptions = new List<LayoutChoice_Set>() { sublayout };
             }
             else
             {
-                this.sublayoutOptions = new List<LayoutChoice_Set>();
+                List<LayoutChoice_Set> sublayoutOptions = new List<LayoutChoice_Set>();
                 if (allowCropping)
                 {
-                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 30, scoreIfEmpty));
-                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 16, scoreIfEmpty));
-                    this.sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 12, scoreIfEmpty));
+                    sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 30, scoreIfEmpty));
+                    sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 16, scoreIfEmpty));
+                    sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 12, scoreIfEmpty));
                 }
                 else
                 {
-                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30, false, scoreIfEmpty));
-                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16, false, scoreIfEmpty));
-                    this.sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12, false, scoreIfEmpty));
+                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30, false, scoreIfEmpty));
+                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16, false, scoreIfEmpty));
+                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12, false, scoreIfEmpty));
                 }
-                LayoutUnion layoutUnion = new LayoutUnion(this.sublayoutOptions);
+                LayoutUnion layoutUnion = new LayoutUnion(sublayoutOptions);
                 sublayout = layoutUnion;
             }
 
@@ -94,7 +92,7 @@ namespace VisiPlacement
                 spacing.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
                 ContainerLayout spacingLayout = new MustBorderLayout(spacing, outsideLayout, spacingThickness, false);
 
-                this.SubLayout = new LayoutUnion(spacingLayout, new ScoreShifted_Layout(null, LayoutScore.Get_CutOff_LayoutScore(1)));
+                this.Set_LayoutChoices(new List<LayoutChoice_Set>() { spacingLayout, new ScoreShifted_Layout(null, LayoutScore.Get_CutOff_LayoutScore(1)) });
 
                 button.TextColor = Color.LightGray;
             }
@@ -106,11 +104,10 @@ namespace VisiPlacement
                     button.TextColor = Color.Black;
                     button.BackgroundColor = Color.LightGray;
                 }
-                this.SubLayout = backgroundLayout;
+                this.Set_LayoutChoices(new List<LayoutChoice_Set>() { backgroundLayout });
             }
         }
 
-        private List<LayoutChoice_Set> sublayoutOptions;
     }
 
     public class ButtonText_Configurer : TextItem_Configurer
