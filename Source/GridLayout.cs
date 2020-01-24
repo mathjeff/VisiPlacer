@@ -818,7 +818,10 @@ namespace VisiPlacement
                     if (subLayout != null)
                     {
                         // ask the view for the highest-scoring size that fits within the specified dimensions
-                        LayoutQuery query = new MaxScore_LayoutQuery(layout.GetWidthCoordinate(columnNumber), layout.GetHeightCoordinate(rowNumber), LayoutScore.Minimum);
+                        SpecificLayout bestLayout = layout.GetChildLayout(columnNumber, rowNumber);
+                        double queryWidth = layout.GetWidthCoordinate(columnNumber);
+                        double queryHeight = layout.GetHeightCoordinate(rowNumber);
+                        /* LayoutQuery query = new MaxScore_LayoutQuery(layout.GetWidthCoordinate(columnNumber), layout.GetHeightCoordinate(rowNumber), LayoutScore.Minimum);
                         query.Debug = sourceQuery.Debug;
                         if (query.Debug)
                         {
@@ -834,16 +837,14 @@ namespace VisiPlacement
                                     query.ProposedSolution_ForDebugging = possibleSolution;
                                 }
                             }
-
                         }
-                        GridLayout.NumComputations++;
-                        SpecificLayout bestLayout = subLayout.GetBestLayout(query);
+                        SpecificLayout bestLayout = subLayout.GetBestLayout(query);*/
 
                         SpecificLayout layout2;
                         if (runAllSubqueries)
                         {
                             // figure out how far the view can shrink while keeping the same score
-                            LayoutQuery query2 = new MinWidth_LayoutQuery(query.MaxWidth, query.MaxHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
+                            LayoutQuery query2 = new MinWidth_LayoutQuery(queryWidth, queryHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
                             query2.Debug = sourceQuery.Debug;
 
                             layout2 = subLayout.GetBestLayout(query2);
@@ -857,10 +858,10 @@ namespace VisiPlacement
                                 SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
 
                                 // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                                LayoutQuery debugQuery2 = query.Clone();
+                                /*LayoutQuery debugQuery2 = query.Clone();
                                 debugQuery2.Debug = true;
                                 debugQuery2.ProposedSolution_ForDebugging = debugResult1;
-                                subLayout.GetBestLayout(debugQuery2.Clone());
+                                subLayout.GetBestLayout(debugQuery2.Clone());*/
 
                                 LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
                                 SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
@@ -879,7 +880,7 @@ namespace VisiPlacement
                         if (currentWidth > maxRequiredWidth)
                         {
                             maxRequiredWidth = currentWidth;
-                            if (maxRequiredWidth == query.MaxWidth)
+                            if (maxRequiredWidth == queryWidth)
                             {
                                 break;
                             }
@@ -923,7 +924,10 @@ namespace VisiPlacement
                     if (subLayout != null)
                     {
                         // ask the view for the highest-scoring size that fits within the specified dimensions
-                        LayoutQuery query = new MaxScore_LayoutQuery(layout.GetWidthCoordinate(columnNumber), layout.GetHeightCoordinate(rowNumber), LayoutScore.Minimum);
+                        SpecificLayout bestLayout = layout.GetChildLayout(columnNumber, rowNumber);
+                        double queryWidth = layout.GetWidthCoordinate(columnNumber);
+                        double queryHeight = layout.GetHeightCoordinate(rowNumber);
+                        /* LayoutQuery query = new MaxScore_LayoutQuery(layout.GetWidthCoordinate(columnNumber), layout.GetHeightCoordinate(rowNumber), LayoutScore.Minimum);
                         query.Debug = sourceQuery.Debug;
                         if (query.Debug)
                         {
@@ -941,13 +945,13 @@ namespace VisiPlacement
                             }
                         }
                         GridLayout.NumComputations++;
-                        SpecificLayout bestLayout = subLayout.GetBestLayout(query);
+                        SpecificLayout bestLayout = subLayout.GetBestLayout(query);*/
 
                         SpecificLayout layout2;
                         if (runAllSubqueries)
                         {
                             // figure out how far the view can shrink while keeping the same score
-                            LayoutQuery query2 = new MinHeight_LayoutQuery(query.MaxWidth, query.MaxHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
+                            LayoutQuery query2 = new MinHeight_LayoutQuery(queryWidth, queryHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
                             query2.Debug = sourceQuery.Debug;
                             //query2.ProposedSolution_ForDebugging = sourceQuery.ProposedSolution_ForDebugging;
 
@@ -962,10 +966,11 @@ namespace VisiPlacement
                                 SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
 
                                 // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                                LayoutQuery debugQuery2 = query.Clone();
+                                /*LayoutQuery debugQuery2 = query.Clone();
                                 debugQuery2.Debug = true;
                                 debugQuery2.ProposedSolution_ForDebugging = debugResult1;
                                 subLayout.GetBestLayout(debugQuery2.Clone());
+                                */
 
                                 LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
                                 SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
@@ -987,7 +992,7 @@ namespace VisiPlacement
                         if (currentHeight > maxRequiredHeight)
                         {
                             maxRequiredHeight = currentHeight;
-                            if (maxRequiredHeight == query.MaxHeight)
+                            if (maxRequiredHeight == queryHeight)
                             {
                                 break;
                             }
@@ -1079,19 +1084,18 @@ namespace VisiPlacement
                     if (currentLayout != null)
                     {
                         // ask the subview for the best layout that fits in these dimensions. Hopefully, it will generate a result that is no larger than needed
-                        LayoutQuery query = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum);
-                        query.Debug = enableDebugging;
-                        SpecificLayout subLayout = currentLayout.GetBestLayout(query);
+                        //LayoutQuery query = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum);
+                        //query.Debug = enableDebugging;
+                        SpecificLayout subLayout = layout.GetChildLayout(columnNumber, rowNumber);
                         double requiredWidth = this.RoundWidthUp(subLayout.Width);
                         double requiredHeight = this.RoundHeightUp(subLayout.Height);
-                        if (query.Debug)
+                        /*if (query.Debug)
                         {
                             query = new MaxScore_LayoutQuery(requiredWidth, requiredHeight, LayoutScore.Minimum);
                             SpecificLayout recheckedLayout = currentLayout.GetBestLayout(query);
                             if (query.PreferredLayout(subLayout, recheckedLayout) != subLayout)
                                 ErrorReporter.ReportParadox("Error; sublayout cannot re-find its own response");
-
-                        }
+                        }*/
                         // update out how large the rows and columns need to be, using this new information
                         double requiredGroupWidth = this.RoundWidthUp(requiredWidth / layout.GetWidthFraction(columnNumber));
                         double requiredGroupHeight = this.RoundHeightUp(requiredHeight / layout.GetHeightFraction(rowNumber));
@@ -1346,6 +1350,7 @@ namespace VisiPlacement
             this.elements = elements;
             int numRows = elements.GetLength(1);
             int numColumns = elements.GetLength(0);
+            this.sub_specificLayouts = new SublayoutResponse[this.elements.GetLength(0), this.elements.GetLength(1)];
             this.rowHeights = new BoundProperty_List(rowHeights);
             this.columnWidths = new BoundProperty_List(columnWidths);
             this.bonusScore = bonusScore;
@@ -1592,11 +1597,32 @@ namespace VisiPlacement
             this.score = newScore;
         }
 
+        private SpecificLayout get_cached_specificLayout(int columnIndex, int rowIndex)
+        {
+            double width = this.GetWidthCoordinate(columnIndex);
+            double height = this.GetHeightCoordinate(rowIndex);
+            SublayoutResponse las = this.sub_specificLayouts[columnIndex, rowIndex];
+            if (las != null && las.QuerySize.Width == width && las.QuerySize.Height == height)
+                return las.Layout;
+            return null;
+        }
+        private SpecificLayout get_specificLayout(int columnIndex, int rowIndex)
+        {
+            SpecificLayout cached = this.get_cached_specificLayout(columnIndex, rowIndex);
+            if (cached != null)
+                return cached;
+            double width = this.GetWidthCoordinate(columnIndex);
+            double height = this.GetHeightCoordinate(rowIndex);
+            LayoutChoice_Set layout = this.elements[columnIndex, rowIndex];
+            SpecificLayout specificLayout = null;
+            if (layout != null)
+                specificLayout = layout.GetBestLayout(new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum));
+            this.sub_specificLayouts[columnIndex, rowIndex] = new SublayoutResponse(specificLayout, new Size(width, height));
+            return specificLayout;
+        }
         // TODO this should probably be deduplicated with isScoreAtLeast()
         private LayoutScore ComputeScore()
         {
-            if (this.sub_specificLayouts == null)
-                this.sub_specificLayouts = new SpecificLayout[this.elements.GetLength(0), this.elements.GetLength(1)];
             LayoutScore totalScore = this.bonusScore;
             int rowNumber, columnNumber;
             double width, height;
@@ -1609,18 +1635,7 @@ namespace VisiPlacement
                     LayoutChoice_Set subLayout = this.elements[columnNumber, rowNumber];
                     if (subLayout != null)
                     {
-                        SpecificLayout previousLayout = this.sub_specificLayouts[columnNumber, rowNumber];
-                        SpecificLayout layout;
-                        if (previousLayout == null || previousLayout.Width != width || previousLayout.Height != height)
-                        {
-                            MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum);
-                            layout = subLayout.GetBestLayout(query);
-                            this.sub_specificLayouts[columnNumber, rowNumber] = layout;
-                        }
-                        else
-                        {
-                            layout = previousLayout;
-                        }
+                        SpecificLayout layout = this.get_specificLayout(columnNumber, rowNumber);
                         totalScore = totalScore.Plus(layout.Score);
                     }
                 }
@@ -1652,24 +1667,41 @@ namespace VisiPlacement
             List<LayoutAndSize> unscoredLayouts = new List<LayoutAndSize>();
             int rowNumber, columnNumber;
             double width, height;
+            LayoutScore currentScore = this.bonusScore;
             for (rowNumber = 0; rowNumber < this.rowHeights.NumProperties; rowNumber++)
             {
                 height = this.rowHeights.GetValue(rowNumber);
                 for (columnNumber = 0; columnNumber < this.columnWidths.NumProperties; columnNumber++)
                 {
                     width = this.columnWidths.GetValue(columnNumber);
-                    LayoutChoice_Set layout = this.elements[columnNumber, rowNumber];
-                    if (layout != null)
-                        unscoredLayouts.Add(new LayoutAndSize(layout, new Size(width, height)));
+                    // Check whether we already know the score of this layout
+                    SpecificLayout cachedLayout = this.get_cached_specificLayout(columnNumber, rowNumber);
+                    if (cachedLayout != null)
+                    {
+                        // We already know the score of this layout, so we can use it
+                        currentScore = currentScore.Plus(cachedLayout.Score);
+                    }
+                    else
+                    {
+                        // We don't necessarily know the score of this layout already, so we have to recompute it
+                        LayoutChoice_Set layout = this.elements[columnNumber, rowNumber];
+                        SublayoutResponse response = this.sub_specificLayouts[columnNumber, rowNumber];
+                        LayoutAndSize las = new LayoutAndSize(layout, new Size(width, height));
+                        bool probablyAccepted = (response != null && response.QuerySize.Width <= width && response.QuerySize.Height <= height);
+                        if (probablyAccepted)
+                            unscoredLayouts.Insert(0, las);
+                        else
+                            unscoredLayouts.Add(las);
+                    }
+
                 }
             }
             // look for any sublayouts that can increase the score by at least the required average amount
-            LayoutScore currentScore = this.bonusScore;
             bool seemsSufficient = true;
             while (unscoredLayouts.Count > 0)
             {
                 LayoutScore requiredExtraScore = targetScore.Minus(currentScore);
-
+                
                 LayoutScore averageRequiredExtraScore = requiredExtraScore.Times(1.0 / unscoredLayouts.Count);
                 List<LayoutAndSize> nextUnscoredLayouts = new List<LayoutAndSize>();
 
@@ -1953,9 +1985,7 @@ namespace VisiPlacement
 
         public SpecificLayout GetChildLayout(int columnNumber, int rowNumber)
         {
-            if (this.sub_specificLayouts == null)
-                this.ComputeScore();
-            return this.sub_specificLayouts[columnNumber, rowNumber];
+            return this.get_specificLayout(columnNumber, rowNumber);
         }
 
         public override void Remove_VisualDescendents()
@@ -1969,7 +1999,7 @@ namespace VisiPlacement
 
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
-            if (this.sub_specificLayouts == null)
+            //if (this.sub_specificLayouts == null)
             {
                 this.DoLayout_Impl(new Size(this.columnWidths.GetTotalValue(), this.rowHeights.GetTotalValue()), true);
             }
@@ -1978,9 +2008,13 @@ namespace VisiPlacement
             {
                 for (int j = 0; j < this.rowHeights.NumProperties; j++)
                 {
-                    SpecificLayout candidate = this.sub_specificLayouts[i, j];
-                    if (candidate != null)
-                        results.Add(candidate);
+                    SublayoutResponse las = this.sub_specificLayouts[i, j];
+                    if (las != null)
+                    {
+                        SpecificLayout candidate = las.Layout;
+                        if (candidate != null)
+                            results.Add(candidate);
+                    }
                 }
             }
             return results;
@@ -1994,7 +2028,7 @@ namespace VisiPlacement
         bool setWidthBeforeHeight;
         GridView view;
         public LayoutScore score;
-        SpecificLayout[,] sub_specificLayouts;
+        SublayoutResponse[,] sub_specificLayouts;
     }
 
     // A CompositeGridLayout just has a few GridLayouts inside it, which results in better (more-granular) caching than just one grid with everything
@@ -2096,5 +2130,16 @@ namespace VisiPlacement
         }
         public LayoutChoice_Set Layout;
         public Size Size;
+    }
+
+    class SublayoutResponse
+    {
+        public SublayoutResponse(SpecificLayout layout, Size size)
+        {
+            this.Layout = layout;
+            this.QuerySize = size;
+        }
+        public SpecificLayout Layout;
+        public Size QuerySize;
     }
 }
