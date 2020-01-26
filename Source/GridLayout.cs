@@ -2007,10 +2007,8 @@ namespace VisiPlacement
 
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
-            //if (this.sub_specificLayouts == null)
-            {
-                this.DoLayout_Impl(new Size(this.columnWidths.GetTotalValue(), this.rowHeights.GetTotalValue()), true);
-            }
+            if (this.score == null)
+                this.ComputeScore();
             List<SpecificLayout> results = new List<SpecificLayout>();
             for (int i = 0; i < this.columnWidths.NumProperties; i++)
             {
