@@ -5,7 +5,7 @@ using Xamarin.Forms;
 // A TextblockLayout is what callers should make if they want to display uneditable text
 namespace VisiPlacement
 {
-    public class TextblockLayout : LayoutCache
+    public class TextblockLayout : ContainerLayout
     {
         public TextblockLayout(string text, bool allowCropping)
         {
@@ -81,7 +81,7 @@ namespace VisiPlacement
                 layouts.Add(this.makeLayout(10, allowCropping, allowSplittingWords));
             }
                 
-            this.LayoutToManage = new LayoutUnion(layouts);
+            this.SubLayout = new LayoutUnion(layouts);
         }
 
         public bool ScoreIfEmpty

@@ -5,7 +5,7 @@ using Xamarin.Forms;
 // A TextboxLayout is what callers should make if they want to display editable text
 namespace VisiPlacement
 {
-    public class TextboxLayout : LayoutCache
+    public class TextboxLayout : ContainerLayout
     {
         public TextboxLayout()
         {
@@ -38,7 +38,7 @@ namespace VisiPlacement
                 this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), fontSize));
             }
 
-            this.LayoutToManage = new LayoutUnion(layouts);
+            this.SubLayout = new LayoutUnion(layouts);
         }
 
         public bool ScoreIfEmpty

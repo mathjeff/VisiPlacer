@@ -182,7 +182,7 @@ namespace VisiPlacement
         private SpecificLayout Query_SubLayout(LayoutQuery query)
         {
             numComputations++;
-            if (this.true_queryResults.Count == 10)
+            if (this.true_queryResults.Count == 15)
             {
                 System.Diagnostics.Debug.WriteLine("Lots of queries being sent to " + this.layoutToManage);
             }
