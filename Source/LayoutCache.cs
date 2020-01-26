@@ -135,7 +135,6 @@ namespace VisiPlacement
                         return this.inferredLayout(query, shrunken.Response);
                 }
             }
-            /* TODO: Figure out why this block doesn't improve performance
             // if we couldn't immediately return a result using the cache, we can still put a bound on the results we might get
             // They have to be at least as good as the sample we found
             if (shrunken != null)
@@ -153,7 +152,7 @@ namespace VisiPlacement
                     result = shrunken.Response;
                 return this.inferredLayout(query, result);
             }
-            else*/
+            else
             {
                 result = this.Query_SubLayout(query);
             }
