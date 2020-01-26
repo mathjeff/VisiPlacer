@@ -14,7 +14,7 @@ namespace VisiPlacement
             this.maxWidth = double.PositiveInfinity;
             this.maxHeight = double.PositiveInfinity;
             this.debugID = nextID;
-            /*if (this.debugID >= 26 && this.debugID <= 78)
+            /*if (this.debugID >= 3501 && this.debugID <= 7305)
             {
                 System.Diagnostics.Debug.WriteLine("Hi");
             }*/

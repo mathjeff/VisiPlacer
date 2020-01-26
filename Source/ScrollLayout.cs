@@ -71,12 +71,17 @@ namespace VisiPlacement
             // If the child layout has negative score, the Specific_ScrollLayout refuses to do a layout
             // If the child layout has nonnegative score, the Specific_ScrollLayout's score equals
             //   (this.resultingScore * (what fraction of the child layout is visible))
-
             if (query.MinScore.CompareTo(this.resultingScore) > 0)
             {
                 // Demands too high of a score: no solution
                 return null;
             }
+
+            if (query.MaxHeight <= 0)
+            {
+                return this.returnEmptySize(query);
+            }
+
             // what fraction of the score of the sublayout will appear onscreen at once
             double scoreFraction = Math.Max(query.MinScore.DividedBy(this.resultingScore), 0);
             // what fraction of the child's height we need to include in the size of the ScrollView
@@ -95,12 +100,13 @@ namespace VisiPlacement
                 // For a min-width query, first shrink the width as much as possible before continuing
                 SpecificLayout minWidth_childLayout = this.subLayout.GetBestLayout(new MinWidth_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
                 if (minWidth_childLayout == null)
-                    return null;
+                    return this.returnEmptySize(query);
                 query = query.WithDimensions(minWidth_childLayout.Width, minWidth_childLayout.Height);
             }
 
-
             SpecificLayout childLayout = this.subLayout.GetBestLayout(new MinHeight_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
+            if (childLayout == null)
+                return this.returnEmptySize(query);
 
             if (!query.MinimizesHeight())
             {
@@ -126,6 +132,12 @@ namespace VisiPlacement
             LayoutScore score = this.resultingScore.Times(size.Height / childHeight);
             SpecificLayout result = new Specific_ScrollLayout(this.view, size, score, childLayout);
             return this.prepareLayoutForQuery(result, originalQuery);
+        }
+
+        private SpecificLayout returnEmptySize(LayoutQuery originalQuery)
+        {
+            SpecificLayout emptyChildLayout = this.subLayout.GetBestLayout(new MaxScore_LayoutQuery(0, 0, LayoutScore.Minimum));
+            return this.returnLayout(new Size(), emptyChildLayout, originalQuery);
         }
 
         private LayoutChoice_Set subLayout;
