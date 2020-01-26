@@ -1690,13 +1690,16 @@ namespace VisiPlacement
                     {
                         // We don't necessarily know the score of this layout already, so we have to recompute it
                         LayoutChoice_Set layout = this.elements[columnNumber, rowNumber];
-                        SublayoutResponse response = this.sub_specificLayouts[columnNumber, rowNumber];
-                        LayoutAndSize las = new LayoutAndSize(layout, new Size(width, height));
-                        bool probablyAccepted = (response != null && response.QuerySize.Width <= width && response.QuerySize.Height <= height);
-                        if (probablyAccepted)
-                            unscoredLayouts.Insert(0, las);
-                        else
-                            unscoredLayouts.Add(las);
+                        if (layout != null)
+                        {
+                            SublayoutResponse response = this.sub_specificLayouts[columnNumber, rowNumber];
+                            LayoutAndSize las = new LayoutAndSize(layout, new Size(width, height));
+                            bool probablyAccepted = (response != null && response.QuerySize.Width <= width && response.QuerySize.Height <= height);
+                            if (probablyAccepted)
+                                unscoredLayouts.Insert(0, las);
+                            else
+                                unscoredLayouts.Add(las);
+                        }
                     }
 
                 }
