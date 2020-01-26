@@ -5,6 +5,7 @@ using Xamarin.Forms;
 // the GridLayout will arrange the child elements in a grid pattern
 namespace VisiPlacement
 {
+    [System.Diagnostics.DebuggerDisplay("{ToString()}")]
     public class GridLayout : LayoutChoice_Set
     {
         public static int NumQueries = 0;
@@ -1039,6 +1040,10 @@ namespace VisiPlacement
             return this.RoundWidthDown(value);
         }
 
+        public override string ToString()
+        {
+            return "GridLayout: (" + this.NumColumns + "x" + this.NumRows + ")";
+        }
 
         // given a layout, this function attempts to shrink it without decreasing the score
         // It allows the cache managing this layout to run faster, because it makes our results more likely to be valid for other queries
@@ -2032,6 +2037,7 @@ namespace VisiPlacement
     }
 
     // A CompositeGridLayout just has a few GridLayouts inside it, which results in better (more-granular) caching than just one grid with everything
+    [System.Diagnostics.DebuggerDisplay("{ToString()}")]
     class CompositeGridLayout : GridLayout
     {
         public CompositeGridLayout(int numRows, int numColumns, LayoutScore bonusScore)
@@ -2112,6 +2118,11 @@ namespace VisiPlacement
             {
                 return this.numColumns;
             }
+        }
+
+        public override string ToString()
+        {
+            return "CompositeGridLayout: (" + this.numColumns + "x" + this.numRows + ")";
         }
 
         private GridLayout[,] gridLayouts;
