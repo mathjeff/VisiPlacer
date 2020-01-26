@@ -1721,7 +1721,7 @@ namespace VisiPlacement
                     }
 
                     // loosen the score requirements slightly in case of rounding error
-                    MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery(layoutAndSize.Size.Width, layoutAndSize.Size.Height, LayoutScore.Min(averageRequiredExtraScore.Times(0.9999), averageRequiredExtraScore.Times(1.0001)));
+                    MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery(layoutAndSize.Size.Width, layoutAndSize.Size.Height, averageRequiredExtraScore);
                     SpecificLayout result = layoutAndSize.Layout.GetBestLayout(subQuery);
                     if (result != null)
                         currentScore = currentScore.Plus(result.Score);
