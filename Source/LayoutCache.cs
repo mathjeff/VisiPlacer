@@ -122,17 +122,17 @@ namespace VisiPlacement
                 if (query.MaximizesScore())
                 {
                     if (shrunken.Response.Width >= query.MaxWidth && shrunken.Response.Height >= query.MaxHeight)
-                        return shrunken.Response;
+                        return this.inferredLayout(query, shrunken.Response);
                 }
                 if (query.MinimizesWidth())
                 {
                     if (shrunken.Response.Width <= 0)
-                        return shrunken.Response;
+                        return this.inferredLayout(query, shrunken.Response);
                 }
                 if (query.MinimizesHeight())
                 {
                     if (shrunken.Response.Height <= 0)
-                        return shrunken.Response;
+                        return this.inferredLayout(query, shrunken.Response);
                 }
             }
             /* TODO: Figure out why this block doesn't improve performance
