@@ -81,7 +81,7 @@ namespace VisiPlacement
                 layouts.Add(this.makeLayout(10, allowCropping, allowSplittingWords));
             }
                 
-            this.SubLayout = new LayoutUnion(layouts);
+            this.SubLayout = LayoutUnion.New(layouts);
         }
 
         public bool ScoreIfEmpty

@@ -9,6 +9,14 @@ namespace VisiPlacement
 {
     public class LayoutUnion : LayoutChoice_Set
     {
+        public static LayoutChoice_Set New(IEnumerable<LayoutChoice_Set> layoutOptions)
+        {
+            if (layoutOptions.Count() == 1)
+                return layoutOptions.First();
+            return new LayoutUnion(layoutOptions);
+        }
+
+
         public LayoutUnion()
         {
         }

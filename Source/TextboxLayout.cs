@@ -38,8 +38,8 @@ namespace VisiPlacement
                 this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), fontSize));
             }
 
-            this.SubLayout = new LayoutUnion(layouts);
-        }
+            this.SubLayout = LayoutUnion.New(layouts);
+       }
 
         public bool ScoreIfEmpty
         {
