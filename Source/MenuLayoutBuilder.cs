@@ -27,7 +27,7 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
         {
-            this.layoutNames.AddLast(name);
+            this.layoutNames.Add(name);
             Button button = this.MakeButton(name, layoutProvider);
             return this;
         }
@@ -76,7 +76,7 @@ namespace VisiPlacement
         }
 
 
-        LinkedList<string> layoutNames = new LinkedList<string>();
+        List<string> layoutNames = new List<string>();
         Dictionary<string, Button> buttonsByName = new Dictionary<string, Button>();
         Dictionary<Button, LayoutChoice_Set> buttonLayouts_by_button = new Dictionary<Button, LayoutChoice_Set>();
         Dictionary<LayoutChoice_Set, ValueProvider<StackEntry>> buttonDestinations = new Dictionary<LayoutChoice_Set, ValueProvider<StackEntry>>();

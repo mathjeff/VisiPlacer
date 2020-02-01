@@ -14,7 +14,7 @@ namespace VisiPlacement
 
         public HelpWindowBuilder AddMessage(string message)
         {
-            this.messages.AddLast(message);
+            this.messages.Add(message);
             return this;
         }
 
@@ -45,7 +45,7 @@ namespace VisiPlacement
             return new LayoutUnion(fontChoices);
         }
 
-        private LinkedList<string> messages = new LinkedList<string>();
+        private List<string> messages = new List<string>();
 
     }
 }

@@ -168,10 +168,10 @@ namespace VisiPlacement
 
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
-            LinkedList<SpecificLayout> children = new LinkedList<SpecificLayout>();
+            List<SpecificLayout> children = new List<SpecificLayout>();
             if (this.subLayout != null)
             {
-                children.AddLast(subLayout);
+                children.Add(subLayout);
             }
             return children;
         }

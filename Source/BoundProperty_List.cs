@@ -20,13 +20,13 @@ namespace VisiPlacement
         {
             this.values = new double[count];
             this.scales = new double[count];
-            this.indicesByGroup = new List<List<int>>();
+            this.indicesByGroup = new List<List<int>>(count);
             int i;
             for (i = 0; i < count; i++)
             {
                 this.scales[i] = 1;
 
-                List<int> group = new List<int>();
+                List<int> group = new List<int>(2);
                 group.Add(i);
                 indicesByGroup.Add(group);
             }

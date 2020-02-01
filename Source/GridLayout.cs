@@ -1234,7 +1234,7 @@ namespace VisiPlacement
     {
         public Vertical_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
         {
-            this.subLayouts.AddLast(subLayout);
+            this.subLayouts.Add(subLayout);
             return this;
         }
         public Vertical_GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
@@ -1271,11 +1271,11 @@ namespace VisiPlacement
         public LayoutChoice_Set BuildAnyLayout()
         {
             if (this.subLayouts.Count == 1)
-                return this.subLayouts.First.Value;
+                return this.subLayouts[0];
             return this.Build();
         }
 
-        private LinkedList<LayoutChoice_Set> subLayouts = new LinkedList<LayoutChoice_Set>();
+        private List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
         private bool uniform = false;
     }
 
@@ -1283,7 +1283,7 @@ namespace VisiPlacement
     {
         public Horizontal_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
         {
-            this.subLayouts.AddLast(subLayout);
+            this.subLayouts.Add(subLayout);
             return this;
         }
         public Horizontal_GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
@@ -1321,11 +1321,11 @@ namespace VisiPlacement
         public LayoutChoice_Set BuildAnyLayout()
         {
             if (this.subLayouts.Count == 1)
-                return this.subLayouts.First.Value;
+                return this.subLayouts[0];
             return this.Build();
         }
 
-        private LinkedList<LayoutChoice_Set> subLayouts = new LinkedList<LayoutChoice_Set>();
+        private List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
         private bool uniform = false;
     }
 

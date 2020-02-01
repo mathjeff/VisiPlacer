@@ -89,7 +89,7 @@ namespace VisiPlacement
 
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
-            return new LinkedList<SpecificLayout>();
+            return new List<SpecificLayout>();
         }
         public override string ToString()
         {

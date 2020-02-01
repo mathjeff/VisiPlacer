@@ -47,7 +47,7 @@ namespace VisiPlacement
             }
             else
             {
-                List<LayoutChoice_Set> sublayoutOptions = new List<LayoutChoice_Set>();
+                List<LayoutChoice_Set> sublayoutOptions = new List<LayoutChoice_Set>(3);
                 if (allowCropping)
                 {
                     sublayoutOptions.Add(TextLayout.New_Croppable(buttonConfigurer, 30, scoreIfEmpty));

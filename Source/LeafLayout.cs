@@ -9,9 +9,9 @@ namespace VisiPlacement
         public LeafLayout(View view, LayoutDimensions desiredDimensions)
         {
             this.view = view;
-            LinkedList<LayoutDimensions> dimensionOptions = new LinkedList<LayoutDimensions>();
-            dimensionOptions.AddLast(desiredDimensions);
-            dimensionOptions.AddLast(new LayoutDimensions(0, 0, LayoutScore.Get_CutOff_LayoutScore(1)));
+            List<LayoutDimensions> dimensionOptions = new List<LayoutDimensions>();
+            dimensionOptions.Add(desiredDimensions);
+            dimensionOptions.Add(new LayoutDimensions(0, 0, LayoutScore.Get_CutOff_LayoutScore(1)));
             this.dimensionOptions = dimensionOptions;
         }
 
@@ -73,7 +73,7 @@ namespace VisiPlacement
         }
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
-            return new LinkedList<SpecificLayout>();
+            return new List<SpecificLayout>();
         }
 
         public override SpecificLayout Clone()

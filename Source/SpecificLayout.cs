@@ -9,7 +9,7 @@ namespace VisiPlacement
     {
         public SpecificLayout()
         {
-            this.ancestors = new LinkedList<LayoutChoice_Set>();
+            this.ancestors = new List<LayoutChoice_Set>();
         }
         public abstract View View { get; }
         public abstract double Width { get; }
@@ -55,7 +55,7 @@ namespace VisiPlacement
         {
             base.CopyFrom(original);
             this.SourceQuery_ForDebugging = original.SourceQuery_ForDebugging;
-            this.ancestors = new LinkedList<LayoutChoice_Set>(original.ancestors);
+            this.ancestors = new List<LayoutChoice_Set>(original.ancestors);
         }
         public abstract SpecificLayout Clone();
         public LayoutQuery SourceQuery_ForDebugging { get; set; }   // the query that generated this SpecificLayout
@@ -82,7 +82,7 @@ namespace VisiPlacement
         // Sets the general layout that created this specific layout
         public void Set_SourceParent(LayoutChoice_Set parent)
         {
-            this.ancestors.AddLast(parent);
+            this.ancestors.Add(parent);
         }
         
         public virtual ViewManager Get_ViewManager()
@@ -106,7 +106,7 @@ namespace VisiPlacement
             return "SpecificLayout: " + this.Dimensions;
         }
 
-        LinkedList<LayoutChoice_Set> ancestors;
+        List<LayoutChoice_Set> ancestors;
     }
 
 }

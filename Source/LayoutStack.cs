@@ -182,13 +182,13 @@ namespace VisiPlacement
         {
             this.Layout = layout;
             if (listener != null)
-                this.Listeners.AddLast(listener);
+                this.Listeners.Add(listener);
             this.Name = name;
             this.BackPriority = backPriority;
         }
 
         public LayoutChoice_Set Layout;
-        public LinkedList<OnBack_Listener> Listeners = new LinkedList<OnBack_Listener>();
+        public List<OnBack_Listener> Listeners = new List<OnBack_Listener>();
         public string Name;
         public int BackPriority;
     }

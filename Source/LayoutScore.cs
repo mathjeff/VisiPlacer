@@ -353,7 +353,7 @@ namespace VisiPlacement
         public LayoutScore ComponentRange(int minIndexInclusive, int maxIndexExclusive)
         {
             LayoutScore range = new LayoutScore();
-            LinkedList<ListItemStats<double, double>> subComponents = this.components.ItemsBetweenIndices(minIndexInclusive, maxIndexExclusive);
+            List<ListItemStats<double, double>> subComponents = this.components.ItemsBetweenIndices(minIndexInclusive, maxIndexExclusive);
             foreach (ListItemStats<double, double> component in subComponents)
             {
                 range.addComponent(component.Key, component.Value);
