@@ -26,6 +26,11 @@ namespace VisiPlacement
             this.SubLayout = new TitledControl(title, buttonLayout);
         }
 
+        public void Placeholder(string text)
+        {
+            this.placeholder = text;
+            this.updateButtonText();
+        }
         private void Button_Clicked(object sender, EventArgs e)
         {
             this.layoutStack.AddLayout(new StackEntry(this.detailsLayout, this.title, this));
@@ -53,10 +58,17 @@ namespace VisiPlacement
         {
             int longestPrefix = 10;
             string text = this.textBox.Text;
-            if (text != null && text.Length > longestPrefix)
-                this.button.Text = this.textBox.Text.Substring(0, longestPrefix) + "...";
+            if ((text == null || text == "") && this.placeholder != null)
+            {
+                this.button.Text = this.placeholder;
+            }
             else
-                this.button.Text = text;
+            {
+                if (text != null && text.Length > longestPrefix)
+                    this.button.Text = this.textBox.Text.Substring(0, longestPrefix) + "...";
+                else
+                    this.button.Text = text;
+            }
         }
 
         private Button button;
@@ -64,5 +76,6 @@ namespace VisiPlacement
         private LayoutChoice_Set detailsLayout;
         private LayoutStack layoutStack;
         private string title;
+        private string placeholder;
     }
 }
