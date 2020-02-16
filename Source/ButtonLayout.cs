@@ -95,6 +95,10 @@ namespace VisiPlacement
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { spacingLayout, new ScoreShifted_Layout(null, LayoutScore.Get_CutOff_LayoutScore(1)) });
 
                 button.TextColor = Color.LightGray;
+                if (!isButtonColorSet)
+                {
+                    button.BackgroundColor = Color.Black;
+                }
             }
             else
             {
