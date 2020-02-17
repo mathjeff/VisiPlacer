@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 
 namespace VisiPlacement
 {
@@ -97,7 +98,13 @@ namespace VisiPlacement
                 button.TextColor = Color.LightGray;
                 if (!isButtonColorSet)
                 {
-                    button.BackgroundColor = Color.Black;
+                    // On most platforms, setting the background color of a button won't prevent it from changing color when pressed
+                    // On Android, setting the background color of a button will prevent it from changing color, so on Android the application must
+                    // set the button background via a theme instead
+                    if (Device.RuntimePlatform != Device.Android)
+                    {
+                        button.BackgroundColor = Color.FromRgba(0, 0, 0, 255);
+                    }
                 }
             }
             else
