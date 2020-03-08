@@ -78,11 +78,26 @@ namespace VisiPlacement
         {
             Specific_ContainerLayout result;
 
-            // Query sublayout if it exists
+            SpecificLayout sublayoutResult;
             if (this.SubLayout != null)
             {
-                return this.SubLayout.GetBestLayout(query);
+                // We have a sublayout and haven't been asked to wrap it in another view, so we can just forward the query on to it
+                sublayoutResult = this.SubLayout.GetBestLayout(query);
+                if (this.view == null)
+                {
+                    // If we haven't been asked to wrap the sublayout's result, we can just directly use it
+                    return sublayoutResult;
+                }
+                else
+                {
+                    if (sublayoutResult == null)
+                        return null;
+                    result = this.makeSpecificLayout(this.view, sublayoutResult.Size, LayoutScore.Zero, sublayoutResult, new Thickness());
+                    this.prepareLayoutForQuery(result, query);
+                    return result;
+                }
             }
+
             // if there is no subLayout, for now we just return an empty size
             Specific_ContainerLayout empty = this.makeSpecificLayout(this.view, new Size(), LayoutScore.Zero, null, new Thickness());
             if (query.Accepts(empty))
