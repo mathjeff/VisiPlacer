@@ -117,6 +117,8 @@ namespace VisiPlacement
                 }
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { backgroundLayout });
             }
+            Effect effect = Effect.Resolve("VisiPlacement.ButtonEffect");
+            button.Effects.Add(effect);
         }
 
     }
