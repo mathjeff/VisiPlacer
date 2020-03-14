@@ -33,9 +33,11 @@ namespace VisiPlacement
             textBox.BackgroundColor = Color.LightGray;
             this.TextBox.Margin = new Thickness();
 
+            TextBox_Configurer configurer = new TextBox_Configurer(textBox);
             foreach (double fontSize in fontSizes)
             {
-                this.layouts.Add(new TextLayout(new TextBox_Configurer(textBox), fontSize));
+                this.layouts.Add(new TextLayout(configurer, fontSize));
+                this.layouts.Add(new ScoreShifted_Layout(new TextLayout(configurer, fontSize, true), LayoutScore.Get_UnCentered_LayoutScore(1)));
             }
 
             this.SubLayout = LayoutUnion.New(layouts);
@@ -52,23 +54,12 @@ namespace VisiPlacement
             }
         }
 
-        public bool LoggingEnabled
-        {
-            set
-            {
-                foreach (TextLayout layout in this.layouts)
-                {
-                    layout.LoggingEnabled = value;
-                }
-            }
-        }
-
         private void Setup_PropertyChange_Listener(string propertyName, View element, PropertyChangedEventHandler callback)
         {
             this.TextBox.PropertyChanged += callback;
         }
 
-        private List<TextLayout> layouts = new List<TextLayout>();
+        private List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
         private Editor TextBox;
     }
 
