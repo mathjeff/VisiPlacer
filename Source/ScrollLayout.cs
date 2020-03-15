@@ -150,9 +150,10 @@ namespace VisiPlacement
 
     public class Specific_ScrollLayout : Specific_ContainerLayout
     {
-        public Specific_ScrollLayout(View view, Size size, LayoutScore score, SpecificLayout sublayout)
+        public Specific_ScrollLayout(ScrollView view, Size size, LayoutScore score, SpecificLayout sublayout)
             : base(view, size, score, sublayout, new Thickness())
         {
+            this.View = view;
             if (double.IsInfinity(this.SubLayout.Height))
             {
                 ErrorReporter.ReportParadox("Infinite Specific_ScrollLayout height: " + this);
@@ -170,6 +171,31 @@ namespace VisiPlacement
             return new Specific_ScrollLayout(this.View, this.Size, this.Score, this.SubLayout);
         }
 
+
+        public override void Remove_VisualDescendents()
+        {
+            ScrollView view = this.View;
+
+            if (view != null)
+            {
+                this.scrollX = view.ScrollX;
+                this.scrollY = view.ScrollY;
+                view.Content = null;
+            }
+        }
+
+        public new ScrollView View { get; set; }
+
+        public override void AfterLayoutAttached()
+        {
+            this.View.ScrollToAsync(this.scrollX, this.scrollY, false);
+            //this.View.SetScrolledPosition(this.scrollX, this.scrollY);
+        }
+
+        // The scroll coordinates are attached to the Specific_ScrollLayout because if we switch to a different Specific_ScrollLayout (which might use a different font size for its content),
+        // then we probably want to reset the scroll position
+        public double scrollX = 0;
+        public double scrollY = 0;
     }
 
 }

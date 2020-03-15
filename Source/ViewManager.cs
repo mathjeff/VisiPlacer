@@ -128,8 +128,10 @@ namespace VisiPlacement
             DateTime getBestLayout_startDate = DateTime.Now;
             this.specificLayout = this.GetSublayout().GetBestLayout(query);
             if (this.specificLayout == null)
+            {
                 query = query.WithScore(LayoutScore.Minimum);
-            this.specificLayout = this.GetSublayout().GetBestLayout(query);
+                this.specificLayout = this.GetSublayout().GetBestLayout(query);
+            }
 
             DateTime getBestLayout_endDate = DateTime.Now;
 
@@ -158,6 +160,12 @@ namespace VisiPlacement
 
             // update our actual view
             this.mainView.Content = this.specificLayout.DoLayout(displaySize);
+
+            // Inform each layout whose view was reattached, in case they need to restore any state that can only be restored after being reattached (most likely because the view system would overwrite it)
+            foreach (SpecificLayout layout in postParents.Values)
+            {
+                layout.AfterLayoutAttached();
+            }
 
             // display stats
             DateTime endTime = DateTime.Now;
@@ -191,7 +199,7 @@ namespace VisiPlacement
             return null;
         }
 
-        // returns a Dictionary that maps each view in the tree to its closest containing ancestor
+        // returns a Dictionary that maps each view in the tree to its closest containing ancestor layout
         private Dictionary<View, SpecificLayout> findAncestors(SpecificLayout layout)
         {
             Dictionary<View, SpecificLayout> parents = new Dictionary<View, SpecificLayout>();

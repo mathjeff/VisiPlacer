@@ -53,15 +53,6 @@ namespace VisiPlacement
                     this.GetBestLayout(query);
                 }
             }
-            /*if (query.MinScore.Equals(LayoutScore.Minimum))
-            {
-                if (layout == null)
-                {
-                    ErrorReporter.ReportParadox("Layout " + this + " returned illegal null layout for query " + query);
-                    return this.GetBestLayout(query.DebugClone());
-                }
-            }*/
-
             int numMatches;
             //if (query.Debug)
             {

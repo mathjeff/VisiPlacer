@@ -62,6 +62,9 @@ namespace VisiPlacement
 
         public abstract void Remove_VisualDescendents();
 
+        // Gets called after the view is part of the main view hieararchy
+
+        public virtual void AfterLayoutAttached() { }
         // returns a list of general LayoutChoice_Sets where the first item created/found this item, and the second item found the first, etc
         // Note that this is different than the specific layout that contains this one as a visual parent
         public IEnumerable<LayoutChoice_Set> GetAncestors()
