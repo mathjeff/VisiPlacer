@@ -34,11 +34,15 @@ namespace VisiPlacement
             this.TextBox.Margin = new Thickness();
 
             TextBox_Configurer configurer = new TextBox_Configurer(textBox);
+            double minFontSize = -1;
             foreach (double fontSize in fontSizes)
             {
+                if (minFontSize < 0 || fontSize < minFontSize)
+                    minFontSize = fontSize;
                 this.layouts.Add(new TextLayout(configurer, fontSize));
-                this.layouts.Add(new ScoreShifted_Layout(new TextLayout(configurer, fontSize, true), LayoutScore.Get_UnCentered_LayoutScore(1)));
             }
+            if (minFontSize > 0)
+                this.layouts.Add(new ScoreShifted_Layout(new TextLayout(configurer, minFontSize, true), LayoutScore.Get_UnCentered_LayoutScore(1)));
 
             this.SubLayout = LayoutUnion.New(layouts);
        }
