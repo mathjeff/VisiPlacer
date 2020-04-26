@@ -37,6 +37,7 @@ namespace VisiPlacement
         {
             this.picker = picker;
             this.picker.SelectedIndexChanged += TextBox_SelectedIndexChanged;
+            this.ModelledText = this.DisplayText;
         }
 
         public double Width
@@ -60,7 +61,9 @@ namespace VisiPlacement
             get { return 16; }
             set { /* do nothing */ }
         }
-        public string Text
+        public string ModelledText { get; set; }
+
+        public string DisplayText
         {
             get
             {

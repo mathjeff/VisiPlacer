@@ -7,10 +7,16 @@ namespace VisiPlacement
 {
     public class TextblockLayout : ContainerLayout
     {
-        public TextblockLayout(string text, bool allowCropping)
+        public TextblockLayout(string text = "")
         {
             Label textBlock = this.makeTextBlock(text);
             this.Initialize(textBlock, -1, false, false);
+        }
+        public TextblockLayout(string text, Xamarin.Forms.Color textColor)
+        {
+            Label textBlock = this.makeTextBlock(text);
+            this.Initialize(textBlock, -1, false, false);
+            textBlock.TextColor = textColor;
         }
         public TextblockLayout(string text, bool allowCropping, bool allowSplittingWords)
         {
@@ -22,14 +28,14 @@ namespace VisiPlacement
             Label textBlock = this.makeTextBlock(text);
             this.Initialize(textBlock, fontSize, allowCropping, false);
         }
-        public TextblockLayout(Label textBlock, bool allowCropping, double fontSize = -1)
+        /*public TextblockLayout(Label textBlock, bool allowCropping, double fontSize = -1)
         {
             this.Initialize(textBlock, fontSize, allowCropping, false);
-        }
-        public TextblockLayout(Label textBlock, double fontSize = -1)
+        }*/
+        /*public TextblockLayout(Label textBlock, double fontSize = -1)
         {
             this.Initialize(textBlock, fontSize, false, false);
-        }
+        }*/
         public TextblockLayout(String text, double fontSize = -1)
         {
             Label textBlock = this.makeTextBlock(text);
@@ -55,14 +61,41 @@ namespace VisiPlacement
             this.textBlock.HorizontalTextAlignment = horizontalTextAlignment;
             return this;
         }
+        public TextblockLayout AlignVertically(TextAlignment verticalTextAlignment)
+        {
+            this.textBlock.VerticalTextAlignment = verticalTextAlignment;
+            return this;
+        }
+        public void setText(string text)
+        {
+            this.ModelledText = text;
+            foreach (TextLayout layout in this.layouts)
+            {
+                layout.On_TextChanged();
+            }
+        }
+
+        public void setTextColor(Color color)
+        {
+            this.textBlock.TextColor = color;
+        }
+        public void setBackgroundColor(Color color)
+        {
+            this.textBlock.BackgroundColor = color;
+        }
+
+        public string getText()
+        {
+            return this.ModelledText;
+        }
         private Label makeTextBlock(string text)
         {
-            Label textBlock = new Label();
-            textBlock.Text = text;
-            return textBlock;
+            this.ModelledText = text;
+            return new Label();
         }
         private void Initialize(Label textBlock, double fontsize, bool allowCropping, bool allowSplittingWords)
         {
+            //textBlock.LineBreakMode = LineBreakMode.NoWrap;
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
             textBlock.Margin = new Thickness(0);
@@ -109,7 +142,7 @@ namespace VisiPlacement
 
         private LayoutChoice_Set makeLayout(double fontSize, bool allowCropping, bool allowSplittingWords)
         {
-            TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock);
+            TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock, this);
             LayoutChoice_Set layout;
             if (allowCropping)
                 layout = TextLayout.New_Croppable(configurer, fontSize);
@@ -118,6 +151,7 @@ namespace VisiPlacement
             return layout;
         }
 
+        public string ModelledText;
         private Label textBlock;
         private List<LayoutChoice_Set> layouts;
     }
@@ -126,9 +160,10 @@ namespace VisiPlacement
     // The TextBlock_Configurer probably isn't interesting to external callers
     class TextBlock_Configurer : TextItem_Configurer
     {
-        public TextBlock_Configurer(Label Label)
+        public TextBlock_Configurer(Label Label, TextblockLayout layout)
         {
             this.Label = Label;
+            this.Layout = layout;
         }
 
         public double Width
@@ -146,7 +181,18 @@ namespace VisiPlacement
             get { return this.Label.FontSize; }
             set { this.Label.FontSize = value; }
         }
-        public String Text
+        public String ModelledText
+        {
+            get
+            {
+                return this.Layout.ModelledText;
+            }
+            set
+            {
+                this.Layout.ModelledText = value;
+            }
+        }
+        public String DisplayText
         {
             get { return this.Label.Text; }
             set { this.Label.Text = value; }
@@ -164,6 +210,7 @@ namespace VisiPlacement
         }
 
         public Label Label;
+        public TextblockLayout Layout;
     }
 
 }

@@ -9,7 +9,10 @@ namespace VisiPlacement
         double Width { get; set; }
         double Height { get; set; }
         double FontSize { get; set; }
-        String Text { get; set; }
+        // The text that this TextItem represents
+        String ModelledText { get; set; }
+        // The text that we put into the textbox, which may contain extra linebreaks
+        String DisplayText { get; set; }
         View View { get; }
         void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler);
     }

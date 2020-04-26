@@ -163,7 +163,9 @@ namespace VisiPlacement
                 this.button.FontSize = value;
             }
         }
-        public string Text
+        // ButtonLayout doesn't support having a separate ModelledText from DisplayText
+        // TODO: make ButtonLayout support this
+        public string ModelledText
         {
             get
             {
@@ -177,6 +179,8 @@ namespace VisiPlacement
                 this.button.Text = value;
             }
         }
+
+        public string DisplayText { get; set; }
         public View View
         {
             get

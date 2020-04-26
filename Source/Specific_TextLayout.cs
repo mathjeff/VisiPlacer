@@ -7,14 +7,14 @@ namespace VisiPlacement
 {
     public class Specific_TextLayout : SpecificLayout
     {
-        public Specific_TextLayout(TextItem_Configurer textItem, double width, double height, double fontSize, LayoutScore score, String text, Size desiredSize)
+        public Specific_TextLayout(TextItem_Configurer textItem, double width, double height, double fontSize, LayoutScore score, String displayText, Size desiredSize)
         {
             this.textItem = textItem;
             this.width = width;
             this.height = height;
             this.fontSize = fontSize;
             this.score = score;
-            this.TextForDebugging = text;
+            this.DisplayText = displayText;
             this.DesiredSizeForDebugging = desiredSize;
 
         }
@@ -52,7 +52,7 @@ namespace VisiPlacement
             get { return this.textItem.View; }
         }
         public bool Cropped { get; set; }
-        public String TextForDebugging { get; set; }
+        public String DisplayText { get; set; }
         public Size DesiredSizeForDebugging { get; set; }
 
         public override View DoLayout(Size displaySize)
@@ -63,6 +63,8 @@ namespace VisiPlacement
                 this.textItem.Height = displaySize.Height;
             if (this.fontSize != this.textItem.FontSize)
                 this.textItem.FontSize = this.fontSize;
+            if (this.textItem.DisplayText != this.DisplayText)
+                this.textItem.DisplayText = this.DisplayText;
             return this.textItem.View;
         }
 
@@ -83,7 +85,7 @@ namespace VisiPlacement
 
         public override SpecificLayout Clone()
         {
-            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score, this.TextForDebugging, this.DesiredSizeForDebugging);
+            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score, this.DisplayText, this.DesiredSizeForDebugging);
             return clone;
         }
 
@@ -93,7 +95,7 @@ namespace VisiPlacement
         }
         public override string ToString()
         {
-            return "Specific_TextLayout: " + this.Dimensions + " with text '" + this.TextForDebugging + "'";
+            return "Specific_TextLayout: " + this.Dimensions + " with text '" + this.DisplayText + "'";
         }
 
         private TextItem_Configurer textItem;

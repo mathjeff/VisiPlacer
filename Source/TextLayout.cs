@@ -23,7 +23,7 @@ namespace VisiPlacement
             this.TextItem_Configurer = textItem;
             this.FontSize = fontSize;
             this.ScoreIfEmpty = scoreIfEmpty;
-            this.textItem_text = this.TextItem_Configurer.Text;
+            this.textItem_text = this.TextItem_Configurer.ModelledText;
             this.AllowSplittingWords = allowSplittingWords;
             textItem.Add_TextChanged_Handler(new PropertyChangedEventHandler(this.On_TextChanged));
         }
@@ -37,7 +37,7 @@ namespace VisiPlacement
         {
             get
             {
-                return this.TextItem_Configurer.Text;
+                return this.TextItem_Configurer.ModelledText;
             }
         }
         public int TextLength
@@ -78,7 +78,7 @@ namespace VisiPlacement
                 System.Diagnostics.Debug.WriteLine("num text measurements = " + TextLayout.NumMeasures);
             }
             DateTime startTime = DateTime.Now;
-            this.TextItem_Text = this.TextItem_Configurer.Text;
+            this.TextItem_Text = this.TextItem_Configurer.ModelledText;
             //ErrorReporter.ReportParadox("avg num computations per query = " + (double)numComputations / (double)numQueries);
             numQueries++;
 
@@ -190,7 +190,7 @@ namespace VisiPlacement
                     if (firstIteration)
                     {
                         // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
-                        Size desiredSize = this.formatText(maxWidth, query.Debug);
+                        Size desiredSize = this.formatText(maxWidth, query.Debug).Size;
                         if (desiredSize.Width > maxWidth)
                             maxRejectedWidth = desiredSize.Width - pixelSize / 2;
                         maxWidth = desiredSize.Width;
@@ -218,20 +218,22 @@ namespace VisiPlacement
             return bestAllowedDimensions;
         }
 
-        private Size formatText(double maxWidth, bool debug)
+        private FormattedText formatText(double maxWidth, bool debug)
         {
             // check the cache
-            Size size;
-            if (this.layoutsByWidth.TryGetValue(maxWidth, out size))
+            FormattedText formatted;
+            if (this.layoutsByWidth.TryGetValue(maxWidth, out formatted))
             {
                 if (this.LoggingEnabled)
-                    System.Diagnostics.Debug.WriteLine("TextLayout.formatText cache hit for width " + maxWidth + ": " + size);
-                return size;
+                    System.Diagnostics.Debug.WriteLine("TextLayout.formatText cache hit for width " + maxWidth + ": " + formatted.Size);
+                return formatted;
             }
             // recompute and save into cache
-            size = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug);
-            this.layoutsByWidth[maxWidth] = size;
-            return size;
+            formatted = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug);
+            if (this.textItem_text == null || this.textItem_text == "")
+                formatted.Text = this.textItem_text;
+            this.layoutsByWidth[maxWidth] = formatted;
+            return formatted;
         }
 
         // compute the best dimensions fitting within the given size
@@ -240,7 +242,8 @@ namespace VisiPlacement
             DateTime start = DateTime.Now;
             numComputations++;
 
-            Size desiredSize = this.formatText(availableSize.Width, debug);
+            FormattedText formattedText = this.formatText(availableSize.Width, debug);
+            Size desiredSize = formattedText.Size;
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
                 ErrorReporter.ReportParadox("Illegal size " + desiredSize + " returned by textFormatter.FormatText");
@@ -268,7 +271,9 @@ namespace VisiPlacement
                     width = height = 0;
                 }
             }
-            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, this.ComputeScore(desiredSize, availableSize, this.TextToFit), this.textItem_text, desiredSize);
+            Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, 
+                this.ComputeScore(desiredSize, availableSize, this.TextToFit), 
+                formattedText.Text, desiredSize);
             specificLayout.Cropped = cropped;
 
             // diagnostics
@@ -369,7 +374,7 @@ namespace VisiPlacement
                 Size currentSize = new Size(view.Width, view.Height);
                 Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, false);
                 this.TextItem_Text = this.Text;
-                this.layoutsByWidth = new Dictionary<double, Size>();
+                this.layoutsByWidth = new Dictionary<double, FormattedText>();
                 Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize, false);
                 if (!layoutForNewText.Cropped)
                 {
@@ -407,10 +412,11 @@ namespace VisiPlacement
                         mustRedraw = false;
                     }
                 }
+                this.TextItem_Configurer.DisplayText = layoutForNewText.DisplayText;
                 if (this.LoggingEnabled)
                 {
-                    System.Diagnostics.Debug.WriteLine("TextLayout calculating: Have size: " + currentSize + ". Old text: " + layoutForCurrentText.TextForDebugging +
-                        ". Old target: " + layoutForCurrentText.DesiredSizeForDebugging + ". New text: " + layoutForNewText.TextForDebugging + ". New target: " + layoutForNewText.DesiredSizeForDebugging);
+                    System.Diagnostics.Debug.WriteLine("TextLayout calculating: Have size: " + currentSize + ". Old text: " + layoutForCurrentText.DisplayText +
+                        ". Old target: " + layoutForCurrentText.DesiredSizeForDebugging + ". New text: " + layoutForNewText.DisplayText + ". New target: " + layoutForNewText.DesiredSizeForDebugging);
                 }
 
             }
@@ -436,7 +442,7 @@ namespace VisiPlacement
                 if (this.textItem_text != value)
                 {
                     this.textItem_text = value;
-                    this.layoutsByWidth = new Dictionary<double, Size>();
+                    this.layoutsByWidth = new Dictionary<double, FormattedText>();
                 }
             }
         }
@@ -446,7 +452,7 @@ namespace VisiPlacement
         private TextFormatter textFormatter;
         private LayoutScore bonusScore;
         private String textItem_text;
-        private Dictionary<double, Size> layoutsByWidth = new Dictionary<double, Size>();
+        private Dictionary<double, FormattedText> layoutsByWidth = new Dictionary<double, FormattedText>();
 
     }
 
@@ -475,29 +481,34 @@ namespace VisiPlacement
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         // The returned size might have larger width than desiredWidth if needed for the text to fit
-        public Size FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug)
+        public FormattedText FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug)
         {
-            Size result;
+            FormattedText result;
             if (text == null || text == "")
             {
-                result = new Size();
+                result = new FormattedText(new Size(), text);
                 if (debug)
                     System.Diagnostics.Debug.WriteLine("Formatted empty text '" + text + "' into size " + result);
                 return result;
             }
             string[] blocks = text.Split('\n');
             double maxWidth = 0, totalHeight = 0;
+            List<string> formattedStrings = new List<string>();
             for (int i = 0; i < blocks.Length; i++)
             {
                 string block = blocks[i];
-                if (block == "")
-                    block = "M";
+                string formatBlock = block;
+                if (formatBlock == "")
+                    formatBlock = "M";
 
-                Size blockSize = this.FormatParagraph(block, desiredWidth, allowSplittingWords);
+                FormattedText formattedBlock = this.FormatParagraph(formatBlock, desiredWidth, allowSplittingWords);
+                formattedStrings.Add(block);
+                Size blockSize = formattedBlock.Size;
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }
-            result = new Size(maxWidth, totalHeight);
+            string formattedText = String.Join("\n",formattedStrings);
+            result = new FormattedText(new Size(maxWidth, totalHeight), formattedText);
             if (debug)
             {
                 System.Diagnostics.Debug.WriteLine("Formatted text '" + text + "'" + " using desiredWith = " + desiredWidth +
@@ -505,11 +516,11 @@ namespace VisiPlacement
             }
             return result;
         }
-        public Size FormatParagraph(String text, double desiredWidth, bool allowSplittingWords)
+        public FormattedText FormatParagraph(String text, double desiredWidth, bool allowSplittingWords)
         {
             if (text == null || text == "")
-                return new Size();
-
+                return new FormattedText(new Size(), text);
+            
             // previous unsplittable unit in the current line
             String prevComponentInLine = "";
             // current size of the current line
@@ -532,6 +543,7 @@ namespace VisiPlacement
             {
                 components = text.Split(' ');
             }
+            List<string> formattedLines = new List<string>();
 
             // loop until done
             i = 0;
@@ -570,11 +582,15 @@ namespace VisiPlacement
                     totalSize.Width = Math.Max(totalSize.Width, lineSize.Width);
                     totalSize.Height += lineSize.Height;
                     prevComponentInLine = "";
+                    formattedLines.Add("\n");
                     lineSize = new Size();
                 }
                 else
                 {
                     // extend current line
+                    if (!allowSplittingWords && prevComponentInLine != "")
+                        formattedLines.Add(" ");
+                    formattedLines.Add(currentComponent);
                     lineSize = new_lineSize;
                     prevComponentInLine = currentComponent;
                     i++;
@@ -582,7 +598,8 @@ namespace VisiPlacement
             }
             totalSize.Width = Math.Max(totalSize.Width, lineSize.Width);
             totalSize.Height += lineSize.Height;
-            return totalSize;
+            string formattedText = string.Join("", formattedLines);
+            return new FormattedText(totalSize, formattedText);
         }
 
         private Size getBlockSize(String text)
@@ -627,7 +644,7 @@ namespace VisiPlacement
                 try
                 {
                     Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, this.FontSize);
-                    textFormatterType = TextFormatterType.UNIFORMS_MISC;
+                    textFormatterType = TextFormatterType.UNIFORMS_MISC; 
                 }
                 catch (Exception)
                 {
@@ -691,9 +708,10 @@ namespace VisiPlacement
                 return new Size();
             SKPaint textBlock = this.getTextBlock();
             SKRect bounds = new SKRect();
-            double width = textBlock.MeasureText(text, ref bounds);
-
-            return new Size(bounds.Width, bounds.Height);
+            textBlock.MeasureText(text, ref bounds);
+            double reportedWidth = bounds.Width;
+            double actualWidth = reportedWidth * 1.15; // correct for error
+            return new Size(actualWidth, bounds.Height);
             
         }
 
@@ -704,6 +722,17 @@ namespace VisiPlacement
         private Dictionary<String, Size> sizeCache;
         private SKPaint textBlock;
 
+    }
+
+    public class FormattedText
+    {
+        public FormattedText(Size size, string text)
+        {
+            this.Size = size;
+            this.Text = text;
+        }
+        public string Text;
+        public Size Size;
     }
 
 

@@ -11,8 +11,7 @@ namespace VisiPlacement
     {
         public LayoutDuration_Layout(ViewManager viewManager)
         {
-            this.textBlock = new Label();
-            TextblockLayout textblockLayout = new TextblockLayout(this.textBlock, 10);
+            this.textblockLayout = new TextblockLayout("", 10);
             textblockLayout.ScoreIfEmpty = true;
             this.SubLayout = textblockLayout;
 
@@ -21,8 +20,8 @@ namespace VisiPlacement
 
         private void Update(ViewManager_LayoutStats stats)
         {
-            this.textBlock.Text = "(Planned layout in " + Math.Round(stats.ViewManager_getBestLayout_Duration.TotalSeconds, 1)
-                + "s. Completed layout in " + Math.Round(stats.ViewManager_LayoutDuration.TotalSeconds, 1) + "s)";
+            this.textblockLayout.setText("(Planned layout in " + Math.Round(stats.ViewManager_getBestLayout_Duration.TotalSeconds, 1)
+                + "s. Completed layout in " + Math.Round(stats.ViewManager_LayoutDuration.TotalSeconds, 1) + "s)");
         }
 
         public override void AnnounceChange(bool mustRedraw)
@@ -31,6 +30,6 @@ namespace VisiPlacement
             base.AnnounceChange(false);
         }
 
-        private Label textBlock;
+        private TextblockLayout textblockLayout;
     }
 }

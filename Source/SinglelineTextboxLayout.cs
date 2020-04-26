@@ -40,6 +40,7 @@ namespace VisiPlacement
         public SinglelineTextboxConfigurer(Entry TextBox)
         {
             this.TextBox = TextBox;
+            this.ModelledText = this.DisplayText;
         }
         public double Width
         {
@@ -62,7 +63,8 @@ namespace VisiPlacement
             get { return this.TextBox.FontSize; }
             set { this.TextBox.FontSize = value; }
         }
-        public string Text
+        public string ModelledText { get; set; }
+        public string DisplayText
         {
             get { return this.TextBox.Text; }
             set { this.TextBox.Text = value; }

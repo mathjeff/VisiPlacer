@@ -12,7 +12,7 @@ namespace VisiPlacement
         public TitledControl(string startingTitle, double titleFontSize = -1)
         {
             this.Initialize(titleFontSize);
-            this.titleBlock.Text = startingTitle;
+            this.titleLayout.setText(startingTitle);
         }
         public TitledControl(string startingTitle, LayoutChoice_Set content, double titleFontSize = -1)
             : this(startingTitle, titleFontSize)
@@ -22,19 +22,19 @@ namespace VisiPlacement
 
         private void Initialize(double titleFontSize = -1)
         {
-            this.titleBlock = new Label();
-            this.titleBlock.HorizontalTextAlignment = TextAlignment.Center;
+            this.titleLayout = new TextblockLayout("", titleFontSize);
+            this.titleLayout.AlignHorizontally(TextAlignment.Center);
             this.gridLayout = GridLayout.New(new BoundProperty_List(2), new BoundProperty_List(1), LayoutScore.Zero);
-            this.gridLayout.AddLayout(new TextblockLayout(this.titleBlock, titleFontSize));
+            this.gridLayout.AddLayout(this.titleLayout);
             base.LayoutToManage = gridLayout;
         }
         public void SetTitle(string newTitle)
         {
-            this.titleBlock.Text = newTitle;
+            this.titleLayout.setText(newTitle);
         }
         public string GetTitle()
         {
-            return this.titleBlock.Text;
+            return this.titleLayout.getText();
         }
         public void SetContent(LayoutChoice_Set layout)
         {
@@ -44,14 +44,14 @@ namespace VisiPlacement
         {
             return this.gridLayout.GetLayout(0, 1);
         }
-        protected Label TitleBlock
+        protected TextblockLayout TitleLayout
         {
             get
             {
-                return this.titleBlock;
+                return this.titleLayout;
             }
         }
-        Label titleBlock;
+        TextblockLayout titleLayout;
         GridLayout gridLayout;
     }
 }

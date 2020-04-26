@@ -96,14 +96,23 @@ namespace VisiPlacement
             get { return this.TextBox.FontSize; }
             set { this.TextBox.FontSize = value; }
         }
-        public string Text
+        // TextboxLayout doesn't support having different ModelledText from DisplayText
+        public string ModelledText
         {
             get
             {
-                // add another character because the operating system leaves extra space for the user to type another character
-                return this.TextBox.Text + "M";
+                return this.TextBox.Text;
             }
-            set { this.TextBox.Text = value; }
+            set
+            {
+                this.TextBox.Text = value;
+            }
+        }
+        // TextboxLayout doesn't support having different ModelledText from DisplayText
+        public string DisplayText
+        {
+            get;
+            set;
         }
         public View View
         {
