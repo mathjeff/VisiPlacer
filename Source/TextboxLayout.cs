@@ -101,11 +101,12 @@ namespace VisiPlacement
         {
             get
             {
-                return this.TextBox.Text;
-            }
-            set
-            {
-                this.TextBox.Text = value;
+                string text = this.TextBox.Text;
+                if (text == null || text == "")
+                {
+                    return this.TextBox.Placeholder;
+                }
+                return text;
             }
         }
         // TextboxLayout doesn't support having different ModelledText from DisplayText
