@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Forms;
 
 namespace VisiPlacement
@@ -109,7 +110,7 @@ namespace VisiPlacement
             {
                 foreach (SpecificLayout layout in this.specificLayout.GetDescendents())
                 {
-                    if (layout.View != null && layout.View.IsFocused)
+                    if (layout.View != null && layout.View.IsFocused && layout.GetParticipatingChildren().Count() < 1)
                         focusedViews.Add(layout.View);
                 }
             }
@@ -179,7 +180,10 @@ namespace VisiPlacement
 
             // refocus the previously focused views
             foreach (View view in focusedViews)
-                view.Focus();
+            {
+                if (postParents.ContainsKey(view))
+                    view.Focus();
+            }
 
             System.Diagnostics.Debug.WriteLine("ViewManager completed layout at " + DateTime.Now);
 

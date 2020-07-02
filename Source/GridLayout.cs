@@ -1998,11 +1998,11 @@ namespace VisiPlacement
 
         public override void Remove_VisualDescendents()
         {
-            this.GridView.Remove_VisualDescendents();
             foreach (SpecificLayout layout in this.GetParticipatingChildren())
             {
                 layout.Remove_VisualDescendents();
             }
+            this.GridView.Remove_VisualDescendents();
         }
 
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
