@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Xamarin.Forms;
 
 // The TextLayout exists to consolidate some code between TextblockLayout and TextboxLayout
@@ -143,7 +144,6 @@ namespace VisiPlacement
         // computes the layout dimensions of the layout of minimum width such that there is no cropping
         private Specific_TextLayout Get_NonCropping_MinWidthLayout(LayoutQuery query)
         {
-
             Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity), query.Debug);
             double pixelSize = 1;
             double maxRejectedWidth = 0;
@@ -155,7 +155,7 @@ namespace VisiPlacement
                 numIterations++;
                 // given the current width, compute the required height
                 Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), query.Debug);
-                if (newDimensions.Height <= query.MaxHeight && !newDimensions.Cropped)
+                if (newDimensions.Height <= query.MaxHeight && query.MinScore.CompareTo(newDimensions.Score) <= 0)
                 {
                     // this layout fits in the required dimensions
                     if (newDimensions.Width <= bestAllowedDimensions.Width && newDimensions.Width <= query.MaxWidth)
@@ -272,7 +272,7 @@ namespace VisiPlacement
                 }
             }
             Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, 
-                this.ComputeScore(desiredSize, availableSize, this.TextToFit), 
+                this.ComputeScore(desiredSize, availableSize, this.TextToFit, formattedText.Text), 
                 formattedText.Text, desiredSize);
             specificLayout.Cropped = cropped;
 
@@ -292,25 +292,36 @@ namespace VisiPlacement
 
             return specificLayout;
         }
-        private LayoutScore ComputeScore(Size desiredSize, Size availableSize, string text)
+        private LayoutScore ComputeScore(Size desiredSize, Size availableSize, string originalText, string formattedText)
         {
-            if ((text == "" || text == null) && !this.ScoreIfEmpty)
+            if ((originalText == "" || originalText == null) && !this.ScoreIfEmpty)
                 return LayoutScore.Zero;
             bool cropped = (desiredSize.Width > availableSize.Width || desiredSize.Height > availableSize.Height);
+            int numLineWraps = 0;
+            if (formattedText != null)
+            {
+                for (int i = 0; i < formattedText.Length; i++)
+                {
+                    if (formattedText[i] == '\n')
+                        numLineWraps++;
+                }
+            }
             if (cropped)
             {
                 if (this.ScoreIfCropped)
                 {
                     double desiredArea = desiredSize.Width * desiredSize.Height;
                     double availableArea = availableSize.Width * availableSize.Height;
-                    return this.BonusScore.Times(availableArea / desiredArea).Plus(LayoutScore.Get_CutOff_LayoutScore(1));
+                    return this.BonusScore.Times(availableArea / desiredArea)
+                        .Plus(LayoutScore.Get_CutOff_LayoutScore(1))
+                        .Plus(LayoutScore.Get_UnCentered_LayoutScore(numLineWraps));
                 }
                 else
                 {
                     return LayoutScore.Get_CutOff_LayoutScore(1);
                 }
             }
-            return new LayoutScore(this.BonusScore);
+            return new LayoutScore(this.BonusScore).Plus(LayoutScore.Get_UnCentered_LayoutScore(numLineWraps));
         }
 
 
@@ -502,7 +513,9 @@ namespace VisiPlacement
                     formatBlock = "M";
 
                 FormattedText formattedBlock = this.FormatParagraph(formatBlock, desiredWidth, allowSplittingWords);
-                formattedStrings.Add(block);
+                if (block == "")
+                    formattedBlock.Text = block;
+                formattedStrings.Add(formattedBlock.Text);
                 Size blockSize = formattedBlock.Size;
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
