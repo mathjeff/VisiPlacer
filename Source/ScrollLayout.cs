@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -40,8 +41,14 @@ namespace VisiPlacement
                     pixelSize
                 )
             );
+
             subLayouts.Add(sublayoutCache);
             this.Set_LayoutChoices(subLayouts);
+        }
+
+        public override SpecificLayout GetBestLayout(LayoutQuery query)
+        {
+            return base.GetBestLayout(query);
         }
     }
 
@@ -79,7 +86,7 @@ namespace VisiPlacement
 
             if (query.MaxHeight <= 0)
             {
-                return this.returnEmptySize(query);
+                return null;
             }
 
             // what fraction of the score of the sublayout will appear onscreen at once
@@ -100,44 +107,52 @@ namespace VisiPlacement
                 // For a min-width query, first shrink the width as much as possible before continuing
                 SpecificLayout minWidth_childLayout = this.subLayout.GetBestLayout(new MinWidth_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
                 if (minWidth_childLayout == null)
-                    return this.returnEmptySize(query);
+                    return null;
                 query = query.WithDimensions(minWidth_childLayout.Width, minWidth_childLayout.Height);
             }
 
             SpecificLayout childLayout = this.subLayout.GetBestLayout(new MinHeight_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
             if (childLayout == null)
-                return this.returnEmptySize(query);
+                return null;
 
             if (!query.MinimizesHeight())
             {
                 // For a max-score (or min-width) query, use as much height as was allowed
                 Size size = new Size(childLayout.Width, Math.Min(query.MaxHeight, childLayout.Height));
-                return this.returnLayout(size, childLayout, query);
+                SpecificLayout result = this.makeLayout(size, childLayout);
+                if (query.Accepts(result))
+                    return this.prepareLayoutForQuery(result, query);
+                return null;
             }
             else
             {
                 // For a min-height query, use only as much size as is needed
                 double requiredScrollviewHeight = childLayout.Height * requiredHeightFraction;
                 Size size = new Size(childLayout.Width, requiredScrollviewHeight);
-                return this.returnLayout(size, childLayout, query);
+
+                SpecificLayout result = this.makeLayout(size, childLayout);
+                if (!query.Accepts(result))
+                {
+                    // Check for possible rounding error
+                    SpecificLayout larger = this.makeLayout(new Size(size.Width, size.Height + this.pixelSize), childLayout);
+                    if (query.Accepts(larger))
+                        return this.prepareLayoutForQuery(larger, query);
+                    return null;
+                }
+                return this.prepareLayoutForQuery(result, query);
             }
         }
 
 
-        private SpecificLayout returnLayout(Size size, SpecificLayout childLayout, LayoutQuery originalQuery)
+        private SpecificLayout makeLayout(Size size, SpecificLayout childLayout)
         {
             double childHeight = childLayout.Height;
             if (childHeight == 0)
                 childHeight = 1;
             LayoutScore score = this.resultingScore.Times(size.Height / childHeight);
-            SpecificLayout result = new Specific_ScrollLayout(this.view, size, score, childLayout);
-            return this.prepareLayoutForQuery(result, originalQuery);
-        }
-
-        private SpecificLayout returnEmptySize(LayoutQuery originalQuery)
-        {
-            SpecificLayout emptyChildLayout = this.subLayout.GetBestLayout(new MaxScore_LayoutQuery(0, 0, LayoutScore.Minimum));
-            return this.returnLayout(new Size(), emptyChildLayout, originalQuery);
+            LayoutScore scoreDifference = score.Minus(childLayout.Score);
+            SpecificLayout result = new Specific_ScrollLayout(this.view, size, scoreDifference, childLayout);
+            return result;
         }
 
         private LayoutChoice_Set subLayout;
@@ -145,6 +160,7 @@ namespace VisiPlacement
 
         private LayoutScore requiredChildScore;
         private LayoutScore resultingScore;
+        private double pixelSize;
     }
 
 
