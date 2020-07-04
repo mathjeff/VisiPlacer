@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Transactions;
 using Xamarin.Forms;
 
 // The TextLayout exists to consolidate some code between TextblockLayout and TextboxLayout
@@ -281,7 +282,7 @@ namespace VisiPlacement
             {
                 int maxLengthToLog = 100;
                 string textToLog;
-                if (this.Text.Length > maxLengthToLog)
+                if (this.Text != null && this.Text.Length > maxLengthToLog)
                     textToLog = this.Text.Substring(0, maxLengthToLog) + "...";
                 else
                     textToLog = this.Text;
@@ -292,20 +293,26 @@ namespace VisiPlacement
 
             return specificLayout;
         }
+        private int countLinewraps(string text)
+        {
+            int numLineWraps = 0;
+            if (text != null)
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (text[i] == '\n')
+                        numLineWraps++;
+                }
+            }
+            return numLineWraps;
+
+        }
         private LayoutScore ComputeScore(Size desiredSize, Size availableSize, string originalText, string formattedText)
         {
             if ((originalText == "" || originalText == null) && !this.ScoreIfEmpty)
                 return LayoutScore.Zero;
             bool cropped = (desiredSize.Width > availableSize.Width || desiredSize.Height > availableSize.Height);
-            int numLineWraps = 0;
-            if (formattedText != null)
-            {
-                for (int i = 0; i < formattedText.Length; i++)
-                {
-                    if (formattedText[i] == '\n')
-                        numLineWraps++;
-                }
-            }
+            int numLineWraps = this.countLinewraps(formattedText);
             if (cropped)
             {
                 if (this.ScoreIfCropped)
@@ -387,41 +394,21 @@ namespace VisiPlacement
                 this.TextItem_Text = this.Text;
                 this.layoutsByWidth = new Dictionary<double, FormattedText>();
                 Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize, false);
-                if (!layoutForNewText.Cropped)
+                LayoutScore oldScore = layoutForCurrentText.Score;
+                LayoutScore newScore = layoutForNewText.Score;
+                if (!oldScore.Equals(newScore))
                 {
-                    if (!layoutForCurrentText.Cropped)
-                    {
-                        // The new text fits in the existing box, so this box doesn't need any more space
-                        // It is possible that the text has shrunken and another box now can use extra space, but the user probably doesn't care about that right now
-                        mustRedraw = false;
-                    }
-                    else
-                    {
-                        // This layout suddenly no longer needs to be cropped. That might be something that the user cares about
-                        // This might allow us to increase the font size, for example
-                        mustRedraw = true;
-                        if (this.LoggingEnabled)
-                            System.Diagnostics.Debug.WriteLine("TextLayout needs more space: no longer needs to be cropped");
-                    }
+                    // Something about the score would change if we keep the same size and use the new text
+                    // Maybe we suddenly need more space and should ask for it
+                    // Maybe we suddenly have enough space and we might become an interesting layout that permits a different font size
+                    // In either of these cases, we want to recalculate the layout size
+                    mustRedraw = true;
                 }
                 else
                 {
-                    if (!layoutForCurrentText.Cropped)
-                    {
-                        // If we leave the render size the same then the text suddenly gets cropped, so we ask the layout engine for more space
-                        mustRedraw = true;
-                        if (this.LoggingEnabled)
-                            System.Diagnostics.Debug.WriteLine("TextLayout needs more space: no longer has enough space");
-                    }
-                    else
-                    {
-                        if (this.LoggingEnabled)
-                            System.Diagnostics.Debug.WriteLine("TextLayout was cropped and still cropped");
-                        // If the text layout was cropped before and after then we might need to ask the engine for more space,
-                        // but it would annoy the user to keep redoing the layout and probably see no change
-                        // So, we don't bother asking for more space since we probably already had as much space as we could get anyway
-                        mustRedraw = false;
-                    }
+                    // The score didn't change with the new text and the old layout size
+                    // So, the user probably isn't interested in having us recompute the layout dimensions
+                    mustRedraw = false;
                 }
                 this.TextItem_Configurer.DisplayText = layoutForNewText.DisplayText;
                 if (this.LoggingEnabled)
@@ -429,7 +416,6 @@ namespace VisiPlacement
                     System.Diagnostics.Debug.WriteLine("TextLayout calculating: Have size: " + currentSize + ". Old text: " + layoutForCurrentText.DisplayText +
                         ". Old target: " + layoutForCurrentText.DesiredSizeForDebugging + ". New text: " + layoutForNewText.DisplayText + ". New target: " + layoutForNewText.DesiredSizeForDebugging);
                 }
-
             }
 
             this.AnnounceChange(mustRedraw);
