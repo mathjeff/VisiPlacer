@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Transactions;
+using System.Xml.Schema;
 using Xamarin.Forms;
 
 // The TextLayout exists to consolidate some code between TextblockLayout and TextboxLayout
@@ -280,18 +281,24 @@ namespace VisiPlacement
             // diagnostics
             if (this.LoggingEnabled)
             {
-                int maxLengthToLog = 100;
-                string textToLog;
-                if (this.Text != null && this.Text.Length > maxLengthToLog)
-                    textToLog = this.Text.Substring(0, maxLengthToLog) + "...";
-                else
-                    textToLog = this.Text;
                 DateTime end = DateTime.Now;
                 TimeSpan duration = end.Subtract(start);
-                System.Diagnostics.Debug.WriteLine("spent " + duration + " to measure '" + textToLog + "' in " + availableSize + "; desired " + desiredSize + "; requesting " + specificLayout.Size);
+                System.Diagnostics.Debug.WriteLine("spent " + duration + " to measure '" + this.Summarize(this.TextToFit) + "' in " + availableSize +
+                    "; desired " + desiredSize + " (formatted = " + this.Summarize(formattedText.Text) + "); requesting " + specificLayout.Size);
             }
 
             return specificLayout;
+        }
+        private string Summarize(string text)
+        {
+            int maxLength = 100;
+            if (text == null || text.Length <= maxLength)
+            {
+                return text;
+            }
+            string suffix = "...";
+            return text.Substring(0, maxLength - suffix.Length) + suffix;
+
         }
         private int countLinewraps(string text)
         {
@@ -409,8 +416,9 @@ namespace VisiPlacement
                     // The score didn't change with the new text and the old layout size
                     // So, the user probably isn't interested in having us recompute the layout dimensions
                     mustRedraw = false;
+                    this.TextItem_Configurer.DisplayText = layoutForNewText.DisplayText;
                 }
-                this.TextItem_Configurer.DisplayText = layoutForNewText.DisplayText;
+
                 if (this.LoggingEnabled)
                 {
                     System.Diagnostics.Debug.WriteLine("TextLayout calculating: Have size: " + currentSize + ". Old text: " + layoutForCurrentText.DisplayText +

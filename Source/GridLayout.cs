@@ -12,7 +12,7 @@ namespace VisiPlacement
         public static int NumComputations = 0;
         public static int ExpensiveThreshold = 10;
 
-        public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore)
+        public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
         {
             if (Math.Min(rowHeights.NumGroups, columnWidths.NumGroups) <= 1)
             {
@@ -22,25 +22,25 @@ namespace VisiPlacement
                     if (rowHeights.NumGroups == rowHeights.NumProperties && columnWidths.NumGroups == columnWidths.NumProperties)
                     {
                         // we do support composition from smaller grids in this case
-                        return new CompositeGridLayout(rowHeights.NumGroups, columnWidths.NumGroups, bonusScore);
+                        return new CompositeGridLayout(rowHeights.NumGroups, columnWidths.NumGroups, bonusScore, pixelSize);
                     }
                     // don't yet support automatically making a smaller grid in this case
                     // Probably should support this case though
                 }
             }
             // can't compose from smaller grids
-            return new GridLayout(rowHeights, columnWidths, bonusScore);
+            return new GridLayout(rowHeights, columnWidths, bonusScore, pixelSize);
         }
 
         public GridLayout()
         {
         }
 
-        private GridLayout(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore)
+        private GridLayout(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
         {
-            this.Initialize(rowHeights, columnWidths, bonusScore);
+            this.Initialize(rowHeights, columnWidths, bonusScore, pixelSize);
         }
-        protected void Initialize(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore)
+        protected void Initialize(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
         {
             int numColumns = columnWidths.NumProperties;
             int numRows = rowHeights.NumProperties;
@@ -49,7 +49,7 @@ namespace VisiPlacement
             this.rowHeights = rowHeights;
             this.columnWidths = columnWidths;
             this.bonusScore = bonusScore;
-            this.pixelSize = 1;
+            this.pixelSize = pixelSize;
             this.view = new GridView();
         }
         // puts this layout in the designated part of the grid
@@ -2041,7 +2041,7 @@ namespace VisiPlacement
     [System.Diagnostics.DebuggerDisplay("{ToString()}")]
     class CompositeGridLayout : GridLayout
     {
-        public CompositeGridLayout(int numRows, int numColumns, LayoutScore bonusScore)
+        public CompositeGridLayout(int numRows, int numColumns, LayoutScore bonusScore, double pixelSize = 1)
         {
             this.numRows = numRows;
             this.numTopRows = Math.Max(this.numRows / 4, 1);
@@ -2049,18 +2049,18 @@ namespace VisiPlacement
             this.numLeftColumns = Math.Max(this.numColumns / 4, 1);
             int actualNumRows = Math.Min(numRows, 2);
             int actualNumColumns = Math.Min(numColumns, 2);
-            this.Initialize(new BoundProperty_List(actualNumRows), new BoundProperty_List(actualNumColumns), bonusScore);
+            this.Initialize(new BoundProperty_List(actualNumRows), new BoundProperty_List(actualNumColumns), bonusScore, pixelSize);
             this.gridLayouts = new GridLayout[actualNumColumns, actualNumRows];
             int numBottomRows = numRows - numTopRows;
             int numRightColumns = numColumns - numLeftColumns;
 
 
             if (numTopRows > 1 || numLeftColumns > 1)
-                base.PutLayout(this.gridLayouts[0, 0] = GridLayout.New(new BoundProperty_List(numTopRows), new BoundProperty_List(numLeftColumns), LayoutScore.Zero), 0, 0);
+                base.PutLayout(this.gridLayouts[0, 0] = GridLayout.New(new BoundProperty_List(numTopRows), new BoundProperty_List(numLeftColumns), LayoutScore.Zero, pixelSize), 0, 0);
             if (numRightColumns > 1)
-                base.PutLayout(this.gridLayouts[1, 0] = GridLayout.New(new BoundProperty_List(numTopRows), new BoundProperty_List(numColumns - numLeftColumns), LayoutScore.Zero), 1, 0);
+                base.PutLayout(this.gridLayouts[1, 0] = GridLayout.New(new BoundProperty_List(numTopRows), new BoundProperty_List(numColumns - numLeftColumns), LayoutScore.Zero, pixelSize), 1, 0);
             if (numBottomRows > 1)
-                base.PutLayout(this.gridLayouts[0, 1] = GridLayout.New(new BoundProperty_List(numRows - numTopRows), new BoundProperty_List(numColumns), LayoutScore.Zero), 0, 1);
+                base.PutLayout(this.gridLayouts[0, 1] = GridLayout.New(new BoundProperty_List(numRows - numTopRows), new BoundProperty_List(numColumns), LayoutScore.Zero, pixelSize), 0, 1);
         }
         public override void PutLayout(LayoutChoice_Set layout, int xIndex, int yIndex)
         {

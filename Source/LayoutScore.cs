@@ -58,6 +58,13 @@ namespace VisiPlacement
                 return b;
         }
 
+        // a score that is lower in priority than any other publicly available scores (except for Tiny which is an implementation detail)
+        // which can be helpful for testing
+        public static LayoutScore Get_MinPriorityScore_ForTesting(double numItems)
+        {
+            return new LayoutScore(-1, numItems);
+
+        }
         // this score indicates that some items are not centered
         public static LayoutScore Get_UnCentered_LayoutScore(double numItems)
         {

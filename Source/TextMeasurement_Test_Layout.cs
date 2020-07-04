@@ -16,25 +16,32 @@ namespace VisiPlacement
         {
             return new TextMeasurement_Test_Layout();
         }
-        private TextMeasurement_Test_Layout()
+        public TextMeasurement_Test_Layout()
         {
-            GridLayout gridLayout = GridLayout.New(new BoundProperty_List(2), new BoundProperty_List(2), LayoutScore.Zero);
+            Vertical_GridLayout_Builder grid1Builder = new Vertical_GridLayout_Builder().Uniform();
+
+            GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero, 0.01);
             Editor textBox = new Editor();
             textBox.TextChanged += TextBox_TextChanged;
             this.textBox = textBox;
 
-            gridLayout.PutLayout(new TextboxLayout(textBox, 16), 0, 0);
-            Label textBlock = new Label();
-            this.textBlock = textBlock;
-            //gridLayout.PutLayout(new TextblockLayout(textBlock, 16), 0, 1);
-            gridLayout.PutLayout(new ImageLayout(null, LayoutScore.Get_UsedSpace_LayoutScore(1)), 1, 1);
+            grid1Builder.AddLayout(new TextboxLayout(textBox, 16));
 
-            this.SubLayout = gridLayout;
+            Label textBlock = new Label();
+            textBlock.BackgroundColor = Color.Red;
+            this.textBlockLayout = new TextblockLayout(textBlock, 16, false, false);
+            this.textBlockLayout.ScoreIfEmpty = false;
+            this.textBlockLayout.LoggingEnabled = true;
+            grid2.PutLayout(this.textBlockLayout, 0, 0);
+            grid2.PutLayout(new ImageLayout(null, LayoutScore.Get_MinPriorityScore_ForTesting(1)), 1, 0);
+
+            grid1Builder.AddLayout(grid2);
+            this.SubLayout = grid1Builder.Build();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            this.textBlock.Text = this.textBox.Text;
+            this.textBlockLayout.setText(this.textBox.Text);
         }
 
         /*
@@ -49,6 +56,11 @@ namespace VisiPlacement
 
        }
 */
+
+        public override SpecificLayout GetBestLayout(LayoutQuery query)
+        {
+            return base.GetBestLayout(query);
+        }
         private static Color GetNextColor()
         {
             colorIndex++;
@@ -63,5 +75,6 @@ namespace VisiPlacement
 
         private Editor textBox;
         private Label textBlock;
+        private TextblockLayout textBlockLayout;
     }
 }
