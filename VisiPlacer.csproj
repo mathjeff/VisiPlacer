@@ -7,11 +7,21 @@
   <ItemGroup>
     <PackageReference Include="SkiaSharp" Version="1.68.0" />
     <PackageReference Include="Uniforms.Misc" Version="0.9.1" />
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StatList\StatList.csproj" />
+    <ProjectReference Include="deps\StatList\StatList.csproj" Condition="Exists(deps)" />
+    <ProjectReference Include="..\StatList\StatList.csproj" Condition="!Exists(deps)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="deps\**" />
+    <Compile Remove="Sample\**" />
+    <EmbeddedResource Remove="deps\**" />
+    <EmbeddedResource Remove="Sample\**" />
+    <None Remove="deps\**" />
+    <None Remove="Sample\**" />
   </ItemGroup>
 
 </Project>

@@ -20,7 +20,7 @@ namespace VisiPlacement
         {
             Vertical_GridLayout_Builder grid1Builder = new Vertical_GridLayout_Builder().Uniform();
 
-            GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero, 0.01);
+            GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero, 0.0625);
             Editor textBox = new Editor();
             textBox.TextChanged += TextBox_TextChanged;
             this.textBox = textBox;
