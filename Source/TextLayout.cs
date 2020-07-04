@@ -578,9 +578,9 @@ namespace VisiPlacement
                     }
                 }
                 // the size of the new text
-                Size currentCharsSize = this.getBlockSize(currentExpandedComponent);
+                Size currentCharsSize = this.getLineSize(currentExpandedComponent);
                 // the size of the existing ending of the line
-                Size prevCharSize = this.getBlockSize(prevComponentInLine);
+                Size prevCharSize = this.getLineSize(prevComponentInLine);
                 // the new size of the current line if we add this text to this line
                 Size new_lineSize = new Size(lineSize.Width + currentCharsSize.Width - prevCharSize.Width, Math.Max(lineSize.Height, currentCharsSize.Height));
                 if (new_lineSize.Width > desiredWidth && prevComponentInLine != "")
@@ -609,7 +609,9 @@ namespace VisiPlacement
             return new FormattedText(totalSize, formattedText);
         }
 
-        private Size getBlockSize(String text)
+        // Returns the size of the given text
+        // Does use the cache
+        private Size getLineSize(String text)
         {
             Size size;
             // clear cache if too large
@@ -627,8 +629,8 @@ namespace VisiPlacement
                     for (int i = 0; i < text.Length; i++)
                     {
                         String currentCharacter = text.Substring(i, 1);
-                        Size prevSize = this.getBlockSize(prevCharacter);
-                        Size currentSize = this.getBlockSize(prevCharacter + currentCharacter);
+                        Size prevSize = this.computeLineSize(prevCharacter);
+                        Size currentSize = this.computeLineSize(prevCharacter + currentCharacter);
                         size.Height = Math.Max(size.Height, currentSize.Height);
                         size.Width += currentSize.Width - prevSize.Width;
                         prevCharacter = currentCharacter;
@@ -659,10 +661,17 @@ namespace VisiPlacement
                 }
             }
         }
-        // computes the size required by a TextBlock that plans to display this text all in a line
+
+        // Computes the size required by a TextBlock that plans to display this text all in a line
+        // Doesn't use any cache
         private Size computeLineSize(String text)
         {
             this.chooseTextFormatterType();
+            if (text == "")
+            {
+                // Interestingly enough, Uniforms.Misc doesn't return an empty width or an empty height for an empty string
+                return new Size();
+            }
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
                 return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, this.FontSize);
             // Get enough width for the given text, and enough height to accomodate the line spacing

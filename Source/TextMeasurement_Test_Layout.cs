@@ -20,11 +20,10 @@ namespace VisiPlacement
         {
             Vertical_GridLayout_Builder grid1Builder = new Vertical_GridLayout_Builder().Uniform();
 
-            GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero, 0.0625);
+            //GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero, 0.0625);
             Editor textBox = new Editor();
             textBox.TextChanged += TextBox_TextChanged;
             this.textBox = textBox;
-
             grid1Builder.AddLayout(new TextboxLayout(textBox, 16));
 
             Label textBlock = new Label();
@@ -32,10 +31,10 @@ namespace VisiPlacement
             this.textBlockLayout = new TextblockLayout(textBlock, 16, false, false);
             this.textBlockLayout.ScoreIfEmpty = false;
             this.textBlockLayout.LoggingEnabled = true;
-            grid2.PutLayout(this.textBlockLayout, 0, 0);
-            grid2.PutLayout(new ImageLayout(null, LayoutScore.Get_MinPriorityScore_ForTesting(1)), 1, 0);
+            //grid2.PutLayout(this.textBlockLayout, 0, 0);
+            //grid2.PutLayout(new ImageLayout(null, LayoutScore.Get_MinPriorityScore_ForTesting(1)), 1, 0);
 
-            grid1Builder.AddLayout(grid2);
+            grid1Builder.AddLayout(this.textBlockLayout);
             this.SubLayout = grid1Builder.Build();
         }
 
