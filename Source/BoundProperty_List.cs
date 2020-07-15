@@ -16,6 +16,15 @@ namespace VisiPlacement
             }
             return result;
         }
+        public static BoundProperty_List WithRatios(List<double> ratios)
+        {
+            BoundProperty_List result = Uniform(ratios.Count);
+            for (int i = 0; i < ratios.Count; i++)
+            {
+                result.SetPropertyScale(i, ratios[i]);
+            }
+            return result;
+        }
         public BoundProperty_List(int count)
         {
             this.values = new double[count];
