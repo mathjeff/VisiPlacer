@@ -29,10 +29,11 @@ namespace VisiPlacement
 
         private void Button_Clicked(object sender, System.EventArgs e)
         {
-            this.layoutStack.AddLayout(new StackEntry(this.detailLayout, "Help", null));
+            this.layoutStack.AddLayout(new StackEntry(this.detailLayout, this.message, null));
         }
 
         private LayoutStack layoutStack;
         private LayoutChoice_Set detailLayout;
+        private string message;
     }
 }
