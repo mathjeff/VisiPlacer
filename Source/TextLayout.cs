@@ -64,7 +64,7 @@ namespace VisiPlacement
         }
         private TextFormatter MakeTextFormatter()
         {
-            return TextFormatter.ForSize(this.FontSize);
+            return TextFormatter.Impl;
         }
 
         public static TimeSpan TextTime = new TimeSpan();
@@ -192,7 +192,7 @@ namespace VisiPlacement
                     if (firstIteration)
                     {
                         // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
-                        Size desiredSize = this.formatText(maxWidth, query.Debug).Size;
+                        Size desiredSize = this.formatText(maxWidth, query.Debug, this.FontSize).Size;
                         if (desiredSize.Width > maxWidth)
                             maxRejectedWidth = desiredSize.Width - pixelSize / 2;
                         maxWidth = desiredSize.Width;
@@ -220,7 +220,7 @@ namespace VisiPlacement
             return bestAllowedDimensions;
         }
 
-        private FormattedText formatText(double maxWidth, bool debug)
+        private FormattedText formatText(double maxWidth, bool debug, double fontSize)
         {
             // check the cache
             FormattedText formatted;
@@ -231,7 +231,7 @@ namespace VisiPlacement
                 return formatted;
             }
             // recompute and save into cache
-            formatted = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug);
+            formatted = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug, fontSize);
             if (this.textItem_text == null || this.textItem_text == "")
                 formatted.Text = this.textItem_text;
             this.layoutsByWidth[maxWidth] = formatted;
@@ -244,7 +244,7 @@ namespace VisiPlacement
             DateTime start = DateTime.Now;
             numComputations++;
 
-            FormattedText formattedText = this.formatText(availableSize.Width, debug);
+            FormattedText formattedText = this.formatText(availableSize.Width, debug, this.FontSize);
             Size desiredSize = formattedText.Size;
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
@@ -472,21 +472,18 @@ namespace VisiPlacement
     {
         private static TextFormatterType textFormatterType = TextFormatterType.UNDECIDED;
 
-        private static Dictionary<double, TextFormatter> formattersByFontSize = new Dictionary<double, TextFormatter>();
-        public static TextFormatter ForSize(double size)
+        private static TextFormatter formatterImpl = new TextFormatter();
+        public static TextFormatter Impl
         {
-            if (!formattersByFontSize.ContainsKey(size))
+            get
             {
-                TextFormatter formatter = new TextFormatter();
-                formatter.FontSize = size;
-                formattersByFontSize[size] = formatter;
+                return formatterImpl;
             }
-            return formattersByFontSize[size];
         }
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         // The returned size might have larger width than desiredWidth if needed for the text to fit
-        public FormattedText FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug)
+        public FormattedText FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug, double fontSize)
         {
             FormattedText result;
             if (text == null || text == "")
@@ -506,7 +503,7 @@ namespace VisiPlacement
                 if (formatBlock == "")
                     formatBlock = "M";
 
-                FormattedText formattedBlock = this.FormatParagraph(formatBlock, desiredWidth, allowSplittingWords);
+                FormattedText formattedBlock = this.FormatParagraph(formatBlock, desiredWidth, allowSplittingWords, fontSize);
                 if (block == "")
                     formattedBlock.Text = block;
                 formattedStrings.Add(formattedBlock.Text);
@@ -523,7 +520,7 @@ namespace VisiPlacement
             }
             return result;
         }
-        public FormattedText FormatParagraph(String text, double desiredWidth, bool allowSplittingWords)
+        public FormattedText FormatParagraph(String text, double desiredWidth, bool allowSplittingWords, double fontSize)
         {
             if (text == null || text == "")
                 return new FormattedText(new Size(), text);
@@ -578,9 +575,9 @@ namespace VisiPlacement
                     }
                 }
                 // the size of the new text
-                Size currentCharsSize = this.getLineSize(currentExpandedComponent);
+                Size currentCharsSize = this.getLineSize(currentExpandedComponent, fontSize);
                 // the size of the existing ending of the line
-                Size prevCharSize = this.getLineSize(prevComponentInLine);
+                Size prevCharSize = this.getLineSize(prevComponentInLine, fontSize);
                 // the new size of the current line if we add this text to this line
                 Size new_lineSize = new Size(lineSize.Width + currentCharsSize.Width - prevCharSize.Width, Math.Max(lineSize.Height, currentCharsSize.Height));
                 if (new_lineSize.Width > desiredWidth && prevComponentInLine != "")
@@ -611,38 +608,42 @@ namespace VisiPlacement
 
         // Returns the size of the given text
         // Does use the cache
-        private Size getLineSize(String text)
+        private Size getLineSize(String text, double fontSize)
         {
-            Size size;
+            // We always measure one size and then we rescale the result, to allow all sizes to share the same cache
+            double fontSizeForMeasuring = 16;
+            Size measuredSize;
             // clear cache if too large
-            if (this.sizeCache != null && this.sizeCache.Count > 2000)
+            if (this.sizeCache != null && this.sizeCache.Count > 4000)
                 this.sizeCache = null;
+
             // try to load from cache
             if (this.sizeCache == null)
                 this.sizeCache = new Dictionary<string, Size>();
-            if (!this.sizeCache.TryGetValue(text, out size))
+            if (!this.sizeCache.TryGetValue(text, out measuredSize))
             {
                 if (text.Length > 2)
                 {
-                    size = new Size();
+                    measuredSize = new Size();
                     String prevCharacter = "";
                     for (int i = 0; i < text.Length; i++)
                     {
                         String currentCharacter = text.Substring(i, 1);
-                        Size prevSize = this.computeLineSize(prevCharacter);
-                        Size currentSize = this.computeLineSize(prevCharacter + currentCharacter);
-                        size.Height = Math.Max(size.Height, currentSize.Height);
-                        size.Width += currentSize.Width - prevSize.Width;
+                        Size prevSize = this.computeLineSize(prevCharacter, fontSizeForMeasuring);
+                        Size currentSize = this.computeLineSize(prevCharacter + currentCharacter, fontSizeForMeasuring);
+                        measuredSize.Height = Math.Max(measuredSize.Height, currentSize.Height);
+                        measuredSize.Width += currentSize.Width - prevSize.Width;
                         prevCharacter = currentCharacter;
                     }
                 }
                 else
                 {
-                    size = this.computeLineSize(text);
+                    measuredSize = this.computeLineSize(text, fontSizeForMeasuring);
                 }
-                this.sizeCache[text] = size;
+                this.sizeCache[text] = measuredSize;
             }
-            return size;
+            double sizeRatio = fontSize / fontSizeForMeasuring;
+            return new Size(measuredSize.Width * sizeRatio, measuredSize.Height * sizeRatio);
         }
 
         // TODO: can UniformsMisc be made to support UWP?
@@ -652,7 +653,7 @@ namespace VisiPlacement
             {
                 try
                 {
-                    Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, this.FontSize);
+                    Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, 16);
                     textFormatterType = TextFormatterType.UNIFORMS_MISC; 
                 }
                 catch (Exception)
@@ -664,7 +665,7 @@ namespace VisiPlacement
 
         // Computes the size required by a TextBlock that plans to display this text all in a line
         // Doesn't use any cache
-        private Size computeLineSize(String text)
+        private Size computeLineSize(String text, double fontSize)
         {
             this.chooseTextFormatterType();
             if (text == "")
@@ -673,56 +674,41 @@ namespace VisiPlacement
                 return new Size();
             }
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
-                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, this.FontSize);
+                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
             // Get enough width for the given text, and enough height to accomodate the line spacing
-            double width = this.computeGlyphSize(text).Width;
+            double width = this.computeGlyphSize(text, fontSize).Width;
             return new Size(width + this.leftMargin, this.fontLineHeight);
         }
 
-        public double FontSize
-        {
-            get
-            {
-                return this.fontSize;
-            }
-            set
-            {
-                if (!(value == this.FontSize))
-                {
-                    this.textBlock = null;
-                    this.sizeCache = null;
-                }
-                this.fontSize = value;
-            }
-        }
 
-        private SKPaint getTextBlock()
+        private SKPaint getTextBlock(double fontSize)
         {
-            if (this.textBlock == null)
+            if (!this.textBlocks.ContainsKey(fontSize))
             {
-                this.textBlock = new SKPaint();
+                SKPaint textBlock = new SKPaint();
                 Label label = new Label();
-                this.textBlock.TextSize = (float)this.FontSize;
-                this.textBlock.Typeface = SKTypeface.FromFamilyName(label.FontFamily);
+                textBlock.TextSize = (float)fontSize;
+                textBlock.Typeface = SKTypeface.FromFamilyName(label.FontFamily);
 
                 // leave enough height for the characters for the highest ("M") and lowest ("g") characters
                 SKFontMetrics metrics = new SKFontMetrics();
                 textBlock.GetFontMetrics(out metrics);
                 this.fontLineHeight = metrics.Descent - metrics.Ascent;
                 SKRect bounds = new SKRect();
-                this.textBlock.MeasureText("M", ref bounds);
+                textBlock.MeasureText("M", ref bounds);
                 this.leftMargin = bounds.Left;
+                this.textBlocks[fontSize] = textBlock;
             }
-            return this.textBlock;
+            return this.textBlocks[fontSize];
         }
 
         // Computes the size of the letters in the given string, and doesn't add any extra margins
         // TODO: make this more accurate
-        private Size computeGlyphSize(String text)
+        private Size computeGlyphSize(String text, double fontSize)
         {
             if (text == null || text == "")
                 return new Size();
-            SKPaint textBlock = this.getTextBlock();
+            SKPaint textBlock = this.getTextBlock(fontSize);
             SKRect bounds = new SKRect();
             textBlock.MeasureText(text, ref bounds);
             double reportedWidth = bounds.Width;
@@ -731,13 +717,10 @@ namespace VisiPlacement
             
         }
 
-
-        private double fontSize;
         private double fontLineHeight;
         private double leftMargin;
         private Dictionary<String, Size> sizeCache;
-        private SKPaint textBlock;
-
+        private Dictionary<double, SKPaint> textBlocks = new Dictionary<double, SKPaint>();
     }
 
     public class FormattedText
