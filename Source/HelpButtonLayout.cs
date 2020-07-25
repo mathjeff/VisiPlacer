@@ -4,21 +4,21 @@ namespace VisiPlacement
 {
     public class HelpButtonLayout : LayoutCache
     {
-        public HelpButtonLayout(LayoutChoice_Set detailLayout, LayoutStack layoutStack)
+        public HelpButtonLayout(LayoutChoice_Set detailLayout, LayoutStack layoutStack, double fontSize = -1)
         {
-            this.initialize("Help", detailLayout, layoutStack);
+            this.initialize("Help", detailLayout, layoutStack, fontSize = -1);
         }
 
-        public HelpButtonLayout(string message, LayoutChoice_Set detailLayout, LayoutStack layoutStack)
+        public HelpButtonLayout(string message, LayoutChoice_Set detailLayout, LayoutStack layoutStack, double fontSize = -1)
         {
-            this.initialize(message, detailLayout, layoutStack);
+            this.initialize(message, detailLayout, layoutStack, fontSize);
         }
 
-        private void initialize(string message, LayoutChoice_Set detailLayout, LayoutStack layoutStack)
+        private void initialize(string message, LayoutChoice_Set detailLayout, LayoutStack layoutStack, double fontSize)
         {
             this.message = message;
             Button button = new Button();
-            ButtonLayout buttonLayout = new ButtonLayout(button, message);
+            ButtonLayout buttonLayout = new ButtonLayout(button, message, fontSize);
 
             this.detailLayout = detailLayout;
             this.layoutStack = layoutStack;

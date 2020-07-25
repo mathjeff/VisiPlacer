@@ -44,6 +44,7 @@ namespace VisiPlacement
             string when = contribution.DateTime.ToString("yyyy-MM-dd");
             string description = contribution.Description;
             double fontSize = 16;
+            double nameSize = 30;
 
             // build the name button layout
             LayoutChoice_Set nameLayout;
@@ -56,12 +57,14 @@ namespace VisiPlacement
                     detailBuilder.AddLayout(new TextblockLayout("Email: " + who.Email, fontSize));
                 if (who.Website != null)
                     detailBuilder.AddLayout(new TextblockLayout("Website: " + who.Website, fontSize));
-                nameLayout = new HelpButtonLayout(name, detailBuilder.Build(), layoutStack);
+                nameLayout = new HelpButtonLayout(name, detailBuilder.Build(), layoutStack, nameSize);
             }
             else
             {
                 // If this contributor didn't provide details, then just display their name
-                nameLayout = new TextblockLayout(name);
+                TextblockLayout l = new TextblockLayout(name, nameSize);
+                l.AlignHorizontally(TextAlignment.Center);
+                nameLayout = l;
             }
 
             // build the rest of the layout
@@ -74,13 +77,13 @@ namespace VisiPlacement
         public LayoutChoice_Set Build()
         {
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
-            int minIndex = Math.Max(this.contributions.Count - 8, 0);
+            int minIndex = Math.Max(this.contributions.Count - 12, 0);
             for (int i = this.contributions.Count - 1; i >= minIndex; i--)
             {
                 builder.AddLayout(this.MakeSublayout(this.contributions[i]));
             }
 
-            return builder.Build();
+            return ScrollLayout.New(builder.Build());
         }
 
 
@@ -107,7 +110,7 @@ namespace VisiPlacement
         }
         public LayoutChoice_Set Build()
         {
-            return new HelpButtonLayout("Credits", this.contentBuilder.Build(), this.layoutStack);
+            return new HelpButtonLayout("Credits", this.contentBuilder.Build(), this.layoutStack, 16);
         }
         private CreditsWindowBuilder contentBuilder;
         private LayoutStack layoutStack;
