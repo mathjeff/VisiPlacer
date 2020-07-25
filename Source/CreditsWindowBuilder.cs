@@ -16,14 +16,20 @@ namespace VisiPlacement
             this.layoutStack = layoutStack;
         }
 
+        public CreditsWindowBuilder AddContribution(AppContributor who, DateTime when, string description)
+        {
+            return this.AddContribution(new AppContribution(who, when, description));
+        }
         public CreditsWindowBuilder AddContribution(AppContribution contribution)
         {
             if (this.contributions.Count > 0)
             {
                 AppContribution last = this.contributions.Last();
-                if (contribution.DateTime.CompareTo(last) < 0)
+                if (contribution.DateTime.CompareTo(last.DateTime) < 0)
                 {
-                    throw new Exception("Illegal contribution ordering: contribution " + contribution + " mustbe specified before " + last);
+                    string message = "Illegal contribution ordering: contribution " + contribution + " must be specified before " + last;
+                    ErrorReporter.ReportParadox(message);
+                    throw new Exception(message);
                 }
             }
             this.contributions.Add(contribution);
@@ -88,6 +94,11 @@ namespace VisiPlacement
         {
             this.layoutStack = layoutStack;
             this.contentBuilder = new CreditsWindowBuilder(layoutStack);
+        }
+        public CreditsButtonBuilder AddContribution(AppContributor who, DateTime when, string description)
+        {
+            this.contentBuilder.AddContribution(who, when, description);
+            return this;
         }
         public CreditsButtonBuilder AddContribution(AppContribution contribution)
         {
