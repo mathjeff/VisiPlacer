@@ -16,6 +16,7 @@ namespace VisiPlacement
 
         private void initialize(string message, LayoutChoice_Set detailLayout, LayoutStack layoutStack)
         {
+            this.message = message;
             Button button = new Button();
             ButtonLayout buttonLayout = new ButtonLayout(button, message);
 

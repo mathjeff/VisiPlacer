@@ -39,19 +39,28 @@ namespace VisiPlacement
             string description = contribution.Description;
             double fontSize = 16;
 
-            // build the detail layout
-            Vertical_GridLayout_Builder detailBuilder = new Vertical_GridLayout_Builder();
-            detailBuilder.AddLayout(new TextblockLayout("Contributor Name: " + name, fontSize));
-            if (who.Email != null)
-                detailBuilder.AddLayout(new TextblockLayout("Email: " + who.Email, fontSize));
-            if (who.Website != null)
-                detailBuilder.AddLayout(new TextblockLayout("Website: " + who.Website, fontSize));
-
-            HelpButtonLayout nameButtonLayout = new HelpButtonLayout(name, detailBuilder.Build(), layoutStack);
+            // build the name button layout
+            LayoutChoice_Set nameLayout;
+            if (who.Email != null || who.Website != null)
+            {
+                // If this contributor provided details, then make a button to show those details
+                Vertical_GridLayout_Builder detailBuilder = new Vertical_GridLayout_Builder();
+                detailBuilder.AddLayout(new TextblockLayout("Contributor Name: " + name, fontSize));
+                if (who.Email != null)
+                    detailBuilder.AddLayout(new TextblockLayout("Email: " + who.Email, fontSize));
+                if (who.Website != null)
+                    detailBuilder.AddLayout(new TextblockLayout("Website: " + who.Website, fontSize));
+                nameLayout = new HelpButtonLayout(name, detailBuilder.Build(), layoutStack);
+            }
+            else
+            {
+                // If this contributor didn't provide details, then just display their name
+                nameLayout = new TextblockLayout(name);
+            }
 
             // build the rest of the layout
             Vertical_GridLayout_Builder fullBuilder = new Vertical_GridLayout_Builder();
-            fullBuilder.AddLayout(nameButtonLayout);
+            fullBuilder.AddLayout(nameLayout);
             fullBuilder.AddLayout(new TextblockLayout("On " + when + ": " + description, fontSize));
             fullBuilder.AddLayout(new TextblockLayout("Thanks!", fontSize));
             return fullBuilder.Build();
@@ -70,6 +79,26 @@ namespace VisiPlacement
 
 
         private List<AppContribution> contributions = new List<AppContribution>();
+        private LayoutStack layoutStack;
+    }
+
+    public class CreditsButtonBuilder
+    {
+        public CreditsButtonBuilder(LayoutStack layoutStack)
+        {
+            this.layoutStack = layoutStack;
+            this.contentBuilder = new CreditsWindowBuilder(layoutStack);
+        }
+        public CreditsButtonBuilder AddContribution(AppContribution contribution)
+        {
+            this.contentBuilder.AddContribution(contribution);
+            return this;
+        }
+        public LayoutChoice_Set Build()
+        {
+            return new HelpButtonLayout("Credits", this.contentBuilder.Build(), this.layoutStack);
+        }
+        private CreditsWindowBuilder contentBuilder;
         private LayoutStack layoutStack;
     }
 
