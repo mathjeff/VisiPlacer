@@ -74,7 +74,7 @@ namespace VisiPlacement
         public LayoutChoice_Set Build()
         {
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
-            int minIndex = Math.Max(this.contributions.Count - 3, 0);
+            int minIndex = Math.Max(this.contributions.Count - 8, 0);
             for (int i = this.contributions.Count - 1; i >= minIndex; i--)
             {
                 builder.AddLayout(this.MakeSublayout(this.contributions[i]));
