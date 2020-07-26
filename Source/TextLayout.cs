@@ -611,7 +611,7 @@ namespace VisiPlacement
         private Size getLineSize(String text, double fontSize)
         {
             // We always measure one size and then we rescale the result, to allow all sizes to share the same cache
-            double fontSizeForMeasuring = 16;
+            double fontSizeForMeasuring = 1024;
             Size measuredSize;
             // clear cache if too large
             if (this.sizeCache != null && this.sizeCache.Count > 4000)
