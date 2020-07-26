@@ -629,8 +629,8 @@ namespace VisiPlacement
                     for (int i = 0; i < text.Length; i++)
                     {
                         String currentCharacter = text.Substring(i, 1);
-                        Size prevSize = this.computeLineSize(prevCharacter, fontSizeForMeasuring);
-                        Size currentSize = this.computeLineSize(prevCharacter + currentCharacter, fontSizeForMeasuring);
+                        Size prevSize = this.getLineSize(prevCharacter, fontSizeForMeasuring);
+                        Size currentSize = this.getLineSize(prevCharacter + currentCharacter, fontSizeForMeasuring);
                         measuredSize.Height = Math.Max(measuredSize.Height, currentSize.Height);
                         measuredSize.Width += currentSize.Width - prevSize.Width;
                         prevCharacter = currentCharacter;
