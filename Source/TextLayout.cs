@@ -656,8 +656,9 @@ namespace VisiPlacement
                     Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, 16);
                     textFormatterType = TextFormatterType.UNIFORMS_MISC; 
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    System.Diagnostics.Debug.WriteLine(e);
                     textFormatterType = TextFormatterType.INNATE;
                 }
             }
@@ -668,15 +669,16 @@ namespace VisiPlacement
         private Size computeLineSize(String text, double fontSize)
         {
             this.chooseTextFormatterType();
-            if (text == "")
-            {
-                // Interestingly enough, Uniforms.Misc doesn't return an empty width or an empty height for an empty string
-                return new Size();
-            }
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
                 return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
+
+            if (text == "")
+                return new Size();
+
+            string textToMeasure = text.Replace(" ", "i");
+
             // Get enough width for the given text, and enough height to accomodate the line spacing
-            double width = this.computeGlyphSize(text, fontSize).Width;
+            double width = this.computeGlyphSize(textToMeasure, fontSize).Width;
             return new Size(width + this.leftMargin, this.fontLineHeight);
         }
 
