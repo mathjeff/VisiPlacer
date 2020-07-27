@@ -52,8 +52,11 @@ namespace VisiPlacement
             {
                 StackEntry entry = this.layoutEntries.Last();
                 this.layoutEntries.RemoveAt(this.layoutEntries.Count - 1);
-                this.backButton_layouts.RemoveAt(this.backButton_layouts.Count - 1);
-                this.buttons.RemoveAt(this.buttons.Count - 1);
+                if (this.showBackButtons)
+                {
+                    this.backButton_layouts.RemoveAt(this.backButton_layouts.Count - 1);
+                    this.buttons.RemoveAt(this.buttons.Count - 1);
+                }
                 foreach (OnBack_Listener listener in entry.Listeners)
                 {
                     listener.OnBack(entry.Layout);
