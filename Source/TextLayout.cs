@@ -680,7 +680,11 @@ namespace VisiPlacement
         {
             this.chooseTextFormatterType();
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
-                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
+            {
+                Size measuredSize = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
+                // Increase result slightly to account for rounding error in the result that we receive
+                return new Size(measuredSize.Width + 1, measuredSize.Height + 1);
+            }
 
             if (text == "")
                 return new Size();
