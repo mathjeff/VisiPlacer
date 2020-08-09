@@ -359,7 +359,12 @@ namespace VisiPlacement
             get
             {
                 if (this.bonusScore == null)
-                    this.bonusScore = LayoutScore.Get_UsedSpace_LayoutScore(this.FontSize);
+                {
+                    LayoutScore bonus = LayoutScore.Get_UsedSpace_LayoutScore(this.FontSize);
+                    if (this.AllowSplittingWords)
+                        bonus = bonus.Plus(LayoutScore.Get_UnCentered_LayoutScore(1));
+                    this.bonusScore = bonus;
+                }
                 return this.bonusScore;
             }
             set

@@ -42,7 +42,7 @@ namespace VisiPlacement
                 this.layouts.Add(new TextLayout(configurer, fontSize));
             }
             if (minFontSize > 0)
-                this.layouts.Add(new ScoreShifted_Layout(new TextLayout(configurer, minFontSize, true), LayoutScore.Get_UnCentered_LayoutScore(1)));
+                this.layouts.Add(new TextLayout(configurer, minFontSize, true));
 
             this.SubLayout = LayoutUnion.New(layouts);
        }

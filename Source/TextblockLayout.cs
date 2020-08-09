@@ -12,7 +12,7 @@ namespace VisiPlacement
             Label textBlock = this.makeTextBlock(text);
             this.Initialize(textBlock, -1, false, false);
         }
-        public TextblockLayout(string text, Xamarin.Forms.Color textColor)
+        public TextblockLayout(string text, Color textColor)
         {
             Label textBlock = this.makeTextBlock(text);
             this.Initialize(textBlock, -1, false, false);
@@ -21,7 +21,7 @@ namespace VisiPlacement
         public TextblockLayout(string text, bool allowCropping, bool allowSplittingWords)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, -1, false, allowSplittingWords);
+            this.Initialize(textBlock, -1, allowCropping, allowSplittingWords);
         }
         public TextblockLayout(string text, bool allowCropping, double fontSize)
         {
@@ -95,7 +95,6 @@ namespace VisiPlacement
         }
         private void Initialize(Label textBlock, double fontsize, bool allowCropping, bool allowSplittingWords)
         {
-            //textBlock.LineBreakMode = LineBreakMode.NoWrap;
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
             textBlock.Margin = new Thickness(0);
@@ -105,15 +104,19 @@ namespace VisiPlacement
             this.layouts = new List<LayoutChoice_Set>();
             if (fontsize > 0)
             {
-                layouts.Add(this.makeLayout(fontsize, allowCropping, allowSplittingWords));
+                if (allowCropping || allowSplittingWords)
+                    layouts.Add(this.makeLayout(fontsize, allowCropping, allowSplittingWords));
+                layouts.Add(this.makeLayout(fontsize, false, false));
             }
             else
             {
-                layouts.Add(this.makeLayout(30, allowCropping, allowSplittingWords));
-                layouts.Add(this.makeLayout(16, allowCropping, allowSplittingWords));
-                layouts.Add(this.makeLayout(10, allowCropping, allowSplittingWords));
+                layouts.Add(this.makeLayout(30, false, false));
+                layouts.Add(this.makeLayout(16, false, false));
+                layouts.Add(this.makeLayout(10, false, false));
+                if (allowCropping || allowSplittingWords)
+                    layouts.Add(this.makeLayout(10, allowCropping, allowSplittingWords));
             }
-                
+
             this.SubLayout = LayoutUnion.New(layouts);
         }
 
