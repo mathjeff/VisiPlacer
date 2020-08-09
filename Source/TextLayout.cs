@@ -593,6 +593,11 @@ namespace VisiPlacement
                     prevComponentInLine = "";
                     formattedLines.Add("\n");
                     lineSize = new Size();
+                    if (currentComponent == " " && allowSplittingWords)
+                    {
+                        // if a space character causes a line wrap, we don't need to keep the space character
+                        i++;
+                    }
                 }
                 else
                 {
