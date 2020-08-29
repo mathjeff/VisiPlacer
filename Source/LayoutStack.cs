@@ -52,11 +52,6 @@ namespace VisiPlacement
             {
                 StackEntry entry = this.layoutEntries.Last();
                 this.layoutEntries.RemoveAt(this.layoutEntries.Count - 1);
-                if (this.showBackButtons)
-                {
-                    this.backButton_layouts.RemoveAt(this.backButton_layouts.Count - 1);
-                    this.buttons.RemoveAt(this.buttons.Count - 1);
-                }
                 foreach (OnBack_Listener listener in entry.Listeners)
                 {
                     listener.OnBack(entry.Layout);
@@ -91,7 +86,7 @@ namespace VisiPlacement
             if (this.showBackButtons && this.layoutEntries.Count > 1)
             {
                 this.mainGrid.PutLayout(layout, 0, 0);
-                this.mainGrid.PutLayout(this.backButtons(this.layoutEntries), 0, 2);
+                this.mainGrid.PutLayout(this.makeBackButtons(this.layoutEntries), 0, 2);
                 this.SubLayout = this.mainGrid;
             }
             else
@@ -99,7 +94,7 @@ namespace VisiPlacement
                 this.SubLayout = layout;
             }
         }
-        private LayoutChoice_Set backButtons(List<StackEntry> layouts)
+        private LayoutChoice_Set makeBackButtons(List<StackEntry> layouts)
         {
             List<StackEntry> prevLayouts = layouts.GetRange(0, layouts.Count - 1);
 
@@ -116,22 +111,21 @@ namespace VisiPlacement
             }
 
             Horizontal_GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            foreach (StackEntry entry in interestingPrevLayouts)
+            {
+                fullBuilder.AddLayout(this.JumpBack_ButtonLayout(entry));
+            }
+            if (interestingPrevLayouts.Count <= 2)
+            {
+                // If there are 2 or fewer previous layouts, then we show all of them
+                return fullBuilder.BuildAnyLayout();
+            }
             Horizontal_GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
-            if (interestingPrevLayouts.Count >= 2)
-            {
-                abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 2]));
-                abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 1]));
-            }
-
-            for (int i = 0; i < interestingPrevLayouts.Count; i++)
-            {
-                StackEntry entry = interestingPrevLayouts[i];
-                ButtonLayout nameLayout = this.JumpBack_ButtonLayout(entry);
-                fullBuilder.AddLayout(nameLayout);
-            }
+            abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 2]));
+            abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 1]));
             return new LayoutUnion(abbreviatedBuilder.BuildAnyLayout(), fullBuilder.BuildAnyLayout());
         }
-        private ButtonLayout JumpBack_ButtonLayout(StackEntry stackEntry)
+        private LayoutChoice_Set JumpBack_ButtonLayout(StackEntry stackEntry)
         {
             int toIndex = -1;
             for (int i = 0; i < this.layoutEntries.Count; i++)
@@ -142,16 +136,16 @@ namespace VisiPlacement
                     break;
                 }
             }
-            String text = stackEntry.Name;
 
             if (toIndex >= this.backButton_layouts.Count)
             {
-                Button button = new Button();
-                button.Text = text;
-                button.Clicked += Button_Clicked;
-                this.buttons.Add(button);
-                this.backButton_layouts.Add(new ButtonLayout(button));
+                Button newButton = new Button();
+                newButton.Clicked += Button_Clicked;
+                this.backButtons.Add(newButton);
+                this.backButton_layouts.Add(LayoutCache.For(new ButtonLayout(newButton)));
             }
+            Button button = this.backButtons[toIndex];
+            button.Text = stackEntry.Name;
             return this.backButton_layouts[toIndex];
         }
 
@@ -160,7 +154,7 @@ namespace VisiPlacement
             Button button = sender as Button;
             if (button == null)
                 return;
-            int buttonIndex = this.buttons.IndexOf(button);
+            int buttonIndex = this.backButtons.IndexOf(button);
             if (buttonIndex < 0)
                 return;
             this.goBackTo(buttonIndex);
@@ -172,9 +166,12 @@ namespace VisiPlacement
                 this.GoBack();
         }
 
+        // list of entries in the stack, with the last entry in the list being the currently visible entry
         private List<StackEntry> layoutEntries = new List<StackEntry>();
-        private List<Button> buttons = new List<Button>();
-        private List<ButtonLayout> backButton_layouts = new List<ButtonLayout>();
+        // List of buttons that can be pressed to go back. May contain more buttons than necessary, in case we want to repurpose them later
+        private List<Button> backButtons = new List<Button>();
+        // List of layouts that can be pressed to go back. May contain more buttons than necessary, in case we want to repurpose them later
+        private List<LayoutChoice_Set> backButton_layouts = new List<LayoutChoice_Set>();
         private GridLayout mainGrid;
         private bool showBackButtons;
     }

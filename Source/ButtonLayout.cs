@@ -119,8 +119,16 @@ namespace VisiPlacement
             }
             Effect effect = Effect.Resolve("VisiPlacement.ButtonEffect");
             button.Effects.Add(effect);
+
+            this.button = button;
         }
 
+        public void setText(string text)
+        {
+            this.button.Text = text;
+        }
+
+        private Button button;
     }
 
     public class ButtonText_Configurer : TextItem_Configurer
