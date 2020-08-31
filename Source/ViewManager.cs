@@ -84,6 +84,13 @@ namespace VisiPlacement
         // does a layout of size <size> if anything has changed since the last layout
         public void DoLayoutIfOutOfDate(Size size)
         {
+            // if the user asked us to use a different size, use that instead
+            if (this.forcedSize.Width > 0)
+                size.Width = this.forcedSize.Width;
+            if (this.forcedSize.Height > 0)
+                size.Height = this.forcedSize.Height;
+
+            // update size, do layout
             if (size.Width != this.displaySize.Width || size.Height != this.displaySize.Height)
                 this.needsRelayout = true;
             if (this.needsRelayout)
@@ -97,6 +104,12 @@ namespace VisiPlacement
                 throw new ArgumentException();
             this.displaySize = size;
             this.DoLayout();
+        }
+
+        public void forceSize(Size size)
+        {
+            this.forcedSize = size;
+            this.forceRelayout();
         }
 
         // redoes the layout
@@ -356,6 +369,7 @@ namespace VisiPlacement
         // the layout that we put the caller's layout into
         private ContainerLayout callerHolder = new ContainerLayout();
         private Size displaySize;
+        private Size forcedSize;
         private SpecificLayout specificLayout;
         private bool even;
         private bool needsRelayout = true;
