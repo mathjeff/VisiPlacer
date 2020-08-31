@@ -28,7 +28,7 @@ namespace VisiPlacement
 
             Label textBlock = new Label();
             textBlock.BackgroundColor = Color.Red;
-            this.textBlockLayout = new TextblockLayout(textBlock, 16, false, false);
+            this.textBlockLayout = new TextblockLayout(textBlock, 16, false, true);
             this.textBlockLayout.ScoreIfEmpty = false;
             this.textBlockLayout.LoggingEnabled = true;
             //grid2.PutLayout(this.textBlockLayout, 0, 0);

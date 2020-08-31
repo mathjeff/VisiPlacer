@@ -220,10 +220,10 @@ namespace VisiPlacement
             return bestAllowedDimensions;
         }
 
-        private FormattedText formatText(double maxWidth, bool debug, double fontSize)
+        private FormattedParagraph formatText(double maxWidth, bool debug, double fontSize)
         {
             // check the cache
-            FormattedText formatted;
+            FormattedParagraph formatted;
             if (this.layoutsByWidth.TryGetValue(maxWidth, out formatted))
             {
                 if (this.LoggingEnabled)
@@ -244,7 +244,7 @@ namespace VisiPlacement
             DateTime start = DateTime.Now;
             numComputations++;
 
-            FormattedText formattedText = this.formatText(availableSize.Width, debug, this.FontSize);
+            FormattedParagraph formattedText = this.formatText(availableSize.Width, debug, this.FontSize);
             Size desiredSize = formattedText.Size;
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
@@ -404,7 +404,7 @@ namespace VisiPlacement
                 Size currentSize = new Size(view.Width, view.Height);
                 Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, false);
                 this.TextItem_Text = this.Text;
-                this.layoutsByWidth = new Dictionary<double, FormattedText>();
+                this.layoutsByWidth = new Dictionary<double, FormattedParagraph>();
                 Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize, false);
                 LayoutScore oldScore = layoutForCurrentText.Score;
                 LayoutScore newScore = layoutForNewText.Score;
@@ -452,7 +452,7 @@ namespace VisiPlacement
                 if (this.textItem_text != value)
                 {
                     this.textItem_text = value;
-                    this.layoutsByWidth = new Dictionary<double, FormattedText>();
+                    this.layoutsByWidth = new Dictionary<double, FormattedParagraph>();
                 }
             }
         }
@@ -462,7 +462,7 @@ namespace VisiPlacement
         private TextFormatter textFormatter;
         private LayoutScore bonusScore;
         private String textItem_text;
-        private Dictionary<double, FormattedText> layoutsByWidth = new Dictionary<double, FormattedText>();
+        private Dictionary<double, FormattedParagraph> layoutsByWidth = new Dictionary<double, FormattedParagraph>();
 
     }
 
@@ -488,12 +488,12 @@ namespace VisiPlacement
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
         // The returned size might have larger width than desiredWidth if needed for the text to fit
-        public FormattedText FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug, double fontSize)
+        public FormattedParagraph FormatText(String text, double desiredWidth, bool allowSplittingWords, bool debug, double fontSize)
         {
-            FormattedText result;
+            FormattedParagraph result;
             if (text == null || text == "")
             {
-                result = new FormattedText(new Size(), text);
+                result = new FormattedParagraph(new Size(), text);
                 if (debug)
                     System.Diagnostics.Debug.WriteLine("Formatted empty text '" + text + "' into size " + result);
                 return result;
@@ -508,7 +508,7 @@ namespace VisiPlacement
                 if (formatBlock == "")
                     formatBlock = "M";
 
-                FormattedText formattedBlock = this.FormatParagraph(formatBlock, desiredWidth, allowSplittingWords, fontSize);
+                FormattedParagraph formattedBlock = this.FormatParagraph(formatBlock, desiredWidth, allowSplittingWords, fontSize);
                 if (block == "")
                     formattedBlock.Text = block;
                 formattedStrings.Add(formattedBlock.Text);
@@ -517,7 +517,7 @@ namespace VisiPlacement
                 totalHeight += blockSize.Height;
             }
             string formattedText = String.Join("\n",formattedStrings);
-            result = new FormattedText(new Size(maxWidth, totalHeight), formattedText);
+            result = new FormattedParagraph(new Size(maxWidth, totalHeight), formattedText);
             if (debug)
             {
                 System.Diagnostics.Debug.WriteLine("Formatted text '" + text + "'" + " using desiredWith = " + desiredWidth +
@@ -525,135 +525,114 @@ namespace VisiPlacement
             }
             return result;
         }
-        public FormattedText FormatParagraph(String text, double desiredWidth, bool allowSplittingWords, double fontSize)
+        public FormattedParagraph FormatParagraph(String text, double desiredWidth, bool allowSplittingWords, double fontSize)
         {
             if (text == null || text == "")
-                return new FormattedText(new Size(), text);
+                return new FormattedParagraph(new Size(), text);
             
-            // previous unsplittable unit in the current line
-            String prevComponentInLine = "";
-            // current size of the current line
-            Size lineSize = new Size();
             // total size of the paragraph
             Size totalSize = new Size();
 
             // the unsplittable units that we're going to measure
-            string[] components;
+            List<string> components;
             int i;
             if (allowSplittingWords)
             {
-                components = new string[text.Length];
+                components = new List<string>();
                 for (i = 0; i < text.Length; i++)
                 {
-                    components[i] = text.Substring(i, 1);
+                    components.Add(text.Substring(i, 1));
                 }
             }
             else
             {
-                components = text.Split(' ');
+                string[] words = text.Split(' ');
+                components = new List<string>();
+                for (i = 0; i < words.Length; i++)
+                {
+                    if (i != 0)
+                        components.Add(" ");
+                    components.Add(words[i]);
+                }
             }
             List<string> formattedLines = new List<string>();
 
-            // loop until done
             i = 0;
-            while (i < components.Length)
+            while (i < components.Count())
             {
-                // current unit that we want to add
-                String currentComponent = components[i];
-                // the text that we're considering making be the ending of this line
-                String currentExpandedComponent;
-                if (allowSplittingWords)
+                // consume as many words as will fit on this line
+                FormattedLine line = consumeComponents(components, i, desiredWidth, fontSize);
+                // add new text
+                formattedLines.Add(line.Text);
+                // update size
+                totalSize.Width = Math.Max(totalSize.Width, line.Size.Width);
+                totalSize.Height += line.Size.Height;
+                // continue to subsequent components
+                i += line.NumComponents;
+                // If a space character wrapped to the next line, we can skip it instead
+                if (i < components.Count)
                 {
-                    currentExpandedComponent = prevComponentInLine + currentComponent;
-                }
-                else
-                {
-                    if (prevComponentInLine != "")
+                    if (components[i] == " ")
                     {
-                        currentExpandedComponent = prevComponentInLine + " " + currentComponent;
-                    }
-                    else
-                    {
-                        if (currentComponent == "")
-                            currentComponent = " ";
-                        currentExpandedComponent = currentComponent;
-                    }
-                }
-                // the size of the new text
-                Size currentCharsSize = this.getLineSize(currentExpandedComponent, fontSize);
-                // the size of the existing ending of the line
-                Size prevCharSize = this.getLineSize(prevComponentInLine, fontSize);
-                // the new size of the current line if we add this text to this line
-                Size new_lineSize = new Size(lineSize.Width + currentCharsSize.Width - prevCharSize.Width, Math.Max(lineSize.Height, currentCharsSize.Height));
-                if (new_lineSize.Width > desiredWidth && prevComponentInLine != "")
-                {
-                    // line wrap
-                    totalSize.Width = Math.Max(totalSize.Width, lineSize.Width);
-                    totalSize.Height += lineSize.Height;
-                    prevComponentInLine = "";
-                    formattedLines.Add("\n");
-                    lineSize = new Size();
-                    if (currentComponent == " " && allowSplittingWords)
-                    {
-                        // if a space character causes a line wrap, we don't need to keep the space character
                         i++;
                     }
                 }
+            }
+            return new FormattedParagraph(totalSize, String.Join("\n", formattedLines));
+        }
+
+        private FormattedLine consumeComponents(List<string> components, int startIndex, double desiredWidth, double fontSize)
+        {
+            FormattedLine bestResult = null;
+            int lowCount = 1;
+            int highCount = components.Count() - startIndex;
+            while (highCount >= lowCount)
+            {
+                int testCount = Math.Min(lowCount * 2, (lowCount + highCount) / 2);
+
+                string testText = String.Join("", components.GetRange(startIndex, testCount));
+                Size requiredSize = this.getLineSize(testText, fontSize);
+                if (requiredSize.Width <= desiredWidth)
+                {
+                    // we found some characters that all fit into one line
+                    bestResult = new FormattedLine(testCount, testText, requiredSize);
+                    lowCount = testCount + 1;
+                }
                 else
                 {
-                    // extend current line
-                    if (!allowSplittingWords && prevComponentInLine != "")
-                        formattedLines.Add(" ");
-                    formattedLines.Add(currentComponent);
-                    lineSize = new_lineSize;
-                    prevComponentInLine = currentComponent;
-                    i++;
+                    // we tried to use too many characters at once, and they didn't all fit
+                    if (bestResult == null)
+                    {
+                        // We can only get here on the first iteration, when measuring only the first word
+                        // If not even the first word fit, then we return it anyway, so the caller knows how much space it needs
+                        bestResult = new FormattedLine(testCount, testText, requiredSize);
+                    }
+                    highCount = testCount - 1;
                 }
             }
-            totalSize.Width = Math.Max(totalSize.Width, lineSize.Width);
-            totalSize.Height += lineSize.Height;
-            string formattedText = string.Join("", formattedLines);
-            return new FormattedText(totalSize, formattedText);
+            return bestResult;
         }
 
         // Returns the size of the given text
         // Does use the cache
-        private Size getLineSize(String text, double fontSize)
+        private Size getLineSize(string text, double fontSize)
         {
-            // We always measure one size and then we rescale the result, to allow all sizes to share the same cache
-            double fontSizeForMeasuring = 1024;
-            Size measuredSize;
-            // clear cache if too large
-            if (this.sizeCache != null && this.sizeCache.Count > 4000)
-                this.sizeCache = null;
-
+            chooseTextFormatterType();
+            // Ensure we have a cache of this size
+            if (!this.sizesCache.ContainsKey(fontSize))
+                this.sizesCache[fontSize] = new Dictionary<string, Size>();
+            // If our cache is too large, clear it
+            if (this.sizesCache[fontSize].Count > 4000)
+                this.sizesCache[fontSize] = new Dictionary<string, Size>();
             // try to load from cache
-            if (this.sizeCache == null)
-                this.sizeCache = new Dictionary<string, Size>();
-            if (!this.sizeCache.TryGetValue(text, out measuredSize))
+            Dictionary<string, Size> sizeCache = this.sizesCache[fontSize];
+            Size measuredSize;
+            if (!sizeCache.TryGetValue(text, out measuredSize))
             {
-                if (text.Length > 2)
-                {
-                    measuredSize = new Size();
-                    String prevCharacter = "";
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        String currentCharacter = text.Substring(i, 1);
-                        Size prevSize = this.getLineSize(prevCharacter, fontSizeForMeasuring);
-                        Size currentSize = this.getLineSize(prevCharacter + currentCharacter, fontSizeForMeasuring);
-                        measuredSize.Height = Math.Max(measuredSize.Height, currentSize.Height);
-                        measuredSize.Width += currentSize.Width - prevSize.Width;
-                        prevCharacter = currentCharacter;
-                    }
-                }
-                else
-                {
-                    measuredSize = this.computeLineSize(text, fontSizeForMeasuring);
-                }
-                this.sizeCache[text] = measuredSize;
+                measuredSize = this.computeLineSize(text, fontSize);
+                sizeCache[text] = measuredSize;
             }
-            double sizeRatio = fontSize / fontSizeForMeasuring;
-            return new Size(measuredSize.Width * sizeRatio, measuredSize.Height * sizeRatio);
+            return measuredSize;
         }
 
         // TODO: can UniformsMisc be made to support UWP?
@@ -663,8 +642,10 @@ namespace VisiPlacement
             {
                 try
                 {
-                    Uniforms.Misc.TextUtils.GetTextSize("A", double.PositiveInfinity, 16);
-                    textFormatterType = TextFormatterType.UNIFORMS_MISC; 
+                    string text = "ABCD1122";
+                    Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, 16);
+
+                    textFormatterType = TextFormatterType.UNIFORMS_MISC;
                 }
                 catch (Exception e)
                 {
@@ -681,9 +662,7 @@ namespace VisiPlacement
             this.chooseTextFormatterType();
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
             {
-                Size measuredSize = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
-                // Increase result slightly to account for rounding error in the result that we receive
-                return new Size(measuredSize.Width + 1, measuredSize.Height + 1);
+                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
             }
 
             if (text == "")
@@ -735,17 +714,31 @@ namespace VisiPlacement
 
         private double fontLineHeight;
         private double leftMargin;
-        private Dictionary<String, Size> sizeCache;
+        // Dictionary<FontSize, Dictionary<Text, MeasuredSize>>
+        private Dictionary<double, Dictionary<String, Size>> sizesCache = new Dictionary<double, Dictionary<string, Size>>();
         private Dictionary<double, SKPaint> textBlocks = new Dictionary<double, SKPaint>();
     }
 
-    public class FormattedText
+    public class FormattedParagraph
     {
-        public FormattedText(Size size, string text)
+        public FormattedParagraph(Size size, string text)
         {
             this.Size = size;
             this.Text = text;
         }
+        public string Text;
+        public Size Size;
+    }
+
+    class FormattedLine
+    {
+        public FormattedLine(int numComponents, string text, Size size)
+        {
+            this.NumComponents = numComponents;
+            this.Text = text;
+            this.Size = size;
+        }
+        public int NumComponents;
         public string Text;
         public Size Size;
     }
