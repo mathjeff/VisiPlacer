@@ -19,8 +19,8 @@ namespace VisiPlacement
             TextBox.TextColor = Color.Black;
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
-            layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 30));
-            layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 16));
+            layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 30, false));
+            layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 16, false));
 
             this.LayoutToManage = new LayoutUnion(layouts);
 
