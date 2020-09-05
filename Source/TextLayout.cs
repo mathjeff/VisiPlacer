@@ -470,7 +470,8 @@ namespace VisiPlacement
     {
         UNDECIDED = 0,
         UNIFORMS_MISC = 1,
-        INNATE = 2
+        UNIFORMS_MISC_ROUND_UP = 2,
+        INNATE = 3
     }
 
     public class TextFormatter
@@ -643,9 +644,24 @@ namespace VisiPlacement
                 try
                 {
                     string text = "ABCD1122";
-                    Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, 16);
+                    double smallFont = 16;
+                    double smallWidth = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, smallFont).Width;
 
-                    textFormatterType = TextFormatterType.UNIFORMS_MISC;
+                    double multiplier = 64;
+                    double largeFont = smallFont * multiplier;
+                    double largeWidth = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, largeFont).Width;
+
+                    if (smallWidth * multiplier >= largeWidth)
+                    {
+                        // it seems that text sizes either get rounded up or don't get rounded, so we can simply use the measured sizes
+                        textFormatterType = TextFormatterType.UNIFORMS_MISC;
+                    }
+                    else
+                    {
+                        // it seems that font sizes get rounded down, which we will have to compensate for in the future
+                        textFormatterType = TextFormatterType.UNIFORMS_MISC_ROUND_UP;
+                    }
+
                 }
                 catch (Exception e)
                 {
@@ -662,9 +678,19 @@ namespace VisiPlacement
             this.chooseTextFormatterType();
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
             {
+                // If we get here, then Uniforms.Misc returns an acceptable answer and we can just directly use it
                 return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
             }
-
+            if (textFormatterType == TextFormatterType.UNIFORMS_MISC_ROUND_UP)
+            {
+                // If we get here, then Uniforms.Misc returns almost the right answer but we have to account for rounding error
+                // by measuring a larger font and rescaling it down
+                double multiplier = 64;
+                double measureFont = fontSize * multiplier;
+                Size measuredSize = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, measureFont);
+                return new Size(measuredSize.Width / multiplier, measuredSize.Height / multiplier);
+            }
+            // If we get here then Uniforms.Misc isn't supported on the platform and we'll just do our best
             if (text == "")
                 return new Size();
 
