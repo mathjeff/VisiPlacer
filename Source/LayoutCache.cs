@@ -16,13 +16,11 @@ namespace VisiPlacement
         }
         public LayoutCache()
         {
-            this.Initialize();
         }
         public LayoutCache(LayoutChoice_Set layoutToManage)
         {
             if (layoutToManage == null)
                 ErrorReporter.ReportParadox("Warning: creating a LayoutCache with nothing in it");
-            this.Initialize();
             if (layoutToManage is LayoutCache)
                 ErrorReporter.ReportParadox("Warning: creating a LayoutCache that simply manages another LayoutCache");
             this.LayoutToManage = layoutToManage;
@@ -211,6 +209,8 @@ namespace VisiPlacement
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            if (this.true_queryResults == null)
+                this.Initialize();
             numQueries++;
             if (numQueries % 10000 == 0)
             {
