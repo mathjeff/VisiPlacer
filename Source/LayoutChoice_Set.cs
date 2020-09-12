@@ -16,8 +16,8 @@ namespace VisiPlacement
         {
             this.changedSinceLatestQuery = true;
             this.changedSinceLastRender = true;
-            this.parents = new HashSet<LayoutChoice_Set>();
-            this.children = new HashSet<LayoutChoice_Set>();
+            this.parents = new List<LayoutChoice_Set>();
+            this.children = new List<LayoutChoice_Set>();
 
             this.DebugId = nextDebugId;
             nextDebugId++;
@@ -26,12 +26,12 @@ namespace VisiPlacement
         {
             this.changedSinceLatestQuery = original.changedSinceLatestQuery;
             this.changedSinceLastRender = original.changedSinceLastRender;
-            this.parents = new HashSet<LayoutChoice_Set>();
+            this.parents = new List<LayoutChoice_Set>();
             foreach (LayoutChoice_Set parent in original.parents)
             {
                 this.AddParent(parent);
             }
-            this.children = new HashSet<LayoutChoice_Set>();
+            this.children = new List<LayoutChoice_Set>();
             foreach (LayoutChoice_Set child in original.children)
             {
                 child.AddParent(this);
@@ -154,7 +154,7 @@ namespace VisiPlacement
         private bool changedSinceLatestQuery; // for caching
         private bool changedSinceLastRender; // for caching
 
-        private HashSet<LayoutChoice_Set> parents;
-        private HashSet<LayoutChoice_Set> children;
+        private List<LayoutChoice_Set> parents;
+        private List<LayoutChoice_Set> children;
     }
 }
