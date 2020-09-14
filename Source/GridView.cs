@@ -92,14 +92,18 @@ namespace VisiPlacement
                 this.ColumnDefinitions.Add(columnDefinition);
             }
         }
+        public View GetChild(int x, int y)
+        {
+            return this.children[x, y];
+        }
         View[,] children;
 
         public void Remove_VisualDescendents()
         {
             this.Children.Clear();
-            int rowNumber, columnNumber;
             if (this.children != null)
             {
+                int rowNumber, columnNumber;
                 for (columnNumber = 0; columnNumber < this.children.GetLength(0); columnNumber++)
                 {
                     for (rowNumber = 0; rowNumber < this.children.GetLength(1); rowNumber++)
@@ -108,6 +112,13 @@ namespace VisiPlacement
                     }
                 }
             }
+        }
+
+        public void RemoveChild(int x, int y)
+        {
+            View child = this.GetChild(x, y);
+            this.children[x, y] = null;
+            this.Children.Remove(child);
         }
     }
 }

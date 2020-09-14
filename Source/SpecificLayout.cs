@@ -61,6 +61,10 @@ namespace VisiPlacement
         public LayoutQuery SourceQuery_ForDebugging { get; set; }   // the query that generated this SpecificLayout
 
         public abstract void Remove_VisualDescendents();
+        public virtual void Remove_VisualDescendent(View view)
+        {
+            this.Remove_VisualDescendents();
+        }
 
         // Gets called after the view is part of the main view hieararchy
 

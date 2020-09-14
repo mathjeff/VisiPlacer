@@ -2005,6 +2005,23 @@ namespace VisiPlacement
             this.GridView.Remove_VisualDescendents();
         }
 
+        public override void Remove_VisualDescendent(View view)
+        {
+            for (int x = 0; x < this.columnWidths.NumProperties; x++)
+            {
+                for (int y = 0; y < this.rowHeights.NumProperties; y++)
+                {
+                    View childView = this.GridView.GetChild(x, y);
+                    if (childView == view)
+                    {
+                        this.GridView.RemoveChild(x, y);
+                        this.sub_specificLayouts[x, y].Layout.Remove_VisualDescendents();
+                        return;
+                    }
+                }
+            }
+        }
+
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
             if (this.score == null)

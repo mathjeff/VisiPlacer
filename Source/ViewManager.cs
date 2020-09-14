@@ -74,13 +74,6 @@ namespace VisiPlacement
             return this.callerHolder;
         }
 
-
-        public void Remove_VisualDescendents()
-        {
-            if (this.specificLayout != null)
-                this.specificLayout.Remove_VisualDescendents();
-        }
-
         // does a layout of size <size> if anything has changed since the last layout
         public void DoLayoutIfOutOfDate(Size size)
         {
@@ -162,9 +155,8 @@ namespace VisiPlacement
                     if (postLayout == null || preLayout.View != postLayout.View)
                     {
                         // The parent of <view> has changed.
-                        // Disconnect the previous parent's children.
-                        // TODO: only disconnect this specific child (<view>).
-                        preLayout.Remove_VisualDescendents();
+                        // Disconnect it from the previous parent.
+                        preLayout.Remove_VisualDescendent(view);
                     }
                 }
             }

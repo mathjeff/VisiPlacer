@@ -166,6 +166,19 @@ namespace VisiPlacement
             }
         }
 
+        public override void Remove_VisualDescendent(View view)
+        {
+            if (this.view != null)
+            {
+                if (this.view == view)
+                    this.Remove_VisualDescendents();
+                return;
+            }
+            // If we just have a sublayout and no view, then ask our sublayout to remove this view
+            if (this.subLayout != null)
+                this.subLayout.Remove_VisualDescendent(view);
+        }
+
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
             List<SpecificLayout> children = new List<SpecificLayout>();
@@ -182,7 +195,6 @@ namespace VisiPlacement
                 return this.subLayout;
             }
         }
-
 
         public Thickness BorderThickness { get; set; }
         private LayoutScore bonusScore;
