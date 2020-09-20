@@ -714,7 +714,7 @@ namespace VisiPlacement
                 // leave enough height for the characters for the highest ("M") and lowest ("g") characters
                 SKFontMetrics metrics = new SKFontMetrics();
                 textBlock.GetFontMetrics(out metrics);
-                this.fontLineHeight = metrics.Descent - metrics.Ascent;
+                this.fontLineHeight = (metrics.Descent - metrics.Ascent) * 2; // rescale to account for errors in the response
                 SKRect bounds = new SKRect();
                 textBlock.MeasureText("M", ref bounds);
                 this.leftMargin = bounds.Left;
