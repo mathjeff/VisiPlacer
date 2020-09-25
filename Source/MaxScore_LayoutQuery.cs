@@ -6,7 +6,7 @@ using System.Text;
 // the MaxScore_LayoutQuery requests the Layout of minimum width satisfying the given constraints
 namespace VisiPlacement
 {
-    class MaxScore_LayoutQuery : LayoutQuery
+    public class MaxScore_LayoutQuery : LayoutQuery
     {
         public MaxScore_LayoutQuery(double maxWidth, double maxHeight, LayoutScore minScore)
         {
