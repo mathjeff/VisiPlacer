@@ -14,10 +14,10 @@ namespace VisiPlacement
             this.maxWidth = double.PositiveInfinity;
             this.maxHeight = double.PositiveInfinity;
             this.debugID = nextID;
-            /*if (this.debugID >= 3501 && this.debugID <= 7305)
+            if (this.debugID >= 4 && this.debugID <= 58)
             {
                 System.Diagnostics.Debug.WriteLine("Hi");
-            }*/
+            }
             nextID++;
         }
         // returns whichever layout it likes better

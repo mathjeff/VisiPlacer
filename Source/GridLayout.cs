@@ -168,22 +168,12 @@ namespace VisiPlacement
                 }
             }
 
-            //if (query.MaximizesScore())
+            if (layout != null)
             {
-                SemiFixed_GridLayout shrunken = null;
-                if (layout != null)
+                if (layout.Width > 0 && layout.Height > 0)
                 {
-                    if (layout.Width > 0 && layout.Height > 0)
-                    {
-                        shrunken = this.ShrinkLayout(new SemiFixed_GridLayout(layout), query.Debug);
-                        if (query.PreferredLayout(shrunken, layout) != shrunken)
-                        {
-                            ErrorReporter.ReportParadox("error");
-                        }
-                        layout = shrunken;
-                    }
+                    layout = this.ShrinkLayout(layout, query.Debug);
                 }
-
             }
 
             if (layout != null)
@@ -391,7 +381,6 @@ namespace VisiPlacement
                         newSublayout = GridLayout.PreferredLayout(query, newSublayouts);
                         if (newSublayout != null)
                         {
-                            newSublayout = new SemiFixed_GridLayout(newSublayout);
                             currentSublayout = newSublayout;
                         }
                     }
@@ -452,7 +441,7 @@ namespace VisiPlacement
                             }
                             break;
                         }
-                        currentSublayout = new SemiFixed_GridLayout(currentSublayout);
+                        //currentSublayout = new SemiFixed_GridLayout(currentSublayout);
 
                         int numInfiniteWidths = currentSublayout.NumInfiniteWidths;
                         int numInfiniteHeights = currentSublayout.NumInfiniteHeights;
