@@ -10,7 +10,7 @@ namespace VisiPlacement
     {
         public static int NumQueries = 0;
         public static int NumComputations = 0;
-        public static int ExpensiveThreshold = 10;
+        public static int ExpensiveThreshold = 4;
 
         public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
         {
@@ -274,10 +274,6 @@ namespace VisiPlacement
                 if (query.Accepts(semiFixedLayout))
                 {
                     results.Add(semiFixedLayout);
-                    /*if (semiFixedLayout.Score.CompareTo(LayoutScore.Zero) < 0)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Found cropped grid: " + semiFixedLayout);
-                    }*/
                 }
                 if (prevCoordinateShouldBeRight && results.Count < 1)
                 {
@@ -391,7 +387,6 @@ namespace VisiPlacement
 
                         // recursively query the next dimension
                         newSublayouts = this.GetLayoutsToConsider(query, currentLayout);
-                        results.AddRange(newSublayouts);
 
                         newSublayout = GridLayout.PreferredLayout(query, newSublayouts);
                         if (newSublayout != null)
@@ -442,7 +437,6 @@ namespace VisiPlacement
 
                         // recursively query the next dimension
                         newSublayouts = this.GetLayoutsToConsider(subQuery, currentLayout);
-                        results.AddRange(newSublayouts);
                         
 
                         currentSublayout = GridLayout.PreferredLayout(subQuery, newSublayouts);
@@ -668,7 +662,6 @@ namespace VisiPlacement
                     }
                 }
                 // keep track of the coordinates that we are considering
-                //results.Add(new SemiFixed_GridLayout(currentSublayout));
                 if (results.Count > ExpensiveThreshold)
                 {
                     System.Diagnostics.Debug.WriteLine("Surprisingly slow query " + query + " in GridLayout " + this.DebugId + ": " + results.Count +
@@ -678,7 +671,7 @@ namespace VisiPlacement
                 // keep track of the best layout so far
                 if (GridLayout.PreferredLayout(query, currentSublayout, bestSublayout) == currentSublayout)
                 {
-                    bestSublayout = new SemiFixed_GridLayout(currentSublayout);
+                    bestSublayout = currentSublayout;
                     if (bestSublayout != null)
                     {
                         if (query.Accepts(bestSublayout))
@@ -686,10 +679,9 @@ namespace VisiPlacement
                             // if we've found a layout that works, then any future layouts we find must be at least as good as this one
                             query = query.OptimizedUsingExample(bestSublayout);
                         }
-                        results.Add(bestSublayout);
-                        //System.Diagnostics.Debug.WriteLine("Gridlayout currentSublayout: " + currentSublayout + " with score " + currentSublayout.Score);
                     }
                 }
+                results.Add(new SemiFixed_GridLayout(currentSublayout));
 
 
                 if (!query.MaximizesScore() && query.Accepts(currentSublayout))
