@@ -466,7 +466,7 @@ namespace VisiPlacement
 
     }
 
-    enum TextFormatterType
+    public enum TextFormatterType
     {
         UNDECIDED = 0,
         UNIFORMS_MISC = 1,
@@ -485,6 +485,10 @@ namespace VisiPlacement
             {
                 return formatterImpl;
             }
+        }
+        public void ChooseType(TextFormatterType formatterType)
+        {
+            textFormatterType = formatterType;
         }
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
