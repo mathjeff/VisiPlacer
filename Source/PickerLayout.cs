@@ -84,6 +84,11 @@ namespace VisiPlacement
                 return this.picker;
             }
         }
+        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        {
+            // TODO: should a Picker change colors based on LayoutDefaults?
+        }
+
         public void Add_TextChanged_Handler(PropertyChangedEventHandler handler)
         {
             this.textChanged_handlers.Add(handler);

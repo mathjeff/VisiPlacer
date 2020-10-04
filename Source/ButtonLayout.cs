@@ -37,17 +37,18 @@ namespace VisiPlacement
         private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)
         {
             bool isButtonColorSet = button.BackgroundColor.A > 0;
-            ButtonText_Configurer buttonConfigurer = new ButtonText_Configurer(button);
             LayoutChoice_Set sublayout;
+            this.buttonBackground = new ContentView();
             if (fontSize > 0)
             {
                 if (allowCropping)
-                    sublayout = TextLayout.New_Croppable(new ButtonText_Configurer(button), fontSize, scoreIfEmpty);
+                    sublayout = TextLayout.New_Croppable(new ButtonConfigurer(button, includeBevel, this.buttonBackground), fontSize, scoreIfEmpty);
                 else
-                    sublayout = new TextLayout(new ButtonText_Configurer(button), fontSize, scoreIfEmpty);
+                    sublayout = new TextLayout(new ButtonConfigurer(button, includeBevel, this.buttonBackground), fontSize, scoreIfEmpty);
             }
             else
             {
+                ButtonConfigurer buttonConfigurer = new ButtonConfigurer(button, includeBevel, this.buttonBackground);
                 List<LayoutChoice_Set> sublayoutOptions = new List<LayoutChoice_Set>(3);
                 if (allowCropping)
                 {
@@ -66,7 +67,6 @@ namespace VisiPlacement
             }
 
             // add a view behind the button to change its normal background color without changing its color when selected
-            ContentView buttonBackground = new ContentView();
             ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, false);
 
             if (includeBevel)
@@ -96,16 +96,6 @@ namespace VisiPlacement
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { spacingLayout, new ScoreShifted_Layout(null, LayoutScore.Get_CutOff_LayoutScore(1)) });
 
                 button.TextColor = Color.LightGray;
-                if (!isButtonColorSet)
-                {
-                    // On most platforms, setting the background color of a button won't prevent it from changing color when pressed
-                    // On Android, setting the background color of a button will prevent it from changing color, so on Android the application must
-                    // set the button background via a theme instead
-                    if (Device.RuntimePlatform != Device.Android)
-                    {
-                        button.BackgroundColor = Color.FromRgba(0, 0, 0, 255);
-                    }
-                }
             }
             else
             {
@@ -113,7 +103,6 @@ namespace VisiPlacement
                 {
                     buttonBackground.BackgroundColor = Color.White;
                     button.TextColor = Color.Black;
-                    button.BackgroundColor = Color.LightGray;
                 }
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { backgroundLayout });
             }
@@ -129,13 +118,16 @@ namespace VisiPlacement
         }
 
         private Button button;
+        private ContentView buttonBackground;
     }
 
-    public class ButtonText_Configurer : TextItem_Configurer
+    public class ButtonConfigurer : TextItem_Configurer
     {
-        public ButtonText_Configurer(Button button)
+        public ButtonConfigurer(Button button, bool includeBevel, ContentView buttonBackground)
         {
             this.button = button;
+            this.includeBevel = includeBevel;
+            this.buttonBackground = buttonBackground;
         }
 
         public double Width
@@ -196,11 +188,28 @@ namespace VisiPlacement
                 return this.button;
             }
         }
+
+        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        {
+            if (this.includeBevel)
+            {
+                this.button.TextColor = layoutDefaults.ButtonWithBevel_Defaults.TextColor;
+                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.BackgroundColor;
+            }
+            else
+            {
+                this.button.TextColor = layoutDefaults.ButtonWithoutBevel_Defaults.TextColor;
+                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithoutBevel_Defaults.BackgroundColor;
+            }
+        }
+
         public void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler)
         {
             this.button.PropertyChanged += handler;
         }
         public Button button;
+        bool includeBevel;
+        ContentView buttonBackground;
 
     }
 }

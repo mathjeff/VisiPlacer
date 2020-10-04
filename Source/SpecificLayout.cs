@@ -50,7 +50,7 @@ namespace VisiPlacement
                 return true;
             return this.Score.CompareTo(query.MinScore) >= 0;
         }
-        public abstract View DoLayout(Size bounds);
+        public abstract View DoLayout(Size bounds, LayoutDefaults layoutDefaults);
         public void CopyFrom(SpecificLayout original)
         {
             base.CopyFrom(original);

@@ -55,7 +55,7 @@ namespace VisiPlacement
         public String DisplayText { get; set; }
         public Size DesiredSizeForDebugging { get; set; }
 
-        public override View DoLayout(Size displaySize)
+        public override View DoLayout(Size displaySize, LayoutDefaults layoutDefaults)
         {
             if (displaySize.Width != this.textItem.Width)
                 this.textItem.Width = displaySize.Width;
@@ -65,6 +65,7 @@ namespace VisiPlacement
                 this.textItem.FontSize = this.fontSize;
             if (this.textItem.DisplayText != this.DisplayText)
                 this.textItem.DisplayText = this.DisplayText;
+            this.textItem.ApplyDefaults(layoutDefaults);
             return this.textItem.View;
         }
 

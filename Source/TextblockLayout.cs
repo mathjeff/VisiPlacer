@@ -15,8 +15,8 @@ namespace VisiPlacement
         public TextblockLayout(string text, Color textColor)
         {
             Label textBlock = this.makeTextBlock(text);
-            this.Initialize(textBlock, -1, false, false);
             textBlock.TextColor = textColor;
+            this.Initialize(textBlock, -1, false, false);
         }
         public TextblockLayout(string text, bool allowCropping, bool allowSplittingWords)
         {
@@ -98,7 +98,6 @@ namespace VisiPlacement
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
             textBlock.Margin = new Thickness(0);
-            textBlock.TextColor = Color.LightGray;
             this.textBlock = textBlock;
 
             this.layouts = new List<LayoutChoice_Set>();
@@ -163,10 +162,12 @@ namespace VisiPlacement
     // The TextBlock_Configurer probably isn't interesting to external callers
     class TextBlock_Configurer : TextItem_Configurer
     {
-        public TextBlock_Configurer(Label Label, TextblockLayout layout)
+        public TextBlock_Configurer(Label label, TextblockLayout layout)
         {
-            this.Label = Label;
+            this.Label = label;
             this.Layout = layout;
+            this.assignedTextColor = label.TextColor;
+            this.assignedBackgroundColor = label.BackgroundColor;
         }
 
         public double Width
@@ -207,6 +208,16 @@ namespace VisiPlacement
                 return this.Label;
             }
         }
+
+        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        {
+            // apply defaults if colors weren't already set
+            if (this.assignedTextColor.A <= 0)
+                this.Label.TextColor = layoutDefaults.TextBlock_Defaults.TextColor;
+            if (this.assignedBackgroundColor.A <= 0)
+                this.Label.BackgroundColor = layoutDefaults.TextBlock_Defaults.BackgroundColor;
+        }
+
         public void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler)
         {
             this.Label.PropertyChanged += handler;
@@ -214,6 +225,8 @@ namespace VisiPlacement
 
         public Label Label;
         public TextblockLayout Layout;
+        public Color assignedTextColor;
+        public Color assignedBackgroundColor;
     }
 
 }

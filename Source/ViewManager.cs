@@ -12,8 +12,9 @@ namespace VisiPlacement
 
         // A ViewManager queries its child LayoutChoice_Set and puts the result into its parent View as needed.
         // That is, the ViewManager is what triggers the querying of layouts in the first place.
-        public ViewManager(ContentView parentView, LayoutChoice_Set childLayout)
+        public ViewManager(ContentView parentView, LayoutChoice_Set childLayout, LayoutDefaults layoutDefaults)
         {
+            this.layoutDefaults = layoutDefaults;
             this.callerHolder.AddParent(this);
             this.SetLayout(childLayout);
 
@@ -165,7 +166,7 @@ namespace VisiPlacement
             this.Reset_ChangeAnnouncement();
 
             // update our actual view
-            this.mainView.Content = this.specificLayout.DoLayout(displaySize);
+            this.mainView.Content = this.specificLayout.DoLayout(displaySize, this.layoutDefaults);
 
             // Inform each layout whose view was reattached, in case they need to restore any state that can only be restored after being reattached (most likely because the view system would overwrite it)
             foreach (SpecificLayout layout in postParents.Values)
@@ -357,6 +358,15 @@ namespace VisiPlacement
             return null;    // not relevant
         }
 
+        public LayoutDefaults LayoutDefaults
+        {
+            set
+            {
+                this.layoutDefaults = value;
+                this.forceRelayout();
+            }
+        }
+
         private ContentView mainView;
         // the layout that we put the caller's layout into
         private ContainerLayout callerHolder = new ContainerLayout();
@@ -366,6 +376,7 @@ namespace VisiPlacement
         private bool even;
         private bool needsRelayout = true;
         private GridLayout debugLayout;
+        private LayoutDefaults layoutDefaults;
     }
 
     // The ManageableView listens for changes in its dimensions and informs its ViewManager

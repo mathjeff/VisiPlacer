@@ -28,21 +28,19 @@ namespace VisiPlacement
             textBox.Effects.Add(effect);
 
             textBox.Margin = new Thickness();
-
             this.TextBox = textBox;
-            textBox.BackgroundColor = Color.LightGray;
             this.TextBox.Margin = new Thickness();
 
-            TextBox_Configurer configurer = new TextBox_Configurer(textBox);
+            this.textBox_configurer = new TextBox_Configurer(textBox);
             double minFontSize = -1;
             foreach (double fontSize in fontSizes)
             {
                 if (minFontSize < 0 || fontSize < minFontSize)
                     minFontSize = fontSize;
-                this.layouts.Add(new TextLayout(configurer, fontSize));
+                this.layouts.Add(new TextLayout(textBox_configurer, fontSize));
             }
             if (minFontSize > 0)
-                this.layouts.Add(new TextLayout(configurer, minFontSize, true));
+                this.layouts.Add(new TextLayout(textBox_configurer, minFontSize, true));
 
             this.SubLayout = LayoutUnion.New(layouts);
        }
@@ -58,6 +56,11 @@ namespace VisiPlacement
             }
         }
 
+        public void SetBackgroundColor(Color backgroundColor)
+        {
+            this.textBox_configurer.SetBackgroundColor(backgroundColor);
+        }
+
         private void Setup_PropertyChange_Listener(string propertyName, View element, PropertyChangedEventHandler callback)
         {
             this.TextBox.PropertyChanged += callback;
@@ -65,6 +68,7 @@ namespace VisiPlacement
 
         private List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
         private Editor TextBox;
+        private TextBox_Configurer textBox_configurer;
     }
 
     // The TextBox_Configurer is an implementation detail that facilitates sharing code between TextblockLayout and TextboxLayout
@@ -74,6 +78,7 @@ namespace VisiPlacement
         public TextBox_Configurer(Editor TextBox)
         {
             this.TextBox = TextBox;
+            this.configuredBackgroundColor = this.TextBox.BackgroundColor;
         }
         public double Width
         {
@@ -127,6 +132,29 @@ namespace VisiPlacement
             this.TextBox.PropertyChanged += handler;
         }
 
+        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        {
+            this.TextBox.TextColor = layoutDefaults.TextBox_Defaults.TextColor;
+            this.defaultBackground = layoutDefaults.TextBox_Defaults.BackgroundColor;
+            this.updateBackgroundWithDefaults();
+        }
+
+        public void SetBackgroundColor(Color backgroundColor)
+        {
+            this.configuredBackgroundColor = backgroundColor;
+            this.updateBackgroundWithDefaults();
+        }
+
+        private void updateBackgroundWithDefaults()
+        {
+            if (this.configuredBackgroundColor.A > 0)
+                this.TextBox.BackgroundColor = this.configuredBackgroundColor;
+            else
+                this.TextBox.BackgroundColor = this.defaultBackground;
+        }
+
         private Editor TextBox;
+        private Color configuredBackgroundColor;
+        private Color defaultBackground;
     }
 }

@@ -76,6 +76,12 @@ namespace VisiPlacement
                 return this.TextBox;
             }
         }
+
+        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        {
+            this.TextBox.TextColor = layoutDefaults.TextBox_Defaults.TextColor;
+            this.TextBox.BackgroundColor = layoutDefaults.TextBox_Defaults.BackgroundColor;
+        }
         public void Add_TextChanged_Handler(PropertyChangedEventHandler handler)
         {
             this.TextBox.PropertyChanged += handler;

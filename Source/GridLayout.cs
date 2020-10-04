@@ -1863,11 +1863,11 @@ namespace VisiPlacement
                 return this.nextDimensionToSet;
             }
         }
-        public override View DoLayout(Size bounds)
+        public override View DoLayout(Size bounds, LayoutDefaults layoutDefaults)
         {
-            return this.DoLayout_Impl(bounds, false);
+            return this.DoLayout_Impl(bounds, layoutDefaults, false);
         }
-        private View DoLayout_Impl(Size bounds, bool dryRun)
+        private View DoLayout_Impl(Size bounds, LayoutDefaults layoutDefaults, bool dryRun)
         {
             int rowNumber, columnNumber;
             double unscaledX, unscaledY;    // paying a lot of attention to rounding;
@@ -1923,7 +1923,7 @@ namespace VisiPlacement
                         MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(unscaledWidth, unscaledHeight, LayoutScore.Minimum);
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
                         totalScore = totalScore.Plus(bestLayout.Score);
-                        subview = bestLayout.DoLayout(new Size(width, height));
+                        subview = bestLayout.DoLayout(new Size(width, height), layoutDefaults);
                     }
                     subviews[columnNumber, rowNumber] = subview;
 
