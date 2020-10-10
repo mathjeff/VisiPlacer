@@ -12,74 +12,87 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, LayoutChoice_Set layout)
         {
-            this.AddLayout(new StackEntry(layout, name, null));
-            return this;
+            return this.AddLayout(new StackEntry(layout, name, null));
         }
         public MenuLayoutBuilder AddLayout(StackEntry entry)
         {
-            this.AddLayout(entry.Name, new ConstantValueProvider<StackEntry>(entry));
-            return this;
+            return this.AddLayout(entry.Name, new ConstantValueProvider<StackEntry>(entry));
         }
         public MenuLayoutBuilder AddLayout(string name, StackEntry entry)
         {
-            this.AddLayout(name, new ConstantValueProvider<StackEntry>(entry));
-            return this;
+            return this.AddLayout(name, new ConstantValueProvider<StackEntry>(entry));
         }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
         {
-            this.layoutNames.Add(name);
-            Button button = this.MakeButton(name, layoutProvider);
+            return this.AddLayout(new ConstantValueProvider<string>(name), layoutProvider);
+        }
+        public MenuLayoutBuilder AddLayout(ValueProvider<string> nameProvider, StackEntry layout)
+        {
+            return this.AddLayout(nameProvider, new ConstantValueProvider<StackEntry>(layout));
+        }
+        public MenuLayoutBuilder AddLayout(ValueProvider<string> nameProvider, ValueProvider<StackEntry> layoutProvider)
+        {
+            this.layoutNameProviders.Add(nameProvider);
+            this.destinationProviders.Add(layoutProvider);
             return this;
         }
 
         public LayoutChoice_Set Build()
         {
-            Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
-            foreach (string name in this.layoutNames)
+            return new MenuLayout(this.layoutNameProviders, this.destinationProviders, this.layoutStack);
+        }
+
+        List<ValueProvider<string>> layoutNameProviders = new List<ValueProvider<string>>();
+        List<ValueProvider<StackEntry>> destinationProviders = new List<ValueProvider<StackEntry>>();
+        LayoutStack layoutStack;
+    }
+
+    class MenuLayout : ContainerLayout
+    {
+        public MenuLayout(List<ValueProvider<string>> buttonNameProviders, List<ValueProvider<StackEntry>> destinationProviders, LayoutStack layoutStack)
+        {
+            this.buttonNameProviders = buttonNameProviders;
+            this.destinationProviders = destinationProviders;
+            this.layoutStack = layoutStack;
+        }
+        public override SpecificLayout GetBestLayout(LayoutQuery query)
+        {
+            if (this.SubLayout == null)
+                this.SubLayout = this.build();
+            for (int i = 0; i < this.buttonNameProviders.Count; i++)
             {
-                LayoutChoice_Set subLayout = this.Get_ButtonLayout_By_Name(name);
-                gridBuilder.AddLayout(subLayout);
+                this.buttons[i].Text = this.buttonNameProviders[i].Get();
             }
-            return gridBuilder.BuildAnyLayout();
+            return base.GetBestLayout(query);
+        }
+        private LayoutChoice_Set build()
+        {
+            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder().Uniform();
+            this.buttons = new List<Button>();
+            this.buttonDestinations = new Dictionary<Button, ValueProvider<StackEntry>>();
+            for (int i = 0; i < this.buttonNameProviders.Count; i++)
+            {
+                Button button = new Button();
+                button.Clicked += Button_Clicked;
+                this.buttons.Add(button);
+                builder.AddLayout(new ButtonLayout(button));
+                ValueProvider<StackEntry> destinationProvider = destinationProviders[i];
+                this.buttonDestinations[button] = destinationProvider;
+            }
+            return builder.BuildAnyLayout();
         }
 
-        private Button MakeButton(string name, ValueProvider<StackEntry> target)
+        private void Button_Clicked(object sender, System.EventArgs e)
         {
-            Button button = new Button();
-            this.buttonsByName[name] = button;
-            button.Clicked += button_Click;
-            ButtonLayout buttonLayout = new ButtonLayout(button, name);
-            this.buttonLayouts_by_button[button] = buttonLayout;
-            this.buttonDestinations[buttonLayout] = target;
-            return button;
-        }
-
-        private void button_Click(object sender, System.EventArgs e)
-        {
-            // find the sender's name
             Button button = sender as Button;
-
-            if (button != null)
-            {
-                button = (Button)sender;
-                // find where the sender wants to go
-                LayoutChoice_Set sourceLayout = this.buttonLayouts_by_button[button];
-                StackEntry destination = this.buttonDestinations[sourceLayout].Get();
-                // update the view
-                this.layoutStack.AddLayout(destination);
-            }
+            ValueProvider<StackEntry> destinationProvider = this.buttonDestinations[button];
+            this.layoutStack.AddLayout(destinationProvider.Get());
         }
 
-        private LayoutChoice_Set Get_ButtonLayout_By_Name(string name)
-        {
-            return this.buttonLayouts_by_button[this.buttonsByName[name]];
-        }
-
-
-        List<string> layoutNames = new List<string>();
-        Dictionary<string, Button> buttonsByName = new Dictionary<string, Button>();
-        Dictionary<Button, LayoutChoice_Set> buttonLayouts_by_button = new Dictionary<Button, LayoutChoice_Set>();
-        Dictionary<LayoutChoice_Set, ValueProvider<StackEntry>> buttonDestinations = new Dictionary<LayoutChoice_Set, ValueProvider<StackEntry>>();
+        List<ValueProvider<string>> buttonNameProviders;
+        List<ValueProvider<StackEntry>> destinationProviders;
+        List<Button> buttons;
+        Dictionary<Button, ValueProvider<StackEntry>> buttonDestinations;
         LayoutStack layoutStack;
     }
 
