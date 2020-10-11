@@ -24,13 +24,13 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
         {
-            return this.AddLayout(new ConstantValueProvider<string>(name), layoutProvider);
+            return this.AddLayout(new ConstantValueProvider<MenuItem>(new MenuItem(name, null)), layoutProvider);
         }
-        public MenuLayoutBuilder AddLayout(ValueProvider<string> nameProvider, StackEntry layout)
+        public MenuLayoutBuilder AddLayout(ValueProvider<MenuItem> nameProvider, StackEntry layout)
         {
             return this.AddLayout(nameProvider, new ConstantValueProvider<StackEntry>(layout));
         }
-        public MenuLayoutBuilder AddLayout(ValueProvider<string> nameProvider, ValueProvider<StackEntry> layoutProvider)
+        public MenuLayoutBuilder AddLayout(ValueProvider<MenuItem> nameProvider, ValueProvider<StackEntry> layoutProvider)
         {
             this.layoutNameProviders.Add(nameProvider);
             this.destinationProviders.Add(layoutProvider);
@@ -42,14 +42,14 @@ namespace VisiPlacement
             return new MenuLayout(this.layoutNameProviders, this.destinationProviders, this.layoutStack);
         }
 
-        List<ValueProvider<string>> layoutNameProviders = new List<ValueProvider<string>>();
+        List<ValueProvider<MenuItem>> layoutNameProviders = new List<ValueProvider<MenuItem>>();
         List<ValueProvider<StackEntry>> destinationProviders = new List<ValueProvider<StackEntry>>();
         LayoutStack layoutStack;
     }
 
     class MenuLayout : ContainerLayout
     {
-        public MenuLayout(List<ValueProvider<string>> buttonNameProviders, List<ValueProvider<StackEntry>> destinationProviders, LayoutStack layoutStack)
+        public MenuLayout(List<ValueProvider<MenuItem>> buttonNameProviders, List<ValueProvider<StackEntry>> destinationProviders, LayoutStack layoutStack)
         {
             this.buttonNameProviders = buttonNameProviders;
             this.destinationProviders = destinationProviders;
@@ -61,25 +61,46 @@ namespace VisiPlacement
                 this.SubLayout = this.build();
             for (int i = 0; i < this.buttonNameProviders.Count; i++)
             {
-                this.buttons[i].Text = this.buttonNameProviders[i].Get();
+                MenuItem menuItem = this.buttonNameProviders[i].Get();
+                this.buttons[i].Text = menuItem.Name;
+                this.subtitles[i].setText(menuItem.Subtitle);
             }
             return base.GetBestLayout(query);
         }
         private LayoutChoice_Set build()
         {
-            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder().Uniform();
+            Vertical_GridLayout_Builder mainBuilder = new Vertical_GridLayout_Builder().Uniform();
             this.buttons = new List<Button>();
+            this.subtitles = new List<TextblockLayout>();
             this.buttonDestinations = new Dictionary<Button, ValueProvider<StackEntry>>();
             for (int i = 0; i < this.buttonNameProviders.Count; i++)
             {
                 Button button = new Button();
                 button.Clicked += Button_Clicked;
                 this.buttons.Add(button);
-                builder.AddLayout(new ButtonLayout(button));
+
+                ButtonLayout buttonLayout = new ButtonLayout(button);
+                TextblockLayout subtitleLayout = new TextblockLayout();
+                subtitleLayout.AlignHorizontally(TextAlignment.Center);
+                subtitleLayout.AlignVertically(TextAlignment.Center);
+                subtitleLayout.ScoreIfEmpty = false;
+                this.subtitles.Add(subtitleLayout);
+
+                BoundProperty_List columnWidths = new BoundProperty_List(2);
+                columnWidths.SetPropertyScale(0, 2);
+                columnWidths.SetPropertyScale(1, 1);
+                columnWidths.BindIndices(0, 1);
+                GridLayout entryGrid = GridLayout.New(new BoundProperty_List(1), columnWidths, LayoutScore.Get_UnCentered_LayoutScore(1));
+                entryGrid.AddLayout(buttonLayout);
+                entryGrid.AddLayout(subtitleLayout);
+
+                LayoutUnion content = new LayoutUnion(entryGrid, buttonLayout);
+                mainBuilder.AddLayout(content);
+
                 ValueProvider<StackEntry> destinationProvider = destinationProviders[i];
                 this.buttonDestinations[button] = destinationProvider;
             }
-            return builder.BuildAnyLayout();
+            return mainBuilder.BuildAnyLayout();
         }
 
         private void Button_Clicked(object sender, System.EventArgs e)
@@ -89,9 +110,10 @@ namespace VisiPlacement
             this.layoutStack.AddLayout(destinationProvider.Get());
         }
 
-        List<ValueProvider<string>> buttonNameProviders;
+        List<ValueProvider<MenuItem>> buttonNameProviders;
         List<ValueProvider<StackEntry>> destinationProviders;
         List<Button> buttons;
+        List<TextblockLayout> subtitles;
         Dictionary<Button, ValueProvider<StackEntry>> buttonDestinations;
         LayoutStack layoutStack;
     }
@@ -112,6 +134,17 @@ namespace VisiPlacement
             return this.value;
         }
         public T value;
+    }
+
+    public class MenuItem
+    {
+        public MenuItem(string name, string subtitle)
+        {
+            this.Name = name;
+            this.Subtitle = subtitle;
+        }
+        public string Name;
+        public string Subtitle;
     }
 
 }
