@@ -7,9 +7,9 @@ namespace VisiPlacement
 {
     public class Choose_LayoutDefaults_Layout : ContainerLayout
     {
-        public event Chose_LayoutDefaultsHandler Chose_LayoutDefaults;
-        public delegate void Chose_LayoutDefaultsHandler(LayoutDefaults defaults);
-        public Choose_LayoutDefaults_Layout(IEnumerable<LayoutDefaults> choices)
+        public event Chose_VisualDefaults_Handler Chose_VisualDefaults;
+        public delegate void Chose_VisualDefaults_Handler(VisualDefaults defaults);
+        public Choose_LayoutDefaults_Layout(IEnumerable<VisualDefaults> choices)
         {
             // title
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
@@ -21,11 +21,11 @@ namespace VisiPlacement
             builder.AddLayout(new TextboxLayout(sampleTextbox));
 
             // individual themes
-            List<LayoutDefaults> choiceList = new List<LayoutDefaults>(choices);
+            List<VisualDefaults> choiceList = new List<VisualDefaults>(choices);
             int numColumns = 2;
             int numRows = (choiceList.Count + 1) / 2;
             GridLayout grid = GridLayout.New(BoundProperty_List.Uniform(numRows), BoundProperty_List.Uniform(numColumns), LayoutScore.Zero);
-            foreach (LayoutDefaults choice in choiceList)
+            foreach (VisualDefaults choice in choiceList)
             {
                 // add a separator so the user can see when it changes
                 OverrideLayoutDefaults_Layout container = new OverrideLayoutDefaults_Layout(choice);
@@ -38,7 +38,7 @@ namespace VisiPlacement
             this.SubLayout = ScrollLayout.New(builder.Build());
         }
 
-        private LayoutChoice_Set makeDemoLayout(LayoutDefaults defaults)
+        private LayoutChoice_Set makeDemoLayout(VisualDefaults defaults)
         {
             Button okButton = new Button();
             okButton.Clicked += OkButton_Clicked;
@@ -50,17 +50,17 @@ namespace VisiPlacement
         private void OkButton_Clicked(object sender, EventArgs e)
         {
             Button button = sender as Button;
-            LayoutDefaults layoutDefaults = this.defaultsByButton[button];
-            if (this.Chose_LayoutDefaults != null)
-                this.Chose_LayoutDefaults.Invoke(layoutDefaults);
+            VisualDefaults layoutDefaults = this.defaultsByButton[button];
+            if (this.Chose_VisualDefaults != null)
+                this.Chose_VisualDefaults.Invoke(layoutDefaults);
         }
 
-        private Dictionary<Button, LayoutDefaults> defaultsByButton = new Dictionary<Button, LayoutDefaults>();
+        private Dictionary<Button, VisualDefaults> defaultsByButton = new Dictionary<Button, VisualDefaults>();
     }
 
     class OverrideLayoutDefaults_Layout : ContainerLayout
     {
-        public OverrideLayoutDefaults_Layout(LayoutDefaults defaultsOverride)
+        public OverrideLayoutDefaults_Layout(VisualDefaults defaultsOverride)
         {
             this.defaultsOverride = defaultsOverride;
         }
@@ -69,21 +69,21 @@ namespace VisiPlacement
         {
             SpecificLayout result = this.SubLayout.GetBestLayout(query);
             if (result != null)
-                result = new OverrideLayoutDefaults_SpecificLayout(result, this.defaultsOverride);
+                result = new OverrideLayoutDefaults_SpecificLayout(result, this.defaultsOverride.ViewDefaults);
             return this.prepareLayoutForQuery(result, query);
         }
 
-        LayoutDefaults defaultsOverride;
+        VisualDefaults defaultsOverride;
     }
 
     class OverrideLayoutDefaults_SpecificLayout : Specific_ContainerLayout
     {
-        public OverrideLayoutDefaults_SpecificLayout(SpecificLayout sublayout, LayoutDefaults defaultsOverride)
+        public OverrideLayoutDefaults_SpecificLayout(SpecificLayout sublayout, ViewDefaults defaultsOverride)
             : base(null, sublayout.Size, LayoutScore.Zero, sublayout, new Thickness(0))
         {
             this.defaultsOverride = defaultsOverride;
         }
-        public override View DoLayout(Size displaySize, LayoutDefaults layoutDefaults)
+        public override View DoLayout(Size displaySize, ViewDefaults layoutDefaults)
         {
             return this.SubLayout.DoLayout(displaySize, this.defaultsOverride);
         }
@@ -92,6 +92,6 @@ namespace VisiPlacement
             return new OverrideLayoutDefaults_SpecificLayout(this.SubLayout, this.defaultsOverride);
         }
 
-        LayoutDefaults defaultsOverride;
+        ViewDefaults defaultsOverride;
     }
 }

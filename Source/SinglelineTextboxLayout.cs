@@ -77,7 +77,7 @@ namespace VisiPlacement
             }
         }
 
-        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
             this.TextBox.TextColor = layoutDefaults.TextBox_Defaults.TextColor;
             this.TextBox.BackgroundColor = layoutDefaults.TextBox_Defaults.BackgroundColor;

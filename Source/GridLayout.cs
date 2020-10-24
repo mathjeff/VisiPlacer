@@ -1863,11 +1863,11 @@ namespace VisiPlacement
                 return this.nextDimensionToSet;
             }
         }
-        public override View DoLayout(Size bounds, LayoutDefaults layoutDefaults)
+        public override View DoLayout(Size bounds, ViewDefaults layoutDefaults)
         {
             return this.DoLayout_Impl(bounds, layoutDefaults, false);
         }
-        private View DoLayout_Impl(Size bounds, LayoutDefaults layoutDefaults, bool dryRun)
+        private View DoLayout_Impl(Size bounds, ViewDefaults layoutDefaults, bool dryRun)
         {
             int rowNumber, columnNumber;
             double unscaledX, unscaledY;    // paying a lot of attention to rounding;

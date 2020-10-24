@@ -94,7 +94,7 @@ namespace VisiPlacement
                 return this.dimensions.Score;
             }
         }
-        public override View DoLayout(Size bounds, LayoutDefaults layoutDefaults)
+        public override View DoLayout(Size bounds, ViewDefaults layoutDefaults)
         {
             if (this.view != null)
             {

@@ -189,7 +189,7 @@ namespace VisiPlacement
             }
         }
 
-        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
             if (this.includeBevel)
             {

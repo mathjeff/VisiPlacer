@@ -209,7 +209,7 @@ namespace VisiPlacement
             }
         }
 
-        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
             // apply defaults if colors weren't already set
             if (this.assignedTextColor.A <= 0)

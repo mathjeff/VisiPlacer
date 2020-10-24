@@ -84,7 +84,7 @@ namespace VisiPlacement
                 return this.picker;
             }
         }
-        public void ApplyDefaults(LayoutDefaults layoutDefaults)
+        public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
             // TODO: should a Picker change colors based on LayoutDefaults?
         }

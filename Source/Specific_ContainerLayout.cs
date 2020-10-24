@@ -30,7 +30,7 @@ namespace VisiPlacement
         }
 
         public bool ChildFillsAvailableSpace { get; set; }
-        public override View DoLayout(Size displaySize, LayoutDefaults layoutDefaults)
+        public override View DoLayout(Size displaySize, ViewDefaults layoutDefaults)
         {
             if (this.subLayout != null)
             {

@@ -18,6 +18,6 @@ namespace VisiPlacement
         View View { get; }
         void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler);
 
-        void ApplyDefaults(LayoutDefaults layoutDefaults);
+        void ApplyDefaults(ViewDefaults layoutDefaults);
     }
 }

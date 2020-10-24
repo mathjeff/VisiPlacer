@@ -12,9 +12,9 @@ namespace VisiPlacement
 
         // A ViewManager queries its child LayoutChoice_Set and puts the result into its parent View as needed.
         // That is, the ViewManager is what triggers the querying of layouts in the first place.
-        public ViewManager(ContentView parentView, LayoutChoice_Set childLayout, LayoutDefaults layoutDefaults)
+        public ViewManager(ContentView parentView, LayoutChoice_Set childLayout, VisualDefaults layoutDefaults)
         {
-            this.layoutDefaults = layoutDefaults;
+            this.visualDefaults = layoutDefaults;
             this.callerHolder.AddParent(this);
             this.SetLayout(childLayout);
 
@@ -166,7 +166,7 @@ namespace VisiPlacement
             this.Reset_ChangeAnnouncement();
 
             // update our actual view
-            this.mainView.Content = this.specificLayout.DoLayout(displaySize, this.layoutDefaults);
+            this.mainView.Content = this.specificLayout.DoLayout(displaySize, this.visualDefaults.ViewDefaults);
 
             // Inform each layout whose view was reattached, in case they need to restore any state that can only be restored after being reattached (most likely because the view system would overwrite it)
             foreach (SpecificLayout layout in postParents.Values)
@@ -358,11 +358,11 @@ namespace VisiPlacement
             return null;    // not relevant
         }
 
-        public LayoutDefaults LayoutDefaults
+        public VisualDefaults VisualDefaults
         {
             set
             {
-                this.layoutDefaults = value;
+                this.visualDefaults = value;
                 this.forceRelayout();
             }
         }
@@ -376,7 +376,7 @@ namespace VisiPlacement
         private bool even;
         private bool needsRelayout = true;
         private GridLayout debugLayout;
-        private LayoutDefaults layoutDefaults;
+        private VisualDefaults visualDefaults;
     }
 
     // The ManageableView listens for changes in its dimensions and informs its ViewManager
