@@ -8,13 +8,14 @@ namespace VisiPlacement
 {
     class MinWidth_LayoutQuery : LayoutQuery
     {
-        public MinWidth_LayoutQuery(double maxWidth, double maxHeight, LayoutScore minScore)
+        public MinWidth_LayoutQuery(double maxWidth, double maxHeight, LayoutScore minScore, LayoutDefaults layoutDefaults)
         {
             this.setMaxWidth(maxWidth);
             this.setMaxHeight(maxHeight);
             this.setMinScore(minScore);
+            this.setLayoutDefaults(layoutDefaults);
         }
-        public MinWidth_LayoutQuery()
+        private MinWidth_LayoutQuery()
         {
         }
 

@@ -8,13 +8,14 @@ namespace VisiPlacement
 {
     public class MaxScore_LayoutQuery : LayoutQuery
     {
-        public MaxScore_LayoutQuery(double maxWidth, double maxHeight, LayoutScore minScore)
+        public MaxScore_LayoutQuery(double maxWidth, double maxHeight, LayoutScore minScore, LayoutDefaults layoutDefaults)
         {
             this.setMaxWidth(maxWidth);
             this.setMaxHeight(maxHeight);
             this.setMinScore(minScore);
+            this.setLayoutDefaults(layoutDefaults);
         }
-        public MaxScore_LayoutQuery()
+        private MaxScore_LayoutQuery()
         {
         }
         public override LayoutQuery Clone()

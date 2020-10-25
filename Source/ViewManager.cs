@@ -132,7 +132,7 @@ namespace VisiPlacement
             // recompute the new desired layout
             // generally we expect the overall score to be positive, so we start by hypothesizing
             // that there exists a layout with positive score, and only checking negative-scoring layouts if no positive-scoring layout is found
-            LayoutQuery query = new MaxScore_LayoutQuery(this.displaySize.Width, this.displaySize.Height, LayoutScore.Zero);
+            LayoutQuery query = new MaxScore_LayoutQuery(this.displaySize.Width, this.displaySize.Height, LayoutScore.Zero, this.visualDefaults.LayoutDefaults);
             DateTime getBestLayout_startDate = DateTime.Now;
             this.specificLayout = this.GetSublayout().GetBestLayout(query);
             if (this.specificLayout == null)
@@ -279,20 +279,19 @@ namespace VisiPlacement
                     int height = j;
 
                     // find the maximum score of all layouts that fit in these dimensions
-                    LayoutQuery maxScoreQuery = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum);
+                    LayoutQuery maxScoreQuery = new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum, this.visualDefaults.LayoutDefaults);
                     SpecificLayout maxScore_layout = layout.GetBestLayout(maxScoreQuery);
                     maxScore_dimensions[i, j] = maxScore_layout.Dimensions;
 
                     
                     // find the layout of minimum width having at least this score
-                    LayoutQuery minWidthQuery = new MinWidth_LayoutQuery();
-                    minWidthQuery = new MinWidth_LayoutQuery(width, height, maxScore_layout.Score);
+                    LayoutQuery minWidthQuery = new MinWidth_LayoutQuery(width, height, maxScore_layout.Score, this.visualDefaults.LayoutDefaults);
                     SpecificLayout minWidth_layout = layout.GetBestLayout(minWidthQuery);
                     if (minWidth_layout != null)
                         minWidth_dimensions[i, j] = minWidth_layout.Dimensions;
 
                     // find the layout of minimum height having at least this score
-                    LayoutQuery minHeightQuery = new MinHeight_LayoutQuery(width, height, maxScore_layout.Score);
+                    LayoutQuery minHeightQuery = new MinHeight_LayoutQuery(width, height, maxScore_layout.Score, this.visualDefaults.LayoutDefaults);
                     SpecificLayout minHeight_layout = layout.GetBestLayout(minHeightQuery);
                     if (minHeight_layout != null)
                         minHeight_dimensions[i, j] = minHeight_layout.Dimensions;

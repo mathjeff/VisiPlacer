@@ -54,11 +54,11 @@ namespace VisiPlacement
         public void CopyFrom(SpecificLayout original)
         {
             base.CopyFrom(original);
-            this.SourceQuery_ForDebugging = original.SourceQuery_ForDebugging;
+            this.SourceQuery = original.SourceQuery;
             this.ancestors = new List<LayoutChoice_Set>(original.ancestors);
         }
         public abstract SpecificLayout Clone();
-        public LayoutQuery SourceQuery_ForDebugging { get; set; }   // the query that generated this SpecificLayout
+        public LayoutQuery SourceQuery { get; set; }   // the query that generated this SpecificLayout
 
         public abstract void Remove_VisualDescendents();
         public virtual void Remove_VisualDescendent(View view)

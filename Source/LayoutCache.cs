@@ -30,7 +30,6 @@ namespace VisiPlacement
             this.true_queryResults = new Dictionary<LayoutQuery, SpecificLayout>(this);
             this.inferred_queryResults = new Dictionary<LayoutQuery, SpecificLayout>(this);
             this.orderedResponses = new List<LayoutQuery_And_Response>();
-            this.sizeZeroQuery = null;
         }
         public LayoutChoice_Set LayoutToManage
         {
@@ -61,7 +60,8 @@ namespace VisiPlacement
             // A layout of size 0 in one dimension doesn't get any points for being nonzero in the other dimension
             if ((query.MaxHeight == 0) != (query.MaxWidth == 0))
             {
-                result = this.GetBestLayout_Quickly(this.SizeZeroQuery);
+                query = query.WithDimensions(0, 0);
+                result = this.GetBestLayout_Quickly(query);
                 if (query.Accepts(result))
                     return result;
                 return null;
@@ -197,15 +197,6 @@ namespace VisiPlacement
                 this.true_queryResults[query] = result;
             }
             return result;
-        }
-        private LayoutQuery SizeZeroQuery
-        {
-            get
-            {
-                if (sizeZeroQuery == null)
-                    sizeZeroQuery = new MaxScore_LayoutQuery(0, 0, LayoutScore.Minimum);
-                return sizeZeroQuery;
-            }
         }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
@@ -529,7 +520,6 @@ namespace VisiPlacement
         Dictionary<LayoutQuery, SpecificLayout> inferred_queryResults; // for a query, gives what we infer must be the sublayout's response
         private LayoutChoice_Set layoutToManage;
         List<LayoutQuery_And_Response> orderedResponses; // all responses that were returned by this LayoutCache that required querying the sublayout as part of their computation
-        private LayoutQuery sizeZeroQuery;
 
         static int numComputations = 0;
         static int numQueries = 0;

@@ -86,7 +86,7 @@ namespace VisiPlacement
                 if (numMatches > 1)
                     ErrorReporter.ReportParadox("Error: the returned layout contained multiple ancestors matching this one");
 
-                layout.SourceQuery_ForDebugging = query;
+                layout.SourceQuery = query;
             }
 
             if (this.parents.Count < 1 && !(this is ViewManager))

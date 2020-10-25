@@ -66,12 +66,6 @@ namespace VisiPlacement
             this.subLayout.AddParent(this);
             this.view = view;
         }
-        private SpecificLayout getMinHeightChildLayout(double width)
-        {
-            LayoutQuery childQuery = new MinHeight_LayoutQuery(width, double.PositiveInfinity, this.requiredChildScore);
-            SpecificLayout childLayout = this.subLayout.GetBestLayout(childQuery);
-            return childLayout;
-        }
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
             // The score of a Specific_ScrollLayout is defined in returnLayout:
@@ -105,13 +99,13 @@ namespace VisiPlacement
             if (query.MinimizesWidth())
             {
                 // For a min-width query, first shrink the width as much as possible before continuing
-                SpecificLayout minWidth_childLayout = this.subLayout.GetBestLayout(new MinWidth_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
+                SpecificLayout minWidth_childLayout = this.subLayout.GetBestLayout(query.New_MinWidth_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
                 if (minWidth_childLayout == null)
                     return null;
                 query = query.WithDimensions(minWidth_childLayout.Width, minWidth_childLayout.Height);
             }
 
-            SpecificLayout childLayout = this.subLayout.GetBestLayout(new MinHeight_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
+            SpecificLayout childLayout = this.subLayout.GetBestLayout(query.New_MinHeight_LayoutQuery(query.MaxWidth, maxChildHeight, this.requiredChildScore));
             if (childLayout == null)
                 return null;
 

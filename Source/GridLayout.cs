@@ -151,13 +151,13 @@ namespace VisiPlacement
                         setWidthBeforeHeight = false;
                 }
             }
-            SemiFixed_GridLayout layout = this.GetBestLayout(query, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
+            SemiFixed_GridLayout layout = this.GetBestLayout(query, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight, query));
             if (layout != null && !query.Accepts(layout))
             {
                 ErrorReporter.ReportParadox("error");
                 LayoutQuery debugQuery = query.Clone();
                 debugQuery.Debug = true;
-                SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight));
+                SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight, query));
             }
             if (query.MinScore.Equals(LayoutScore.Minimum))
             {
@@ -414,9 +414,9 @@ namespace VisiPlacement
 
                         LayoutQuery subQuery;
                         if (semiFixedLayout.NextCoordinateAffectsWidth)
-                            subQuery = new MinWidth_LayoutQuery(maxWidth, maxHeight, minScore);
+                            subQuery = query.New_MinWidth_LayoutQuery(maxWidth, maxHeight, minScore);
                         else
-                            subQuery = new MinHeight_LayoutQuery(maxWidth, maxHeight, minScore);
+                            subQuery = query.New_MinHeight_LayoutQuery(maxWidth, maxHeight, minScore);
                         subQuery.Debug = query.Debug;
 
 
@@ -826,7 +826,7 @@ namespace VisiPlacement
                         if (runAllSubqueries)
                         {
                             // figure out how far the view can shrink while keeping the same score
-                            LayoutQuery query2 = new MinWidth_LayoutQuery(queryWidth, queryHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
+                            LayoutQuery query2 = sourceQuery.New_MinWidth_LayoutQuery(queryWidth, queryHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
                             query2.Debug = sourceQuery.Debug;
 
                             layout2 = subLayout.GetBestLayout(query2);
@@ -933,7 +933,7 @@ namespace VisiPlacement
                         if (runAllSubqueries)
                         {
                             // figure out how far the view can shrink while keeping the same score
-                            LayoutQuery query2 = new MinHeight_LayoutQuery(queryWidth, queryHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
+                            LayoutQuery query2 = sourceQuery.New_MinHeight_LayoutQuery(queryWidth, queryHeight, bestLayout.Score.Minus(eachAllowedScoreDecrease));
                             query2.Debug = sourceQuery.Debug;
                             //query2.ProposedSolution_ForDebugging = sourceQuery.ProposedSolution_ForDebugging;
 
@@ -1099,6 +1099,7 @@ namespace VisiPlacement
                     }
                 }
             }
+            LayoutQuery sourceQuery = layout.SourceQuery;
             LayoutScore newScore;
             // update each row and column
             for (i = 0; i < groupRowHeights.Count; i++)
@@ -1113,7 +1114,7 @@ namespace VisiPlacement
                     if (newScore.CompareTo(previousScore) < 0)
                     {
                         ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
+                        LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
                         query.Debug = true;
                         query.ProposedSolution_ForDebugging = previousLayout;
                         this.GetBestLayout(query);
@@ -1139,7 +1140,7 @@ namespace VisiPlacement
                         ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                         if (!enableDebugging)
                             this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
+                        LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
                         query.Debug = true;
                         query.ProposedSolution_ForDebugging = previousLayout;
                         this.GetBestLayout(query);
@@ -1167,7 +1168,7 @@ namespace VisiPlacement
                 ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
                 if (!enableDebugging)
                     this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
-                MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
+                LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
                 query.Debug = true;
                 query.ProposedSolution_ForDebugging = previousLayout;
                 this.GetBestLayout(query);
@@ -1316,21 +1317,22 @@ namespace VisiPlacement
     // tells the precise locations of some gridlines in a GridLayout
     class SemiFixed_GridLayout : SpecificLayout
     {
-        public SemiFixed_GridLayout()
+        private SemiFixed_GridLayout()
         {
             this.Initialize();
         }
-        public SemiFixed_GridLayout(bool setWidthBeforeHeight)
+        public SemiFixed_GridLayout(bool setWidthBeforeHeight, LayoutQuery sourceQuery)
         {
             this.Initialize();
             this.setWidthBeforeHeight = setWidthBeforeHeight;
+            this.SourceQuery = sourceQuery;
         }
         public SemiFixed_GridLayout(SemiFixed_GridLayout original)
         {
             this.Initialize();
             this.CopyFrom(original);
         }
-        public SemiFixed_GridLayout(LayoutChoice_Set[,] elements, BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, bool setWidthBeforeHeight)
+        public SemiFixed_GridLayout(LayoutChoice_Set[,] elements, BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, bool setWidthBeforeHeight, LayoutQuery sourceQuery)
         {
             this.Initialize();
             this.elements = elements;
@@ -1341,6 +1343,7 @@ namespace VisiPlacement
             this.columnWidths = new BoundProperty_List(columnWidths);
             this.bonusScore = bonusScore;
             this.setWidthBeforeHeight = setWidthBeforeHeight;
+            this.SourceQuery = sourceQuery;
         }
         public override SpecificLayout Clone()
         {
@@ -1602,7 +1605,7 @@ namespace VisiPlacement
             LayoutChoice_Set layout = this.elements[columnIndex, rowIndex];
             SpecificLayout specificLayout = null;
             if (layout != null)
-                specificLayout = layout.GetBestLayout(new MaxScore_LayoutQuery(width, height, LayoutScore.Minimum));
+                specificLayout = layout.GetBestLayout(this.SourceQuery.New_MaxScore_LayoutQuery(width, height, LayoutScore.Minimum));
             this.sub_specificLayouts[columnIndex, rowIndex] = new SublayoutResponse(specificLayout, new Size(width, height));
             return specificLayout;
         }
@@ -1705,7 +1708,7 @@ namespace VisiPlacement
                     }
 
                     // loosen the score requirements slightly in case of rounding error
-                    MaxScore_LayoutQuery subQuery = new MaxScore_LayoutQuery(layoutAndSize.Size.Width, layoutAndSize.Size.Height, averageRequiredExtraScore);
+                    LayoutQuery subQuery = query.New_MaxScore_LayoutQuery(layoutAndSize.Size.Width, layoutAndSize.Size.Height, averageRequiredExtraScore);
                     SpecificLayout result = layoutAndSize.Layout.GetBestLayout(subQuery);
                     if (result != null)
                         currentScore = currentScore.Plus(result.Score);
@@ -1920,7 +1923,7 @@ namespace VisiPlacement
                     View subview = null;
                     if (subLayout != null)
                     {
-                        MaxScore_LayoutQuery query = new MaxScore_LayoutQuery(unscaledWidth, unscaledHeight, LayoutScore.Minimum);
+                        LayoutQuery query = this.SourceQuery.New_MaxScore_LayoutQuery(unscaledWidth, unscaledHeight, LayoutScore.Minimum);
                         SpecificLayout bestLayout = subLayout.GetBestLayout(query);
                         totalScore = totalScore.Plus(bestLayout.Score);
                         subview = bestLayout.DoLayout(new Size(width, height), layoutDefaults);

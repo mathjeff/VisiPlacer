@@ -90,6 +90,7 @@ namespace VisiPlacement
             this.setMaxWidth(original.maxWidth);
             this.setMaxHeight(original.maxHeight);
             this.setMinScore(original.minScore);
+            this.setLayoutDefaults(original.layoutDefaults);
             if (original.Debug)
                 this.Debug = true;
             this.Cost = original.Cost;
@@ -179,6 +180,19 @@ namespace VisiPlacement
                 return this.minScore;
             }
         }
+
+        public LayoutQuery New_MaxScore_LayoutQuery(double width, double height, LayoutScore layoutScore)
+        {
+            return new MaxScore_LayoutQuery(width, height, layoutScore, this.layoutDefaults);
+        }
+        public LayoutQuery New_MinWidth_LayoutQuery(double width, double height, LayoutScore layoutScore)
+        {
+            return new MinWidth_LayoutQuery(width, height, layoutScore, this.layoutDefaults);
+        }
+        public LayoutQuery New_MinHeight_LayoutQuery(double width, double height, LayoutScore layoutScore)
+        {
+            return new MinHeight_LayoutQuery(width, height, layoutScore, this.layoutDefaults);
+        }
         protected void setMinScore(LayoutScore value)
         {
             this.minScore = value;
@@ -191,6 +205,10 @@ namespace VisiPlacement
                     System.Diagnostics.Debug.WriteLine("Considering cropping: " + this);
                 }
             }*/
+        }
+        protected void setLayoutDefaults(LayoutDefaults defaults)
+        {
+            this.layoutDefaults = defaults;
         }
         public bool Debug { get; set; } // whether we want to do extra work for this query to ensure the results are correct
         public SpecificLayout ProposedSolution_ForDebugging 
@@ -206,7 +224,7 @@ namespace VisiPlacement
                 {
                     ErrorReporter.ReportParadox("Error: attempted to provide an invalid debugging solution");
                     // go back and run the original query again
-                    LayoutQuery debugQuery = proposedSolution.SourceQuery_ForDebugging;
+                    LayoutQuery debugQuery = proposedSolution.SourceQuery;
                     if (debugQuery != null)
                     {
                         debugQuery = debugQuery.Clone();
@@ -261,6 +279,7 @@ namespace VisiPlacement
         }
         private double maxWidth, maxHeight;
         private LayoutScore minScore;
+        private LayoutDefaults layoutDefaults;
         private SpecificLayout proposedSolution_forDebugging;
         public int Cost { get; set; }
         public int debugID;
