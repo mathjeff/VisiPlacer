@@ -120,6 +120,12 @@ namespace VisiPlacement
             get;
             set;
         }
+        public string FontName
+        {
+            get { return this.TextBox.FontFamily; }
+            set { this.TextBox.FontFamily = value; }
+        }
+
         public View View
         {
             get

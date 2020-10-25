@@ -201,7 +201,18 @@ namespace VisiPlacement
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
             if (this.true_queryResults == null)
+            {
                 this.Initialize();
+            }
+            else
+            {
+                if (this.layoutDefaults != query.LayoutDefaults)
+                {
+                    // If this query has different LayoutDefaults than previously, then our cache is invalid
+                    this.Initialize();
+                }
+            }
+            this.layoutDefaults = query.LayoutDefaults;
             numQueries++;
             if (numQueries % 10000 == 0)
             {
@@ -518,8 +529,10 @@ namespace VisiPlacement
 
         Dictionary<LayoutQuery, SpecificLayout> true_queryResults; // for a query, gives the sublayout's response
         Dictionary<LayoutQuery, SpecificLayout> inferred_queryResults; // for a query, gives what we infer must be the sublayout's response
-        private LayoutChoice_Set layoutToManage;
+        LayoutChoice_Set layoutToManage;
         List<LayoutQuery_And_Response> orderedResponses; // all responses that were returned by this LayoutCache that required querying the sublayout as part of their computation
+        // this.ayoutDefaults is the LayoutDefaults of the most recent query. We could store a map of each LayoutDefaults, but in practice, probably only one is used
+        LayoutDefaults layoutDefaults;
 
         static int numComputations = 0;
         static int numQueries = 0;

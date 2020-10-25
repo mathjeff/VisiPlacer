@@ -17,7 +17,8 @@ namespace VisiPlacement
             builder.AddLayout(new TextblockLayout("Choose a theme!"));
 
             Editor sampleTextbox = new Editor();
-            sampleTextbox.Text = "Sample editable text";
+            // There's a bug in Uniforms.Misc where it saves the first font you ask about and always returns sizes for that font
+            sampleTextbox.Text = "Restart after changing fonts";
             builder.AddLayout(new TextboxLayout(sampleTextbox));
 
             // individual themes
@@ -67,6 +68,7 @@ namespace VisiPlacement
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
+            query = query.WithDefaults(this.defaultsOverride.LayoutDefaults);
             SpecificLayout result = this.SubLayout.GetBestLayout(query);
             if (result != null)
                 result = new OverrideLayoutDefaults_SpecificLayout(result, this.defaultsOverride.ViewDefaults);

@@ -185,7 +185,7 @@ namespace VisiPlacement
             get { return this.Label.FontSize; }
             set { this.Label.FontSize = value; }
         }
-        public String ModelledText
+        public string ModelledText
         {
             get
             {
@@ -196,10 +196,15 @@ namespace VisiPlacement
                 this.Layout.ModelledText = value;
             }
         }
-        public String DisplayText
+        public string DisplayText
         {
             get { return this.Label.Text; }
             set { this.Label.Text = value; }
+        }
+        public string FontName
+        {
+            get { return this.Label.FontFamily; }
+            set { this.Label.FontFamily = value; }
         }
         public View View
         {

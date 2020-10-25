@@ -69,6 +69,11 @@ namespace VisiPlacement
             get { return this.TextBox.Text; }
             set { this.TextBox.Text = value; }
         }
+        public string FontName
+        {
+            get { return this.TextBox.FontFamily; }
+            set { this.TextBox.FontFamily = value; }
+        }
         public View View
         {
             get

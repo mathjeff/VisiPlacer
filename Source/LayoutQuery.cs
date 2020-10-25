@@ -76,6 +76,12 @@ namespace VisiPlacement
             result.setMinScore(score);
             return result;
         }
+        public LayoutQuery WithDefaults(LayoutDefaults defaults)
+        {
+            LayoutQuery result = this.Clone();
+            result.setLayoutDefaults(defaults);
+            return result;
+        }
         // returns a stricter query given that this example is one of the options
         public abstract LayoutQuery OptimizedUsingExample(SpecificLayout example);
         // returns a stricter query that won't even be satisfied by this example
@@ -180,6 +186,13 @@ namespace VisiPlacement
                 return this.minScore;
             }
         }
+        public LayoutDefaults LayoutDefaults
+        {
+            get
+            {
+                return this.layoutDefaults;
+            }
+        }
 
         public LayoutQuery New_MaxScore_LayoutQuery(double width, double height, LayoutScore layoutScore)
         {
@@ -198,13 +211,6 @@ namespace VisiPlacement
             this.minScore = value;
             if (!this.Accepts(this.proposedSolution_forDebugging))
                 this.proposedSolution_forDebugging = null;
-            /*if (this.maxWidth > 0 && this.maxHeight > 0)
-            {
-                if (this.minScore.CompareTo(LayoutScore.Get_CutOff_LayoutScore(1)) <= 0 && this.minScore.CompareTo(LayoutScore.Minimum) > 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Considering cropping: " + this);
-                }
-            }*/
         }
         protected void setLayoutDefaults(LayoutDefaults defaults)
         {
@@ -256,6 +262,8 @@ namespace VisiPlacement
             if (query1.MinimizesWidth() != query2.MinimizesWidth())
                 return false;
             if (query1.MaximizesScore() != query2.MaximizesScore())
+                return false;
+            if (query1.layoutDefaults != query2.layoutDefaults)
                 return false;
             return true;
         }

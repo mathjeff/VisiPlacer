@@ -181,6 +181,11 @@ namespace VisiPlacement
         }
 
         public string DisplayText { get; set; }
+        public string FontName
+        {
+            get { return this.button.FontFamily; }
+            set { this.button.FontFamily = value; }
+        }
         public View View
         {
             get

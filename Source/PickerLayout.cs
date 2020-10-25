@@ -77,6 +77,11 @@ namespace VisiPlacement
                 this.picker.SelectedItem = value;
             }
         }
+        public string FontName
+        {
+            get { return this.picker.FontFamily; }
+            set { this.picker.FontFamily = value; }
+        }
         public View View
         {
             get

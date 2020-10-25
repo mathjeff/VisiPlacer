@@ -7,7 +7,7 @@ namespace VisiPlacement
 {
     public class Specific_TextLayout : SpecificLayout
     {
-        public Specific_TextLayout(TextItem_Configurer textItem, double width, double height, double fontSize, LayoutScore score, String displayText, Size desiredSize)
+        public Specific_TextLayout(TextItem_Configurer textItem, double width, double height, double fontSize, LayoutScore score, string displayText, Size desiredSize, string fontName)
         {
             this.textItem = textItem;
             this.width = width;
@@ -16,7 +16,7 @@ namespace VisiPlacement
             this.score = score;
             this.DisplayText = displayText;
             this.DesiredSizeForDebugging = desiredSize;
-
+            this.FontName = fontName;
         }
         // sets the properties on the textblock as required by this layout
         public void PrepareTextview()
@@ -52,10 +52,11 @@ namespace VisiPlacement
             get { return this.textItem.View; }
         }
         public bool Cropped { get; set; }
-        public String DisplayText { get; set; }
+        public string DisplayText { get; set; }
+        public string FontName { get; set; }
         public Size DesiredSizeForDebugging { get; set; }
 
-        public override View DoLayout(Size displaySize, ViewDefaults layoutDefaults)
+        public override View DoLayout(Size displaySize, ViewDefaults viewDefaults)
         {
             if (displaySize.Width != this.textItem.Width)
                 this.textItem.Width = displaySize.Width;
@@ -65,7 +66,12 @@ namespace VisiPlacement
                 this.textItem.FontSize = this.fontSize;
             if (this.textItem.DisplayText != this.DisplayText)
                 this.textItem.DisplayText = this.DisplayText;
-            this.textItem.ApplyDefaults(layoutDefaults);
+            this.textItem.ApplyDefaults(viewDefaults);
+            if (this.textItem.FontName != this.FontName)
+            {
+                this.textItem.FontName = this.FontName;
+                this.textItem.DisplayText = this.textItem.DisplayText + " ";
+            }
             return this.textItem.View;
         }
 
@@ -82,11 +88,12 @@ namespace VisiPlacement
             this.height = original.height;
             this.fontSize = original.fontSize;
             this.textItem = original.textItem;
+            this.FontName = original.FontName;
         }
 
         public override SpecificLayout Clone()
         {
-            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score, this.DisplayText, this.DesiredSizeForDebugging);
+            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score, this.DisplayText, this.DesiredSizeForDebugging, this.FontName);
             return clone;
         }
 

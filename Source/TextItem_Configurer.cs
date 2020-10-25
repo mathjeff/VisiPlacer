@@ -12,12 +12,13 @@ namespace VisiPlacement
         // The text that this text box appears to contain, from the perspective of a user.
         // If a placeholder is present, this may be the placeholder
         // This also doesn't necessarily contain extra newlines when the line wraps
-        String ModelledText { get; }
+        string ModelledText { get; }
         // The text that we put into the TextBox.Text property, which may contain extra linebreaks
-        String DisplayText { get; set; }
+        string DisplayText { get; set; }
         View View { get; }
+        string FontName { get; set; }
         void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler);
+        void ApplyDefaults(ViewDefaults viewDefaults);
 
-        void ApplyDefaults(ViewDefaults layoutDefaults);
     }
 }

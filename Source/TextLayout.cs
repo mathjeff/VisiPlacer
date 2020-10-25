@@ -62,10 +62,6 @@ namespace VisiPlacement
                 return result;
             }
         }
-        private TextFormatter MakeTextFormatter()
-        {
-            return TextFormatter.Impl;
-        }
 
         public static TimeSpan TextTime = new TimeSpan();
         public static int NumMeasures = 0;
@@ -108,7 +104,7 @@ namespace VisiPlacement
         {
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
-            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight), query.Debug);
+            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight), query.Debug, query.LayoutDefaults.TextBox_Defaults.FontName);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
             return null;
@@ -119,10 +115,10 @@ namespace VisiPlacement
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
             // first check whether this query will accept a cropped layout
-            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0), query.Debug);
+            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0), query.Debug, query.LayoutDefaults.TextBox_Defaults.FontName);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
-            specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight), query.Debug);
+            specificLayout = this.ComputeDimensions(new Size(query.MaxWidth, query.MaxHeight), query.Debug, query.LayoutDefaults.TextBox_Defaults.FontName);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout.GetBestLayout(query), query);
             return null;
@@ -133,7 +129,7 @@ namespace VisiPlacement
             if (query.MaxWidth < 0 || query.MaxHeight < 0)
                 return null;
             // first check whether this query will accept a cropped layout
-            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0), query.Debug);
+            Specific_TextLayout specificLayout = this.ComputeDimensions(new Size(0, 0), query.Debug, query.LayoutDefaults.TextBox_Defaults.FontName);
             if (query.Accepts(specificLayout))
                 return this.prepareLayoutForQuery(specificLayout, query);
             // not satisfied with cropping so we need to try harder to do a nice-looking layout
@@ -146,7 +142,7 @@ namespace VisiPlacement
         // computes the layout dimensions of the layout of minimum width such that there is no cropping
         private Specific_TextLayout Get_NonCropping_MinWidthLayout(LayoutQuery query)
         {
-            Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity), query.Debug);
+            Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity), query.Debug, query.LayoutDefaults.TextBox_Defaults.FontName);
             double pixelSize = 1;
             double maxRejectedWidth = 0;
             int numIterations = 0;
@@ -156,7 +152,7 @@ namespace VisiPlacement
             {
                 numIterations++;
                 // given the current width, compute the required height
-                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), query.Debug);
+                Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), query.Debug, query.LayoutDefaults.TextBox_Defaults.FontName);
                 if (newDimensions.Height <= query.MaxHeight && query.MinScore.CompareTo(newDimensions.Score) <= 0)
                 {
                     // this layout fits in the required dimensions
@@ -192,7 +188,7 @@ namespace VisiPlacement
                     if (firstIteration)
                     {
                         // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
-                        Size desiredSize = this.formatText(maxWidth, query.Debug, this.FontSize).Size;
+                        Size desiredSize = this.formatText(maxWidth, query.Debug, this.FontSize, this.fontName).Size;
                         if (desiredSize.Width > maxWidth)
                             maxRejectedWidth = desiredSize.Width - pixelSize / 2;
                         maxWidth = desiredSize.Width;
@@ -220,8 +216,14 @@ namespace VisiPlacement
             return bestAllowedDimensions;
         }
 
-        private FormattedParagraph formatText(double maxWidth, bool debug, double fontSize)
+        private FormattedParagraph formatText(double maxWidth, bool debug, double fontSize, string fontName)
         {
+            // invalidate cache if font name changed
+            if (fontName != this.fontName)
+            {
+                this.layoutsByWidth = new Dictionary<double, FormattedParagraph>();
+                this.fontName = fontName;
+            }
             // check the cache
             FormattedParagraph formatted;
             if (this.layoutsByWidth.TryGetValue(maxWidth, out formatted))
@@ -231,7 +233,7 @@ namespace VisiPlacement
                 return formatted;
             }
             // recompute and save into cache
-            formatted = this.TextFormatter.FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug, fontSize);
+            formatted = this.GetTextFormatter(fontName).FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug, fontSize);
             if (this.textItem_text == null || this.textItem_text == "")
                 formatted.Text = this.textItem_text;
             this.layoutsByWidth[maxWidth] = formatted;
@@ -239,12 +241,12 @@ namespace VisiPlacement
         }
 
         // compute the best dimensions fitting within the given size
-        private Specific_TextLayout ComputeDimensions(Size availableSize, bool debug)
+        private Specific_TextLayout ComputeDimensions(Size availableSize, bool debug, string fontName)
         {
             DateTime start = DateTime.Now;
             numComputations++;
 
-            FormattedParagraph formattedText = this.formatText(availableSize.Width, debug, this.FontSize);
+            FormattedParagraph formattedText = this.formatText(availableSize.Width, debug, this.FontSize, fontName);
             Size desiredSize = formattedText.Size;
             if (desiredSize.Width < 0 || desiredSize.Height < 0)
             {
@@ -275,7 +277,7 @@ namespace VisiPlacement
             }
             Specific_TextLayout specificLayout = new Specific_TextLayout(this.TextItem_Configurer, width, height, this.FontSize, 
                 this.ComputeScore(desiredSize, availableSize, this.TextToFit, formattedText.Text), 
-                formattedText.Text, desiredSize);
+                formattedText.Text, desiredSize, this.fontName);
             specificLayout.Cropped = cropped;
 
             // diagnostics
@@ -339,13 +341,11 @@ namespace VisiPlacement
         }
 
 
-        public TextFormatter TextFormatter
+        public TextFormatter GetTextFormatter(string fontName)
         {
-            get
-            {
-                this.textFormatter = this.MakeTextFormatter();
-                return this.textFormatter;
-            }
+            if (fontName == null)
+                fontName = "";
+            return TextFormatter.GetForFontName(fontName);
         }
         public LayoutScore BestPossibleScore
         {
@@ -402,10 +402,10 @@ namespace VisiPlacement
             {
                 View view = this.TextItem_Configurer.View;
                 Size currentSize = new Size(view.Width, view.Height);
-                Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, false);
+                Specific_TextLayout layoutForCurrentText = this.ComputeDimensions(currentSize, false, this.fontName);
                 this.TextItem_Text = this.Text;
                 this.layoutsByWidth = new Dictionary<double, FormattedParagraph>();
-                Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize, false);
+                Specific_TextLayout layoutForNewText = this.ComputeDimensions(currentSize, false, this.fontName);
                 LayoutScore oldScore = layoutForCurrentText.Score;
                 LayoutScore newScore = layoutForNewText.Score;
                 if (!oldScore.Equals(newScore))
@@ -463,6 +463,7 @@ namespace VisiPlacement
         private LayoutScore bonusScore;
         private String textItem_text;
         private Dictionary<double, FormattedParagraph> layoutsByWidth = new Dictionary<double, FormattedParagraph>();
+        string fontName;
 
     }
 
@@ -478,17 +479,21 @@ namespace VisiPlacement
     {
         private static TextFormatterType textFormatterType = TextFormatterType.UNDECIDED;
 
-        private static TextFormatter formatterImpl = new TextFormatter();
-        public static TextFormatter Impl
+        private static Dictionary<string, TextFormatter> formattersByFontName = new Dictionary<string, TextFormatter>();
+        public static TextFormatter GetForFontName(string fontName)
         {
-            get
-            {
-                return formatterImpl;
-            }
+            if (!formattersByFontName.ContainsKey(fontName))
+                formattersByFontName[fontName] = new TextFormatter(fontName);
+            return formattersByFontName[fontName];
         }
         public void ChooseType(TextFormatterType formatterType)
         {
             textFormatterType = formatterType;
+        }
+
+        public TextFormatter(string fontName)
+        {
+            this.fontName = fontName;
         }
 
         // Tells the required size for a block of text that's supposed to fit it into a column of the given width
@@ -683,7 +688,7 @@ namespace VisiPlacement
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
             {
                 // If we get here, then Uniforms.Misc returns an acceptable answer and we can just directly use it
-                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize);
+                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize, this.fontName);
             }
             if (textFormatterType == TextFormatterType.UNIFORMS_MISC_ROUND_UP)
             {
@@ -691,7 +696,7 @@ namespace VisiPlacement
                 // by measuring a larger font and rescaling it down
                 double multiplier = 64;
                 double measureFont = fontSize * multiplier;
-                Size measuredSize = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, measureFont);
+                Size measuredSize = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, measureFont, this.fontName);
                 return new Size(measuredSize.Width / multiplier, measuredSize.Height / multiplier);
             }
             // If we get here then Uniforms.Misc isn't supported on the platform and we'll just do our best
@@ -747,6 +752,7 @@ namespace VisiPlacement
         // Dictionary<FontSize, Dictionary<Text, MeasuredSize>>
         private Dictionary<double, Dictionary<String, Size>> sizesCache = new Dictionary<double, Dictionary<string, Size>>();
         private Dictionary<double, SKPaint> textBlocks = new Dictionary<double, SKPaint>();
+        private string fontName;
     }
 
     public class FormattedParagraph
