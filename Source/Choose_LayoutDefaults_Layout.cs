@@ -18,7 +18,7 @@ namespace VisiPlacement
 
             Editor sampleTextbox = new Editor();
             // There's a bug in Uniforms.Misc where it saves the first font you ask about and always returns sizes for that font
-            sampleTextbox.Text = "Restart after changing fonts";
+            sampleTextbox.Text = "Sample editable text";
             builder.AddLayout(new TextboxLayout(sampleTextbox));
 
             // individual themes
