@@ -1,17 +1,17 @@
 
-<Project>
+<Project>  
   <name>VisiPlacer</name>
   <source><GitRepo/></source>
   <version><GitVersion/></version>
-  <dependencies>
-    <DependencyList>
-      <item>
+  <dependencies>  
+    <DependencyList>  
+      <item>  
         <name>StatList</name>
         <version>ece5ba10012ccf00589197bb292d2e6c3c247360</version>
-        <syncher>
-          <Git>
-            <origin>
-              <Url>
+        <syncher>  
+          <Git>  
+            <origin>  
+              <Url>  
                 <server>https://github.com</server>
                 <path>mathjeff/StatList</path>
               </Url>
@@ -19,13 +19,14 @@
           </Git>
         </syncher>
       </item>
-      <item>
+      
+      <item>  
         <name>Uniforms-Misc</name>
-        <version>e8c21d3290c71c171733285b64aa1130695340f2</version>
-        <syncher>
-          <Git>
-            <origin>
-              <Url>
+        <version>81e904f37b383682d401006cafab7c5bb4e98ca8</version>
+        <syncher>  
+          <Git>  
+            <origin>  
+              <Url>  
                 <server>https://github.com</server>
                 <path>mathjeff/Uniforms-Misc</path>
               </Url>
