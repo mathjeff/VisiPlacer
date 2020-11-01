@@ -39,16 +39,16 @@ namespace VisiPlacement
             bool isButtonColorSet = button.BackgroundColor.A > 0;
             LayoutChoice_Set sublayout;
             this.buttonBackground = new ContentView();
+            ButtonConfigurer buttonConfigurer = new ButtonConfigurer(button, includeBevel, this.buttonBackground);
             if (fontSize > 0)
             {
                 if (allowCropping)
-                    sublayout = TextLayout.New_Croppable(new ButtonConfigurer(button, includeBevel, this.buttonBackground), fontSize, scoreIfEmpty);
+                    sublayout = TextLayout.New_Croppable(buttonConfigurer, fontSize, scoreIfEmpty);
                 else
-                    sublayout = new TextLayout(new ButtonConfigurer(button, includeBevel, this.buttonBackground), fontSize, scoreIfEmpty);
+                    sublayout = new TextLayout(buttonConfigurer, fontSize, scoreIfEmpty);
             }
             else
             {
-                ButtonConfigurer buttonConfigurer = new ButtonConfigurer(button, includeBevel, this.buttonBackground);
                 List<LayoutChoice_Set> sublayoutOptions = new List<LayoutChoice_Set>(3);
                 if (allowCropping)
                 {
@@ -109,15 +109,23 @@ namespace VisiPlacement
             Effect effect = Effect.Resolve("VisiPlacement.ButtonEffect");
             button.Effects.Add(effect);
 
-            this.button = button;
+            this.buttonConfigurer = buttonConfigurer;
         }
 
         public void setText(string text)
         {
-            this.button.Text = text;
+            this.buttonConfigurer.ModelledText = text;
+        }
+        public void setTextColor(Color color)
+        {
+            this.buttonConfigurer.TextColor = color;
+        }
+        public void resetTextColor()
+        {
+            this.buttonConfigurer.TextColor = null;
         }
 
-        private Button button;
+        private ButtonConfigurer buttonConfigurer;
         private ContentView buttonBackground;
     }
 
@@ -196,16 +204,21 @@ namespace VisiPlacement
 
         public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
-            if (this.includeBevel)
+            if (this.TextColor != null)
             {
-                this.button.TextColor = layoutDefaults.ButtonWithBevel_Defaults.TextColor;
-                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.BackgroundColor;
+                this.button.TextColor = this.TextColor.Value;
             }
             else
             {
-                this.button.TextColor = layoutDefaults.ButtonWithoutBevel_Defaults.TextColor;
-                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithoutBevel_Defaults.BackgroundColor;
+                if (this.includeBevel)
+                    this.button.TextColor = layoutDefaults.ButtonWithBevel_Defaults.TextColor;
+                else
+                    this.button.TextColor = layoutDefaults.ButtonWithoutBevel_Defaults.TextColor;
             }
+            if (this.includeBevel)
+                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.BackgroundColor;
+            else
+                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithoutBevel_Defaults.BackgroundColor;
         }
 
         public void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler)
@@ -213,6 +226,7 @@ namespace VisiPlacement
             this.button.PropertyChanged += handler;
         }
         public Button button;
+        public Color? TextColor;
         bool includeBevel;
         ContentView buttonBackground;
 
