@@ -70,7 +70,7 @@ namespace VisiPlacement
             if (this.textItem.FontName != this.FontName)
             {
                 this.textItem.FontName = this.FontName;
-                this.textItem.DisplayText = this.textItem.DisplayText + " ";
+                this.textItem.DisplayText = this.textItem.DisplayText;
             }
             return this.textItem.View;
         }
