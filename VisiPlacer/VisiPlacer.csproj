@@ -5,14 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="1.68.0" />
     <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Uniforms-Misc\Uniforms.Misc\Uniforms.Misc.csproj" />
+    <ProjectReference Include="..\..\StatList\StatList.csproj" />
     <ProjectReference Include="deps\StatList\StatList.csproj" Condition="Exists(deps)" />
-    <ProjectReference Include="..\StatList\StatList.csproj" Condition="!Exists(deps)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -78,16 +78,24 @@ namespace VisiPlacement
         {
             if (Device.RuntimePlatform == Device.Android)
             {
-                // on Android, we use a long path for specifying the font name, something like myfile.ttf#myfontname
+                // on Android, we have to specify the filename and the font name, something like myfile.ttf#myfontname
                 this.fontName = name;
             }
             else
             {
-                // On other operating systems, we just use the name of the font
-                int poundIndex = name.IndexOf("#");
-                if (poundIndex >= 0)
-                    name = name.Substring(poundIndex);
-                this.fontName = name;
+                if (Device.RuntimePlatform == Device.UWP)
+                {
+                    // On Windows, we have to give the full filepath
+                    this.fontName = "/Assets/Fonts/" + name;
+                }
+                else
+                {
+                    // On other operating systems, we just use the name of the font
+                    int poundIndex = name.IndexOf('#');
+                    if (poundIndex >= 0)
+                        name = name.Substring(poundIndex + 1);
+                    this.fontName = name;
+                }
             }
             return this;
         }

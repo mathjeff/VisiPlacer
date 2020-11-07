@@ -20,20 +20,6 @@
         </syncher>
       </item>
       
-      <item>  
-        <name>Uniforms-Misc</name>
-        <version>81e904f37b383682d401006cafab7c5bb4e98ca8</version>
-        <syncher>  
-          <Git>  
-            <origin>  
-              <Url>  
-                <server>https://github.com</server>
-                <path>mathjeff/Uniforms-Misc</path>
-              </Url>
-            </origin>
-          </Git>
-        </syncher>
-      </item>
     </DependencyList>
   </dependencies>
 </Project>

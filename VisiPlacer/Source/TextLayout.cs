@@ -1,5 +1,4 @@
-﻿using SkiaSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -477,18 +476,12 @@ namespace VisiPlacement
 
     public class TextFormatter
     {
-        private static TextFormatterType textFormatterType = TextFormatterType.UNDECIDED;
-
         private static Dictionary<string, TextFormatter> formattersByFontName = new Dictionary<string, TextFormatter>();
         public static TextFormatter GetForFontName(string fontName)
         {
             if (!formattersByFontName.ContainsKey(fontName))
                 formattersByFontName[fontName] = new TextFormatter(fontName);
             return formattersByFontName[fontName];
-        }
-        public void ChooseType(TextFormatterType formatterType)
-        {
-            textFormatterType = formatterType;
         }
 
         public TextFormatter(string fontName)
@@ -627,7 +620,6 @@ namespace VisiPlacement
         // Does use the cache
         private Size getLineSize(string text, double fontSize)
         {
-            chooseTextFormatterType();
             // Ensure we have a cache of this size
             if (!this.sizesCache.ContainsKey(fontSize))
                 this.sizesCache[fontSize] = new Dictionary<string, Size>();
@@ -646,112 +638,19 @@ namespace VisiPlacement
         }
 
         // TODO: can UniformsMisc be made to support UWP?
-        private void chooseTextFormatterType()
-        {
-            if (textFormatterType == TextFormatterType.UNDECIDED)
-            {
-                try
-                {
-                    string text = "ABCD1122";
-                    double smallFont = 16;
-                    double smallWidth = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, smallFont).Width;
-
-                    double multiplier = 64;
-                    double largeFont = smallFont * multiplier;
-                    double largeWidth = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, largeFont).Width;
-
-                    if (smallWidth * multiplier >= largeWidth)
-                    {
-                        // it seems that text sizes either get rounded up or don't get rounded, so we can simply use the measured sizes
-                        textFormatterType = TextFormatterType.UNIFORMS_MISC;
-                    }
-                    else
-                    {
-                        // it seems that font sizes get rounded down, which we will have to compensate for in the future
-                        textFormatterType = TextFormatterType.UNIFORMS_MISC_ROUND_UP;
-                    }
-
-                }
-                catch (Exception e)
-                {
-                    System.Diagnostics.Debug.WriteLine(e);
-                    textFormatterType = TextFormatterType.INNATE;
-                }
-            }
-        }
 
         // Computes the size required by a TextBlock that plans to display this text all in a line
         // Doesn't use any cache
         private Size computeLineSize(String text, double fontSize)
         {
-            this.chooseTextFormatterType();
-            if (textFormatterType == TextFormatterType.UNIFORMS_MISC)
-            {
-                // If we get here, then Uniforms.Misc returns an acceptable answer and we can just directly use it
-                return Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, fontSize, this.fontName);
-            }
-            if (textFormatterType == TextFormatterType.UNIFORMS_MISC_ROUND_UP)
-            {
-                // If we get here, then Uniforms.Misc returns almost the right answer but we have to account for rounding error
-                // by measuring a larger font and rescaling it down
-                double multiplier = 64;
-                double measureFont = fontSize * multiplier;
-                Size measuredSize = Uniforms.Misc.TextUtils.GetTextSize(text, double.PositiveInfinity, measureFont, this.fontName);
-                return new Size(measuredSize.Width / multiplier, measuredSize.Height / multiplier);
-            }
-            // If we get here then Uniforms.Misc isn't supported on the platform and we'll just do our best
-            if (text == "")
-                return new Size();
-
-            string textToMeasure = text.Replace(" ", "i");
-
-            // Get enough width for the given text, and enough height to accomodate the line spacing
-            double width = this.computeGlyphSize(textToMeasure, fontSize).Width;
-            return new Size(width + this.leftMargin, this.fontLineHeight);
+            return TextMeasurer.Instance.Measure(text, fontSize, this.fontName);
         }
 
-
-        private SKPaint getTextBlock(double fontSize)
-        {
-            if (!this.textBlocks.ContainsKey(fontSize))
-            {
-                SKPaint textBlock = new SKPaint();
-                Label label = new Label();
-                textBlock.TextSize = (float)fontSize;
-                textBlock.Typeface = SKTypeface.FromFamilyName(label.FontFamily);
-
-                // leave enough height for the characters for the highest ("M") and lowest ("g") characters
-                SKFontMetrics metrics = new SKFontMetrics();
-                textBlock.GetFontMetrics(out metrics);
-                this.fontLineHeight = (metrics.Descent - metrics.Ascent) * 2; // rescale to account for errors in the response
-                SKRect bounds = new SKRect();
-                textBlock.MeasureText("M", ref bounds);
-                this.leftMargin = bounds.Left;
-                this.textBlocks[fontSize] = textBlock;
-            }
-            return this.textBlocks[fontSize];
-        }
-
-        // Computes the size of the letters in the given string, and doesn't add any extra margins
-        // TODO: make this more accurate
-        private Size computeGlyphSize(String text, double fontSize)
-        {
-            if (text == null || text == "")
-                return new Size();
-            SKPaint textBlock = this.getTextBlock(fontSize);
-            SKRect bounds = new SKRect();
-            textBlock.MeasureText(text, ref bounds);
-            double reportedWidth = bounds.Width;
-            double actualWidth = reportedWidth * 1.15; // correct for error
-            return new Size(actualWidth, bounds.Height);
-            
-        }
 
         private double fontLineHeight;
         private double leftMargin;
         // Dictionary<FontSize, Dictionary<Text, MeasuredSize>>
         private Dictionary<double, Dictionary<String, Size>> sizesCache = new Dictionary<double, Dictionary<string, Size>>();
-        private Dictionary<double, SKPaint> textBlocks = new Dictionary<double, SKPaint>();
         private string fontName;
     }
 
