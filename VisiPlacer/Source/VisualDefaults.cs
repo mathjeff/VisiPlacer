@@ -24,7 +24,7 @@ namespace VisiPlacement
     }
     public class TextBox_LayoutDefaults
     {
-        public string FontName;
+        public ScaledFont Font;
     }
     // a ViewDefaults stores default properties that affect the display but that don't affect the layout dimensions
     public class ViewDefaults
@@ -100,6 +100,12 @@ namespace VisiPlacement
             return this;
         }
 
+        public VisualDefaults_Builder FontSizeMultiplier(double multiplier)
+        {
+            this.fontSizeMultiplier = multiplier;
+            return this;
+        }
+
         public VisualDefaults_Builder DisplayName(string name)
         {
             this.displayName = name;
@@ -133,7 +139,9 @@ namespace VisiPlacement
             LayoutDefaults layoutDefaults = new LayoutDefaults();
 
             TextBox_LayoutDefaults textbox_layoutDefaults = new TextBox_LayoutDefaults();
-            textbox_layoutDefaults.FontName = this.fontName;
+            textbox_layoutDefaults.Font = new ScaledFont();
+            textbox_layoutDefaults.Font.Name = this.fontName;
+            textbox_layoutDefaults.Font.SizeMultiplier = this.fontSizeMultiplier;
             layoutDefaults.TextBox_Defaults = textbox_layoutDefaults;
 
             VisualDefaults visualDefaults = new VisualDefaults();
@@ -151,5 +159,6 @@ namespace VisiPlacement
         private Color uneditableTextColor;
         private Color uneditableTextBackgroundColor;
         private string fontName;
+        private double fontSizeMultiplier = 1;
     }
 }
