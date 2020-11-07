@@ -22,7 +22,10 @@ namespace Sample
             this.Content = contentView;
 
             LayoutChoice_Set layout = new TextMeasurement_Test_Layout();
-            ViewManager viewManager = new ViewManager(contentView, layout);
+            VisualDefaults_Builder defaultsBuilder = new VisualDefaults_Builder();
+            defaultsBuilder.FontName("SatellaRegular.ttf#Satella");
+
+            ViewManager viewManager = new ViewManager(contentView, layout, defaultsBuilder.Build());
         }
     }
 }

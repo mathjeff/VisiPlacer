@@ -123,11 +123,17 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
     <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Uniforms-Misc\Uniforms.Misc.iOS\Uniforms.Misc.iOS.csproj">
+      <Project>{d13a4cca-6f79-4d18-9da0-a37163c0bc55}</Project>
+      <Name>Uniforms.Misc.iOS</Name>
+      <IsAppExtension>false</IsAppExtension>
+      <IsWatchApp>false</IsWatchApp>
+    </ProjectReference>
     <ProjectReference Include="..\Sample\Sample.csproj">
       <Project>{129AA935-8C46-475D-8986-AC1365AD8567}</Project>
       <Name>Sample</Name>

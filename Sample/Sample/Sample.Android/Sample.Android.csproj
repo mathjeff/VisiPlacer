@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -54,7 +54,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
     <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +63,30 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\aArushShiny.otf">
+      <Link>Assets\aArushShiny.otf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\BlackChancery.ttf">
+      <Link>Assets\BlackChancery.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\HandDrawnShapes.otf">
+      <Link>Assets\HandDrawnShapes.otf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\MinimalFont5x7.ttf">
+      <Link>Assets\MinimalFont5x7.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\PruistineScript.ttf">
+      <Link>Assets\PruistineScript.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\Qdbettercomicsans.ttf">
+      <Link>Assets\Qdbettercomicsans.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\SatellaRegular.ttf">
+      <Link>Assets\SatellaRegular.ttf</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\..\..\..\Fonts\Resources\TitanOne.ttf">
+      <Link>Assets\TitanOne.ttf</Link>
+    </AndroidAsset>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />
@@ -89,10 +113,14 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Uniforms-Misc\Uniforms.Misc.Droid\Uniforms.Misc.Droid.csproj">
+      <Project>{f03d6b60-ab98-4c16-aa3e-51a57abbf2ca}</Project>
+      <Name>Uniforms.Misc.Droid</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sample\Sample.csproj">
       <Project>{129AA935-8C46-475D-8986-AC1365AD8567}</Project>
       <Name>Sample</Name>
     </ProjectReference>
   </ItemGroup>
- <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

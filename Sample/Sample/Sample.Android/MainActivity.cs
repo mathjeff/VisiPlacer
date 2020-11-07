@@ -22,8 +22,6 @@ namespace Sample.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            Uniforms.Misc.Droid.ScreenUtils.Init();
-            Uniforms.Misc.Droid.ImageUtils.Init();
             Uniforms.Misc.Droid.TextUtils.Init();
 
             LoadApplication(new App());

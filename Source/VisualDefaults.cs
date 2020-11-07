@@ -76,7 +76,19 @@ namespace VisiPlacement
         }
         public VisualDefaults_Builder FontName(string name)
         {
-            this.fontName = name;
+            if (Device.RuntimePlatform == Device.Android)
+            {
+                // on Android, we use a long path for specifying the font name, something like myfile.ttf#myfontname
+                this.fontName = name;
+            }
+            else
+            {
+                // On other operating systems, we just use the name of the font
+                int poundIndex = name.IndexOf("#");
+                if (poundIndex >= 0)
+                    name = name.Substring(poundIndex);
+                this.fontName = name;
+            }
             return this;
         }
 
