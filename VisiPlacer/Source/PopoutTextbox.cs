@@ -17,8 +17,8 @@ namespace VisiPlacement
             Button button = new Button();
             button.Clicked += Button_Clicked;
             this.button = button;
-            
-            ButtonLayout buttonLayout = ButtonLayout.WithoutBevel(button);
+
+            ButtonLayout buttonLayout = new ButtonLayout(button, null, -1, false, true, true);
 
             this.textBox = new Editor();
             this.detailsLayout = new TitledControl(title, ScrollLayout.New(new TextboxLayout(this.textBox)));
@@ -56,7 +56,6 @@ namespace VisiPlacement
 
         private void updateButtonText()
         {
-            int longestPrefix = 10;
             string text = this.textBox.Text;
             if ((text == null || text == "") && this.placeholder != null)
             {
@@ -64,10 +63,8 @@ namespace VisiPlacement
             }
             else
             {
-                if (text != null && text.Length > longestPrefix)
-                    this.button.Text = this.textBox.Text.Substring(0, longestPrefix) + "...";
-                else
-                    this.button.Text = text;
+                // note that the button text may appear cropped if needed
+                this.button.Text = text;
             }
         }
 
