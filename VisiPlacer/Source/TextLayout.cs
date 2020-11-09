@@ -382,7 +382,8 @@ namespace VisiPlacement
         {
             get
             {
-                return this.BaseFontSize * this.font.SizeMultiplier;
+                // Round font size to an integer in hopes of lower chances of rounding error in the operating system
+                return Math.Round(this.BaseFontSize * this.font.SizeMultiplier, 0);
             }
         }
         public void On_TextChanged(object sender, PropertyChangedEventArgs e)
