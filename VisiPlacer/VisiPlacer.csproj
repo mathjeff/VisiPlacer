@@ -9,17 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\StatList\StatList.csproj" />
-    <ProjectReference Include="deps\StatList\StatList.csproj" Condition="Exists(deps)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="deps\**" />
-    <Compile Remove="Sample\**" />
-    <EmbeddedResource Remove="deps\**" />
-    <EmbeddedResource Remove="Sample\**" />
-    <None Remove="deps\**" />
-    <None Remove="Sample\**" />
+    <ProjectReference Include="..\deps\StatList\StatList.csproj" Condition="Exists('..\deps')" />
+    <ProjectReference Include="..\..\..\deps\StatList\StatList.csproj" Condition="Exists('..\..\..\deps')" />
   </ItemGroup>
 
 </Project>

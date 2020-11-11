@@ -23,7 +23,7 @@ namespace Sample
 
             LayoutChoice_Set layout = new TextMeasurement_Test_Layout();
             VisualDefaults_Builder defaultsBuilder = new VisualDefaults_Builder();
-            defaultsBuilder.FontName("SatellaRegular.ttf#Satella");
+            defaultsBuilder.FontName("BlackChancery.ttf#BlackChancery");
 
             ViewManager viewManager = new ViewManager(contentView, layout, defaultsBuilder.Build());
         }

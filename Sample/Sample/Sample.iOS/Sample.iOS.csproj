@@ -134,6 +134,16 @@
       <IsAppExtension>false</IsAppExtension>
       <IsWatchApp>false</IsWatchApp>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\VisiPlacer.iOS\VisiPlacer.iOS.csproj">
+      <Project>{de461a19-e352-4a79-855b-4fcc38da6bb6}</Project>
+      <Name>VisiPlacer.iOS</Name>
+      <IsAppExtension>false</IsAppExtension>
+      <IsWatchApp>false</IsWatchApp>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\VisiPlacer\VisiPlacer.csproj">
+      <Project>{a80801af-e3fb-42f4-bcab-949a988e02ce}</Project>
+      <Name>VisiPlacer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sample\Sample.csproj">
       <Project>{129AA935-8C46-475D-8986-AC1365AD8567}</Project>
       <Name>Sample</Name>

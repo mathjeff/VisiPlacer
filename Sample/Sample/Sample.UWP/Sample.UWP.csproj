@@ -144,10 +144,18 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9"/>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9" />
     <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\VisiPlacer.UWP\VisiPlacer.UWP.csproj">
+      <Project>{9323f653-bb21-4967-9341-88dbad2728c3}</Project>
+      <Name>VisiPlacer.UWP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\VisiPlacer\VisiPlacer.csproj">
+      <Project>{a80801af-e3fb-42f4-bcab-949a988e02ce}</Project>
+      <Name>VisiPlacer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sample\Sample.csproj">
       <Project>{129AA935-8C46-475D-8986-AC1365AD8567}</Project>
       <Name>Sample</Name>

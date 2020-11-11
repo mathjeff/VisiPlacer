@@ -113,9 +113,13 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Uniforms-Misc\Uniforms.Misc.Droid\Uniforms.Misc.Droid.csproj">
-      <Project>{f03d6b60-ab98-4c16-aa3e-51a57abbf2ca}</Project>
-      <Name>Uniforms.Misc.Droid</Name>
+    <ProjectReference Include="..\..\..\VisiPlacer.Android\VisiPlacer.Android.csproj">
+      <Project>{5911e1a9-9c98-42ba-9878-90ed3f946e57}</Project>
+      <Name>VisiPlacer.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\VisiPlacer\VisiPlacer.csproj">
+      <Project>{a80801af-e3fb-42f4-bcab-949a988e02ce}</Project>
+      <Name>VisiPlacer</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sample\Sample.csproj">
       <Project>{129AA935-8C46-475D-8986-AC1365AD8567}</Project>

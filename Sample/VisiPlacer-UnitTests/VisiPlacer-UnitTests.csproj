@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\VisiPlacer.csproj" />
+    <ProjectReference Include="..\..\VisiPlacer\VisiPlacer.csproj" />
   </ItemGroup>
 
 </Project>
