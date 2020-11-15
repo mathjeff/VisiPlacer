@@ -74,6 +74,11 @@ namespace VisiPlacement
             this.uneditableTextBackgroundColor = color;
             return this;
         }
+        public VisualDefaults_Builder ApplicationBackground(Color color)
+        {
+            this.applicationBackground = color;
+            return this;
+        }
         public VisualDefaults_Builder FontName(string name)
         {
             if (Device.RuntimePlatform == Device.Android)
@@ -114,7 +119,7 @@ namespace VisiPlacement
         public VisualDefaults Build()
         {
             ViewDefaults viewDefaults = new ViewDefaults();
-            viewDefaults.ApplicationBackground = this.uneditableTextBackgroundColor;
+            viewDefaults.ApplicationBackground = this.applicationBackground;
 
             TextBlock_ViewDefaults textblockDefaults = new TextBlock_ViewDefaults();
             textblockDefaults.TextColor = this.uneditableTextColor;
@@ -158,6 +163,7 @@ namespace VisiPlacement
 
         private Color uneditableTextColor;
         private Color uneditableTextBackgroundColor;
+        private Color applicationBackground;
         private string fontName;
         private double fontSizeMultiplier = 1;
     }
