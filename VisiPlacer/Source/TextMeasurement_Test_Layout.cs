@@ -18,29 +18,32 @@ namespace VisiPlacement
         }
         public TextMeasurement_Test_Layout()
         {
-            Vertical_GridLayout_Builder grid1Builder = new Vertical_GridLayout_Builder().Uniform();
+            Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
 
-            //GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero, 0.0625);
             Editor textBox = new Editor();
             textBox.TextChanged += TextBox_TextChanged;
             this.textBox = textBox;
-            grid1Builder.AddLayout(new TextboxLayout(textBox, 16));
+            gridBuilder.AddLayout(new TextboxLayout(textBox, 16));
 
-            Label textBlock = new Label();
-            textBlock.BackgroundColor = Color.Red;
-            this.textBlockLayout = new TextblockLayout(textBlock, 16, false, true);
-            this.textBlockLayout.ScoreIfEmpty = false;
-            this.textBlockLayout.LoggingEnabled = true;
-            //grid2.PutLayout(this.textBlockLayout, 0, 0);
-            //grid2.PutLayout(new ImageLayout(null, LayoutScore.Get_MinPriorityScore_ForTesting(1)), 1, 0);
+            for (double i = 0; i < 8; i += 1)
+            {
+                Label textBlock1 = new Label();
+                textBlock1.BackgroundColor = Color.Red;
+                TextblockLayout textBlockLayout = new TextblockLayout(textBlock1, i + 16, false, true);
+                textBlockLayout.ScoreIfEmpty = false;
+                gridBuilder.AddLayout(textBlockLayout);
+                this.textBlockLayouts.Add(textBlockLayout);
+            }
 
-            grid1Builder.AddLayout(this.textBlockLayout);
-            this.SubLayout = grid1Builder.Build();
+            this.SubLayout = ScrollLayout.New(gridBuilder.Build());
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            this.textBlockLayout.setText(this.textBox.Text);
+            foreach (TextblockLayout textBlockLayout in this.textBlockLayouts)
+            {
+                textBlockLayout.setText(this.textBox.Text);
+            }
         }
 
         /*
@@ -73,7 +76,6 @@ namespace VisiPlacement
         private static List<Color> colorChoices = new List<Color>() { Color.Red, Color.Yellow, Color.Blue, Color.Orange, Color.Green, Color.Purple };
 
         private Editor textBox;
-        private Label textBlock;
-        private TextblockLayout textBlockLayout;
+        private List<TextblockLayout> textBlockLayouts = new List<TextblockLayout>();
     }
 }
