@@ -12,12 +12,16 @@ namespace VisiPlacement
         public static int NumComputations = 0;
         public static int ExpensiveThreshold = 4;
 
-        public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
+        public static GridLayout New(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1, GridView gridView = null)
         {
             if (Math.Min(rowHeights.NumGroups, columnWidths.NumGroups) <= 1)
             {
                 if (Math.Max(rowHeights.NumGroups, columnWidths.NumGroups) > 2)
                 {
+                    if (gridView != null)
+                    {
+                        throw new ArgumentException("Cannot specify a specific gridView for with dimensions of AxB with a<=1 and b>2");
+                    }
                     // we should instead make a smaller grid with additional grids inside it, to better enable caching
                     if (rowHeights.NumGroups == rowHeights.NumProperties && columnWidths.NumGroups == columnWidths.NumProperties)
                     {
@@ -29,18 +33,18 @@ namespace VisiPlacement
                 }
             }
             // can't compose from smaller grids
-            return new GridLayout(rowHeights, columnWidths, bonusScore, pixelSize);
+            return new GridLayout(rowHeights, columnWidths, bonusScore, pixelSize, gridView);
         }
 
         public GridLayout()
         {
         }
 
-        private GridLayout(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
+        private GridLayout(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize, GridView gridView)
         {
-            this.Initialize(rowHeights, columnWidths, bonusScore, pixelSize);
+            this.Initialize(rowHeights, columnWidths, bonusScore, pixelSize, gridView);
         }
-        protected void Initialize(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize = 1)
+        protected void Initialize(BoundProperty_List rowHeights, BoundProperty_List columnWidths, LayoutScore bonusScore, double pixelSize, GridView gridView)
         {
             int numColumns = columnWidths.NumProperties;
             int numRows = rowHeights.NumProperties;
@@ -50,7 +54,10 @@ namespace VisiPlacement
             this.columnWidths = columnWidths;
             this.bonusScore = bonusScore;
             this.pixelSize = pixelSize;
-            this.view = new GridView();
+
+            this.view = gridView;
+            if (this.view == null)
+                this.view = new GridView();
         }
         // puts this layout in the designated part of the grid
         public virtual void PutLayout(LayoutChoice_Set layout, int xIndex, int yIndex)
@@ -2050,7 +2057,7 @@ namespace VisiPlacement
             this.numLeftColumns = Math.Max(this.numColumns / 4, 1);
             int actualNumRows = Math.Min(numRows, 2);
             int actualNumColumns = Math.Min(numColumns, 2);
-            this.Initialize(new BoundProperty_List(actualNumRows), new BoundProperty_List(actualNumColumns), bonusScore, pixelSize);
+            this.Initialize(new BoundProperty_List(actualNumRows), new BoundProperty_List(actualNumColumns), bonusScore, pixelSize, null);
             this.gridLayouts = new GridLayout[actualNumColumns, actualNumRows];
             int numBottomRows = numRows - numTopRows;
             int numRightColumns = numColumns - numLeftColumns;
