@@ -114,7 +114,9 @@ namespace VisiPlacement
             if (scales[propertyIndex] == 0)
                 throw new ArgumentException("cannot set the value of a property having zero weight");
             if (double.IsNaN(value))
-                throw new ArgumentException("illegal value: " + value + " to set for index " + propertyIndex);
+                throw new ArgumentException("illegal value: " + value + " to set for property " + propertyIndex);
+            if (value < 0)
+                throw new ArgumentException("illegal negative value: " + value + " to set for property " + propertyIndex);
             int groupIndex = this.GetGroupIndexFromPropertyIndex(propertyIndex);
             double groupRatio = value / this.scales[propertyIndex];
             if (double.IsNaN(groupRatio))
@@ -123,10 +125,7 @@ namespace VisiPlacement
             List<int> indices = this.indicesByGroup[groupIndex];
             foreach (int index in indices)
             {
-                double oldValue = values[index];
-                double newValue = scales[index] * groupRatio;
-                double difference = newValue - oldValue;
-                values[index] = newValue;
+                values[index] = scales[index] * groupRatio;
             }
             if (values[propertyIndex] != value)
             {
@@ -136,6 +135,9 @@ namespace VisiPlacement
 
         public void Set_GroupTotal(int groupIndex, double totalValue)
         {
+            if (totalValue < 0)
+                throw new ArgumentException("illegal negative value: " + totalValue + " to set for group " + groupIndex);
+
             double totalWeight = this.GetGroupScale(groupIndex);
             if (totalWeight == 0)
                 totalWeight = 1;
@@ -164,6 +166,12 @@ namespace VisiPlacement
                     double currentAdjustment = error * currentWeight / (totalWeight - cumulativeWeight);
                     this.values[index] += currentAdjustment;
 
+                    if (this.values[index] < 0)
+                    {
+                        ErrorReporter.ReportParadox("Internal error: after correcting for rounding error, calculated a negative value " + this.values[index] + " at index " + index);
+                    }
+
+
                     cumulativeWeight += currentWeight;
                 }
 
@@ -183,6 +191,10 @@ namespace VisiPlacement
                         break;
                     currentAdjustment = error;
                     newValue = this.values[index] + currentAdjustment;
+                    if (newValue < 0)
+                    {
+                        ErrorReporter.ReportParadox("Internal error: after correcting for rounding error, calculated a negative value " + newValue + " at index " + index);
+                    }
                     this.values[index] = newValue;
                 }
 
@@ -280,6 +292,8 @@ namespace VisiPlacement
 
         public void RescaleToTotalValue(double total)
         {
+            if (total < 0)
+                throw new ArgumentException("Illegal negative total " + total);
             double existingTotal = this.GetTotalValue();
             double ratio;
             if (double.IsPositiveInfinity(total))
@@ -299,9 +313,16 @@ namespace VisiPlacement
                     double error = total - this.GetTotalValue();
                     if (error == 0)
                         break;
-                    double currentAdjustment = error;
-                    double newValue = this.Get_GroupTotal(i) + currentAdjustment;
-                    this.Set_GroupTotal(i, newValue);
+                    double newValue = this.Get_GroupTotal(i) + error;
+                    if (newValue < 0)
+                    {
+                        // If the new value would be negative, then it means that were considering applying all of the rounding error to a number that's already too small
+                        // There must be a larger value somewhere else; change that value instead
+                    }
+                    else
+                    {
+                        this.Set_GroupTotal(i, newValue);
+                    }
                 }
             }
         }

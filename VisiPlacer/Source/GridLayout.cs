@@ -1612,7 +1612,11 @@ namespace VisiPlacement
             LayoutChoice_Set layout = this.elements[columnIndex, rowIndex];
             SpecificLayout specificLayout = null;
             if (layout != null)
+            {
                 specificLayout = layout.GetBestLayout(this.SourceQuery.New_MaxScore_LayoutQuery(width, height, LayoutScore.Minimum));
+                if (specificLayout == null)
+                    ErrorReporter.ReportParadox("Could not find layout for size " + width + "x" + height);
+            }
             this.sub_specificLayouts[columnIndex, rowIndex] = new SublayoutResponse(specificLayout, new Size(width, height));
             return specificLayout;
         }
