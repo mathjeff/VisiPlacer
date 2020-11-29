@@ -106,6 +106,21 @@ namespace VisiPlacement
             this.forceRelayout();
         }
 
+        public Button FindButton(string text)
+        {
+            Dictionary<View, SpecificLayout> parents = this.findAncestors(this.specificLayout);
+            foreach (View view in parents.Keys)
+            {
+                Button button = view as Button;
+                if (button != null)
+                {
+                    if (button.Text == text)
+                        return button;
+                }
+            }
+            return null;
+        }
+
         // redoes the layout
         private void DoLayout()
         {
