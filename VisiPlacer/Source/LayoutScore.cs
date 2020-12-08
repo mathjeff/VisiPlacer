@@ -58,19 +58,19 @@ namespace VisiPlacement
                 return b;
         }
 
-        // a score that is lower in priority than any other publicly available scores (except for Tiny which is an implementation detail)
+        // A score that is lower in priority than any other publicly available scores (except for Tiny which is an implementation detail)
         // which can be helpful for testing
         public static LayoutScore Get_MinPriorityScore_ForTesting(double numItems)
         {
             return new LayoutScore(-1, numItems);
 
         }
-        // this score indicates that some items are not centered
+        // This score indicates that some items are not centered
         public static LayoutScore Get_UnCentered_LayoutScore(double numItems)
         {
             return new LayoutScore(0, -numItems);
         }
-        // this score indicates that some space has been used
+        // This score indicates that some space has been used
         public static LayoutScore Get_UsedSpace_LayoutScore(double numPixels)
         {
             double value = Math.Sqrt(numPixels);
@@ -78,15 +78,20 @@ namespace VisiPlacement
             double rounded = Math.Round(value * multiplier) / multiplier;
             return new LayoutScore(1, rounded);
         }
-        // this score indicates that some items were laid out awkwardly
+        // This score indicates that some items were laid out awkwardly
         /*public static LayoutScore Get_Disjointed_LayoutScore(double numItems)
         {
             return new LayoutScore(2, -numItems);
         }*/
-        // this score indicates that some items were cut off
-        public static LayoutScore Get_CutOff_LayoutScore(double numItems)
+        // This score indicates that some information was missing, but that the layout was aware of this and explicitly offered this as an option
+        public static LayoutScore Get_ReducedContent_Score(double numItems)
         {
             return new LayoutScore(2, -numItems);
+        }
+        // This score indicates that some items were unexpectedly unable to show all of their content, and those items didn't suggest any alternatives
+        public static LayoutScore Get_CutOff_LayoutScore(double numItems)
+        {
+            return new LayoutScore(3, -numItems);
         }
 
         public LayoutScore()
