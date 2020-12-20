@@ -39,7 +39,7 @@ namespace VisiPlacement
             bool isButtonColorSet = button.BackgroundColor.A > 0;
             LayoutChoice_Set sublayout;
             this.buttonBackground = new ContentView();
-            ButtonConfigurer buttonConfigurer = new ButtonConfigurer(button, includeBevel, this.buttonBackground);
+            ButtonConfigurer buttonConfigurer = new ButtonConfigurer(button, this.buttonBackground);
             if (fontSize > 0)
             {
                 if (allowCropping)
@@ -76,14 +76,16 @@ namespace VisiPlacement
                 Thickness innerBevelThickness = new Thickness(1);
                 ContentView insideBevel = new ContentView();
                 insideBevel.Padding = innerBevelThickness;
-                insideBevel.BackgroundColor = Color.DarkGray;// Color.FromRgb(0.4, 0.4, 0.4);
+                //insideBevel.BackgroundColor = Color.DarkGray;// Color.FromRgb(0.4, 0.4, 0.4);
+                buttonConfigurer.InnerBevel = insideBevel;
                 ContainerLayout middleLayout = new MustBorderLayout(insideBevel, backgroundLayout, innerBevelThickness, false);
 
                 // add a bevel to the border
                 Thickness outerBevelThickness = new Thickness(1);
                 ContentView outsideBevel = new ContentView();
                 outsideBevel.Padding = outerBevelThickness;
-                outsideBevel.BackgroundColor = Color.LightGray;// Color.FromRgb(0.63, 0.63, 0.63);
+                //outsideBevel.BackgroundColor = Color.LightGray;// Color.FromRgb(0.63, 0.63, 0.63);
+                buttonConfigurer.OuterBevel = outsideBevel;
                 ContainerLayout outsideLayout = new MustBorderLayout(outsideBevel, middleLayout, outerBevelThickness, false);
 
                 // add some extra space around it
@@ -131,10 +133,9 @@ namespace VisiPlacement
 
     public class ButtonConfigurer : TextItem_Configurer
     {
-        public ButtonConfigurer(Button button, bool includeBevel, ContentView buttonBackground)
+        public ButtonConfigurer(Button button, ContentView buttonBackground)
         {
             this.button = button;
-            this.includeBevel = includeBevel;
             this.buttonBackground = buttonBackground;
         }
 
@@ -201,6 +202,15 @@ namespace VisiPlacement
                 return this.button;
             }
         }
+        public bool IncludeBevel
+        {
+            get
+            {
+                return this.InnerBevel != null || this.OuterBevel != null;
+            }
+        }
+        public ContentView InnerBevel { get; set; }
+        public ContentView OuterBevel { get; set; }
 
         public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
@@ -210,15 +220,19 @@ namespace VisiPlacement
             }
             else
             {
-                if (this.includeBevel)
+                if (this.IncludeBevel)
                     this.button.TextColor = layoutDefaults.ButtonWithBevel_Defaults.TextColor;
                 else
                     this.button.TextColor = layoutDefaults.ButtonWithoutBevel_Defaults.TextColor;
             }
-            if (this.includeBevel)
+            if (this.IncludeBevel)
                 this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.BackgroundColor;
             else
                 this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithoutBevel_Defaults.BackgroundColor;
+            if (this.InnerBevel != null)
+                this.InnerBevel.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.InnerBevelColor;
+            if (this.OuterBevel != null)
+                this.OuterBevel.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.OuterBevelColor;
         }
 
         public void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler)
@@ -227,7 +241,6 @@ namespace VisiPlacement
         }
         public Button button;
         public Color? TextColor;
-        bool includeBevel;
         ContentView buttonBackground;
 
     }

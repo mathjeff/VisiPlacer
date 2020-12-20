@@ -79,6 +79,16 @@ namespace VisiPlacement
             this.applicationBackground = color;
             return this;
         }
+        public VisualDefaults_Builder ButtonInnerBevelColor(Color color)
+        {
+            this.buttonInnerBevelColor = color;
+            return this;
+        }
+        public VisualDefaults_Builder ButtonOuterBevelColor(Color color)
+        {
+            this.buttonOuterBevelColor = color;
+            return this;
+        }
         public VisualDefaults_Builder FontName(string name)
         {
             if (Device.RuntimePlatform == Device.Android)
@@ -134,6 +144,14 @@ namespace VisiPlacement
             ButtonViewDefaults buttonDefaults = new ButtonViewDefaults();
             buttonDefaults.TextColor = this.uneditableTextColor;
             buttonDefaults.BackgroundColor = this.uneditableTextBackgroundColor;
+            if (this.buttonInnerBevelColor != null)
+                buttonDefaults.InnerBevelColor = this.buttonInnerBevelColor.Value;
+            else
+                buttonDefaults.InnerBevelColor = Color.DarkGray;
+            if (this.buttonOuterBevelColor != null)
+                buttonDefaults.OuterBevelColor = this.buttonOuterBevelColor.Value;
+            else
+                buttonDefaults.OuterBevelColor = Color.LightGray;
             viewDefaults.ButtonWithBevel_Defaults = buttonDefaults;
 
             ButtonViewDefaults buttonWithoutBevelDefaults = new ButtonViewDefaults();
@@ -164,6 +182,8 @@ namespace VisiPlacement
         private Color uneditableTextColor;
         private Color uneditableTextBackgroundColor;
         private Color applicationBackground;
+        private Color? buttonInnerBevelColor;
+        private Color? buttonOuterBevelColor;
         private string fontName;
         private double fontSizeMultiplier = 1;
     }
