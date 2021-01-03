@@ -65,11 +65,16 @@ namespace VisiPlacement
             }
         }
 
-
-        private void SingleSelect_Clicked(object sender, EventArgs e)
+        public void Advance()
         {
             this.selectedIndex = (this.selectedIndex + 1) % this.items.Count;
             this.updateAppearance();
+        }
+
+
+        private void SingleSelect_Clicked(object sender, EventArgs e)
+        {
+            this.Advance();
         }
         private void updateAppearance()
         {
