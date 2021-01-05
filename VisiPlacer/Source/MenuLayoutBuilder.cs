@@ -39,7 +39,7 @@ namespace VisiPlacement
 
         public LayoutChoice_Set Build()
         {
-            return new MenuLayout(this.layoutNameProviders, this.destinationProviders, this.layoutStack);
+            return LayoutCache.For(new MenuLayout(this.layoutNameProviders, this.destinationProviders, this.layoutStack));
         }
 
         List<ValueProvider<MenuItem>> layoutNameProviders = new List<ValueProvider<MenuItem>>();
