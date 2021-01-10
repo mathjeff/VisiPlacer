@@ -176,12 +176,6 @@ namespace VisiPlacement
             return result;
         }
 
-        public override SpecificLayout Clone()
-        {
-            return new Specific_ScrollLayout(this.View, this.Size, this.Score, this.SubLayout);
-        }
-
-
         public override void Remove_VisualDescendents()
         {
             ScrollView view = this.View;

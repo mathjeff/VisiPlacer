@@ -1352,12 +1352,6 @@ namespace VisiPlacement
             this.setWidthBeforeHeight = setWidthBeforeHeight;
             this.SourceQuery = sourceQuery;
         }
-        public override SpecificLayout Clone()
-        {
-            SemiFixed_GridLayout clone = new SemiFixed_GridLayout();
-            clone.CopyFrom(this);
-            return clone;
-        }
         public void CopyFrom(SemiFixed_GridLayout original)
         {
             base.CopyFrom(original);

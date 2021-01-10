@@ -171,8 +171,8 @@ namespace VisiPlacement
 
             //this.debugCheck(queryAndResponse);
 
-            if (result != null)
-                result = result.Clone();
+            //if (result != null)
+            //    result = result.Clone();
             return result;
         }
 
@@ -254,8 +254,8 @@ namespace VisiPlacement
                 return this.prepareLayoutForQuery(correctResult, query);
             }
             //this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
-            if (fastResult != null)
-                fastResult = fastResult.Clone();
+            //if (fastResult != null)
+            //    fastResult = fastResult.Clone();
             return this.prepareLayoutForQuery(fastResult, query);
         }
 

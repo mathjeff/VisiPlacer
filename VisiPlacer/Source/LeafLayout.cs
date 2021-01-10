@@ -76,10 +76,6 @@ namespace VisiPlacement
             return new List<SpecificLayout>();
         }
 
-        public override SpecificLayout Clone()
-        {
-            return new Specific_LeafLayout(this.view, this.dimensions);
-        }
         public override View View
         {
             get

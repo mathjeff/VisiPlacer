@@ -73,10 +73,10 @@ namespace VisiPlacement
 
             if (layout != null)
             {
-                layout.Set_SourceParent(this);
+                //layout.Set_SourceParent(this);
 
                 numMatches = 0;
-                foreach (LayoutChoice_Set ancestor in layout.GetAncestors())
+                /*foreach (LayoutChoice_Set ancestor in layout.GetAncestors())
                 {
                     if (ancestor == this)
                         numMatches++;
@@ -85,7 +85,7 @@ namespace VisiPlacement
                     ErrorReporter.ReportParadox("Error: the returned layout did not come from this layout");
                 if (numMatches > 1)
                     ErrorReporter.ReportParadox("Error: the returned layout contained multiple ancestors matching this one");
-
+                */
                 layout.SourceQuery = query;
             }
 

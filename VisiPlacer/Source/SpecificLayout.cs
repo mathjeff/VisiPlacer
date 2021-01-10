@@ -9,7 +9,7 @@ namespace VisiPlacement
     {
         public SpecificLayout()
         {
-            this.ancestors = new List<LayoutChoice_Set>();
+            //this.ancestors = new List<LayoutChoice_Set>();
         }
         public abstract View View { get; }
         public abstract double Width { get; }
@@ -55,9 +55,9 @@ namespace VisiPlacement
         {
             base.CopyFrom(original);
             this.SourceQuery = original.SourceQuery;
-            this.ancestors = new List<LayoutChoice_Set>(original.ancestors);
+            //this.ancestors = new List<LayoutChoice_Set>(original.ancestors);
         }
-        public abstract SpecificLayout Clone();
+        //public abstract SpecificLayout Clone();
         public LayoutQuery SourceQuery { get; set; }   // the query that generated this SpecificLayout
 
         public abstract void Remove_VisualDescendents();
@@ -71,10 +71,10 @@ namespace VisiPlacement
         public virtual void AfterLayoutAttached() { }
         // returns a list of general LayoutChoice_Sets where the first item created/found this item, and the second item found the first, etc
         // Note that this is different than the specific layout that contains this one as a visual parent
-        public IEnumerable<LayoutChoice_Set> GetAncestors()
+        /*public IEnumerable<LayoutChoice_Set> GetAncestors()
         {
             return this.ancestors;
-        }
+        }*/
         public IEnumerable<SpecificLayout> GetDescendents()
         {
             List<SpecificLayout> layouts = new List<SpecificLayout>();
@@ -87,10 +87,10 @@ namespace VisiPlacement
         }
         public abstract IEnumerable<SpecificLayout> GetParticipatingChildren();
         // Sets the general layout that created this specific layout
-        public void Set_SourceParent(LayoutChoice_Set parent)
+        /*public void Set_SourceParent(LayoutChoice_Set parent)
         {
             this.ancestors.Add(parent);
-        }
+        }*/
         
         public virtual ViewManager Get_ViewManager()
         {
@@ -113,7 +113,7 @@ namespace VisiPlacement
             return "SpecificLayout: " + this.Dimensions;
         }
 
-        List<LayoutChoice_Set> ancestors;
+        //List<LayoutChoice_Set> ancestors;
     }
 
 }

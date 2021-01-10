@@ -229,7 +229,7 @@ namespace VisiPlacement
                 if ((proposedSolution != null) && !this.Accepts(proposedSolution))
                 {
                     ErrorReporter.ReportParadox("Error: attempted to provide an invalid debugging solution");
-                    // go back and run the original query again
+                    /* // go back and run the original query again
                     LayoutQuery debugQuery = proposedSolution.SourceQuery;
                     if (debugQuery != null)
                     {
@@ -241,7 +241,7 @@ namespace VisiPlacement
                             SpecificLayout result = parent.GetBestLayout(debugQuery);
                             ErrorReporter.ReportParadox("result = " + result);
                         }
-                    }
+                    }*/
                 }
                 this.proposedSolution_forDebugging = proposedSolution;
             }

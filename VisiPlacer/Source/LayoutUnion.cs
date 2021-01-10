@@ -74,8 +74,8 @@ namespace VisiPlacement
         {
             SpecificLayout best_specificLayout = null;
             SpecificLayout debugResult = query.ProposedSolution_ForDebugging;
-            if (debugResult != null)
-                debugResult = debugResult.Clone();
+            //if (debugResult != null)
+            //    debugResult = debugResult.Clone();
             List<LayoutChoice_Set> good_sourceLayouts = new List<LayoutChoice_Set>();
             LayoutQuery originalQuery = query;
             foreach (LayoutChoice_Set layoutSet in this.layoutOptions)
@@ -87,7 +87,7 @@ namespace VisiPlacement
                     query = query.OptimizedUsingExample(best_specificLayout);
                 }
                 SpecificLayout currentLayout;
-                if (query.Debug)
+                /*if (query.Debug)
                 {
                     // if the proposed layout is an option, then be sure to consider it
                     if (debugResult != null && debugResult.GetAncestors().Contains(layoutSet))
@@ -97,7 +97,7 @@ namespace VisiPlacement
                         query.ProposedSolution_ForDebugging = debugResult;
                         return this.prepareLayoutForQuery(currentLayout, query);
                     }
-                }
+                }*/
                 currentLayout = layoutSet.GetBestLayout(query);
 
                 if (currentLayout != null && query.PreferredLayout(currentLayout, best_specificLayout) == currentLayout)

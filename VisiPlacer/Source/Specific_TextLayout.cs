@@ -90,12 +90,6 @@ namespace VisiPlacement
             this.FontName = original.FontName;
         }
 
-        public override SpecificLayout Clone()
-        {
-            Specific_TextLayout clone = new Specific_TextLayout(this.textItem, this.width, this.height, this.fontSize, this.score, this.DisplayText, this.DesiredSizeForDebugging, this.FontName);
-            return clone;
-        }
-
         public override IEnumerable<SpecificLayout> GetParticipatingChildren()
         {
             return new List<SpecificLayout>();

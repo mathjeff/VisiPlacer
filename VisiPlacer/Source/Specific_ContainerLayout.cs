@@ -86,12 +86,6 @@ namespace VisiPlacement
             }
             throw new ArgumentException("Unrecognized view type " + parent);
         }
-        public override SpecificLayout Clone()
-        {
-            Specific_ContainerLayout clone = new Specific_ContainerLayout();
-            clone.CopyFrom(this);
-            return clone;
-        }
         public void CopyFrom(Specific_ContainerLayout original)
         {
             base.CopyFrom(original);

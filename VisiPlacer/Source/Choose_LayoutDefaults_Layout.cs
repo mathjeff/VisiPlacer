@@ -89,10 +89,6 @@ namespace VisiPlacement
         {
             return this.SubLayout.DoLayout(displaySize, this.defaultsOverride);
         }
-        public override SpecificLayout Clone()
-        {
-            return new OverrideLayoutDefaults_SpecificLayout(this.SubLayout, this.defaultsOverride);
-        }
 
         ViewDefaults defaultsOverride;
     }
