@@ -3,13 +3,12 @@ using Xamarin.Forms;
 
 namespace VisiPlacement
 {
-    class PixelatedLayout : LayoutChoice_Set
+    class PixelatedLayout : ContainerLayout
     {
         public PixelatedLayout(LayoutChoice_Set layoutToManage, double pixelSize)
         {
-            this.layoutToManage = layoutToManage;
+            this.SubLayout = layoutToManage;
             pixelWidth = pixelHeight = pixelSize;
-            layoutToManage.AddParent(this);
         }
 
         public override SpecificLayout GetBestLayout(LayoutQuery query)
@@ -22,7 +21,7 @@ namespace VisiPlacement
                 height = Math.Floor(query.MaxHeight / this.pixelHeight) * this.pixelHeight;
             if (width != query.MaxWidth || height != query.MaxHeight)
                 query = query.WithDimensions(width, height);
-            SpecificLayout internalLayout = this.layoutToManage.GetBestLayout(query);
+            SpecificLayout internalLayout = this.SubLayout.GetBestLayout(query);
             if (internalLayout != null) {
                 Size size = new Size(Math.Ceiling(internalLayout.Width / this.pixelWidth) * this.pixelWidth, Math.Ceiling(internalLayout.Height / this.pixelHeight) * this.pixelHeight);
                 Specific_ContainerLayout result = new Specific_ContainerLayout(null, size, new LayoutScore(), internalLayout, new Thickness(0));
@@ -31,15 +30,7 @@ namespace VisiPlacement
             return null;
         }
 
-        public LayoutChoice_Set LayoutToManage
-        {
-            get
-            {
-                return this.layoutToManage;
-            }
-        }
 
-        LayoutChoice_Set layoutToManage;
         double pixelWidth;
         double pixelHeight;
     }

@@ -48,7 +48,7 @@ namespace VisiPlacement
         {
             int numColumns = columnWidths.NumProperties;
             int numRows = rowHeights.NumProperties;
-            this.wrappedChildren = new LayoutChoice_Set[numColumns, numRows];
+            this.wrappedChildren = new PixelatedLayout[numColumns, numRows];
             this.givenChildren = new LayoutChoice_Set[numColumns, numRows];
             this.rowHeights = rowHeights;
             this.columnWidths = columnWidths;
@@ -64,16 +64,20 @@ namespace VisiPlacement
         {
             if (this.GetLayout(xIndex, yIndex) == layout)
                 return;
-            LayoutChoice_Set wrappedLayout = layout;
-            LayoutChoice_Set previousLayout = this.wrappedChildren[xIndex, yIndex];
-            if (previousLayout != null)
-                previousLayout.RemoveParent(this);
-
-            if (wrappedLayout != null)
+            PixelatedLayout wrappedLayout = this.wrappedChildren[xIndex, yIndex];
+            // attach new layout
+            if (layout != null)
             {
-                wrappedLayout = LayoutCache.For(wrappedLayout);
-                wrappedLayout = new PixelatedLayout(wrappedLayout, this.pixelSize);
-                wrappedLayout.AddParent(this);
+                // ensure there is a cache
+                LayoutCache cache = LayoutCache.For(layout);
+                // if we don't yet have a pixelated layout here, make one, otherwise, reuse the existing
+                if (wrappedLayout == null)
+                {
+                    wrappedLayout = new PixelatedLayout(null, this.pixelSize);
+                    wrappedLayout.AddParent(this);
+                }
+                // attach child
+                wrappedLayout.SubLayout = cache;
             }
             this.wrappedChildren[xIndex, yIndex] = wrappedLayout;
             this.givenChildren[xIndex, yIndex] = layout;
@@ -1208,7 +1212,7 @@ namespace VisiPlacement
         // the children that we given to us by the caller
         private LayoutChoice_Set[,] givenChildren;
         // We add some extra wrapping around elements for caching and for snapping to gridlines. These are the wrapped layouts
-        private LayoutChoice_Set[,] wrappedChildren;
+        private PixelatedLayout[,] wrappedChildren;
         private BoundProperty_List rowHeights;
         private BoundProperty_List columnWidths;
         private LayoutScore bonusScore;
