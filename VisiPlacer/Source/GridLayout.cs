@@ -79,6 +79,14 @@ namespace VisiPlacement
                 // attach child
                 wrappedLayout.SubLayout = cache;
             }
+            else
+            {
+                // If there is no child layout to wrap, then we don't need a wrapper either.
+                // We could keep the wrapper around to reuse later, but if we did that, we'd have to allocate something else to hold unused wrappers,
+                // and that holder would need to be available even for grids that don't have any unused wrappers.
+                // It should be unlikely enough for us to remove a child and restore it later, so here we just clear the wrapper too.
+                wrappedLayout = null;
+            }
             this.wrappedChildren[xIndex, yIndex] = wrappedLayout;
             this.givenChildren[xIndex, yIndex] = layout;
             this.AnnounceChange(true);

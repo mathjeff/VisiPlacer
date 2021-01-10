@@ -12,23 +12,27 @@ namespace VisiPlacement
         }
         public MenuLayoutBuilder AddLayout(string name, LayoutChoice_Set layout)
         {
+            layout = LayoutCache.For(layout);
             return this.AddLayout(new StackEntry(layout, name, null));
         }
         public MenuLayoutBuilder AddLayout(StackEntry entry)
         {
+            entry.Layout = LayoutCache.For(entry.Layout);
             return this.AddLayout(entry.Name, new ConstantValueProvider<StackEntry>(entry));
         }
         public MenuLayoutBuilder AddLayout(string name, StackEntry entry)
         {
+            entry.Layout = LayoutCache.For(entry.Layout);
             return this.AddLayout(name, new ConstantValueProvider<StackEntry>(entry));
         }
         public MenuLayoutBuilder AddLayout(string name, ValueProvider<StackEntry> layoutProvider)
         {
             return this.AddLayout(new ConstantValueProvider<MenuItem>(new MenuItem(name, null)), layoutProvider);
         }
-        public MenuLayoutBuilder AddLayout(ValueProvider<MenuItem> nameProvider, StackEntry layout)
+        public MenuLayoutBuilder AddLayout(ValueProvider<MenuItem> nameProvider, StackEntry entry)
         {
-            return this.AddLayout(nameProvider, new ConstantValueProvider<StackEntry>(layout));
+            entry.Layout = LayoutCache.For(entry.Layout);
+            return this.AddLayout(nameProvider, new ConstantValueProvider<StackEntry>(entry));
         }
         public MenuLayoutBuilder AddLayout(ValueProvider<MenuItem> nameProvider, ValueProvider<StackEntry> layoutProvider)
         {
