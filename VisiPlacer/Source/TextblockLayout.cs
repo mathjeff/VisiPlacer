@@ -77,7 +77,7 @@ namespace VisiPlacement
 
         public void setTextColor(Color color)
         {
-            this.textBlock.TextColor = color;
+            this.configurer.TextColor = color;
         }
         public void setBackgroundColor(Color color)
         {
@@ -95,6 +95,7 @@ namespace VisiPlacement
         }
         private void Initialize(Label textBlock, double fontsize, bool allowCropping, bool allowSplittingWords)
         {
+            this.configurer = new TextBlock_Configurer(textBlock, this);
             Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
             textBlock.Margin = new Thickness(0);
@@ -144,7 +145,6 @@ namespace VisiPlacement
 
         private LayoutChoice_Set makeLayout(double fontSize, bool allowCropping, bool allowSplittingWords)
         {
-            TextBlock_Configurer configurer = new TextBlock_Configurer(this.textBlock, this);
             LayoutChoice_Set layout;
             if (allowCropping)
                 layout = TextLayout.New_Croppable(configurer, fontSize);
@@ -154,6 +154,7 @@ namespace VisiPlacement
         }
 
         public string ModelledText;
+        private TextBlock_Configurer configurer;
         private Label textBlock;
         private List<LayoutChoice_Set> layouts;
     }
@@ -211,6 +212,15 @@ namespace VisiPlacement
             get
             {
                 return this.Label;
+            }
+        }
+
+        public Color TextColor
+        {
+            set
+            {
+                this.Label.TextColor = value;
+                this.assignedTextColor = value;
             }
         }
 
