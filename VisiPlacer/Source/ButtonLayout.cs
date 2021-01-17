@@ -17,10 +17,10 @@ namespace VisiPlacement
             this.Initialize(button);
         }
 
-        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)
+        public ButtonLayout(Button button, string content, double fontSize, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false, bool allowSplittingWords = false)
         {
             button.Text = content;
-            this.Initialize(button, fontSize, includeBevel, allowCropping, scoreIfEmpty);
+            this.Initialize(button, fontSize, includeBevel, allowCropping, scoreIfEmpty, allowSplittingWords);
         }
 
 
@@ -33,8 +33,8 @@ namespace VisiPlacement
         {
             return new LayoutUnion(buttonLayout, new ContainerLayout());
         }
-        
-        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false)
+
+        private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false, bool allowSplittingWords = false)
         {
             bool isButtonColorSet = button.BackgroundColor.A > 0;
             LayoutChoice_Set sublayout;
@@ -45,7 +45,7 @@ namespace VisiPlacement
                 if (allowCropping)
                     sublayout = TextLayout.New_Croppable(buttonConfigurer, fontSize, scoreIfEmpty);
                 else
-                    sublayout = new TextLayout(buttonConfigurer, fontSize, scoreIfEmpty);
+                    sublayout = new TextLayout(buttonConfigurer, fontSize, allowSplittingWords, scoreIfEmpty);
             }
             else
             {
@@ -58,9 +58,9 @@ namespace VisiPlacement
                 }
                 else
                 {
-                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30, false, scoreIfEmpty));
-                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16, false, scoreIfEmpty));
-                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12, false, scoreIfEmpty));
+                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 30, allowSplittingWords, scoreIfEmpty));
+                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 16, allowSplittingWords, scoreIfEmpty));
+                    sublayoutOptions.Add(new TextLayout(buttonConfigurer, 12, allowSplittingWords, scoreIfEmpty));
                 }
                 LayoutUnion layoutUnion = new LayoutUnion(sublayoutOptions);
                 sublayout = layoutUnion;
