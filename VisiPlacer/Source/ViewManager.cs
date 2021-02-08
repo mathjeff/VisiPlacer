@@ -381,6 +381,14 @@ namespace VisiPlacement
             }
         }
 
+        public bool NeedsRelayout
+        {
+            get
+            {
+                return this.needsRelayout;
+            }
+        }
+
         private ContentView mainView;
         // the layout that we put the caller's layout into
         private ContainerLayout callerHolder = new ContainerLayout();
