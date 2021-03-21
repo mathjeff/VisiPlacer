@@ -20,6 +20,9 @@ namespace VisiPlacement
             return ScrollLayout.New(textLayout, null);
         }
 
+        // All measurements should be a multiple of this value. This helps Get_NonCropping_MinWidthLayout
+        private static double pixelSize = 1;
+
         public TextLayout(TextItem_Configurer textItem, double fontSize, bool allowSplittingWords = false, bool scoreIfEmpty = true)
         {
             this.TextItem_Configurer = textItem;
@@ -151,19 +154,23 @@ namespace VisiPlacement
         private Specific_TextLayout Get_NonCropping_MinWidthLayout(LayoutQuery query)
         {
             Specific_TextLayout bestAllowedDimensions = this.ComputeDimensions(new Size(double.PositiveInfinity, double.PositiveInfinity), query.Debug);
-            double pixelSize = 1;
             double maxRejectedWidth = 0;
             int numIterations = 0;
             bool firstIteration = true;
             double maxWidth = query.MaxWidth;
+            if (query.Debug)
+                System.Diagnostics.Debug.WriteLine("TextLayout.Get_NonCropping_MinWidthLayout starting for text '" + this.TextToFit + "'");
             while (maxRejectedWidth < bestAllowedDimensions.Width - pixelSize / 2)
             {
                 numIterations++;
                 // given the current width, compute the required height
                 Specific_TextLayout newDimensions = this.ComputeDimensions(new Size(maxWidth, double.PositiveInfinity), query.Debug);
+                if (query.Debug)
+                    System.Diagnostics.Debug.WriteLine("TextLayout.Get_NonCropping_MinWidthLayout checking width " + maxWidth + ", got dimensions " + newDimensions);
+                // check whether the resulting layout satisfies the query
                 if (newDimensions.Height <= query.MaxHeight && query.MinScore.CompareTo(newDimensions.Score) <= 0)
                 {
-                    // this layout fits in the required dimensions
+                    // this layout fits in the required score+height dimensions
                     if (newDimensions.Width <= bestAllowedDimensions.Width && newDimensions.Width <= query.MaxWidth)
                     {
                         // this layout is at least as good as the best layout we found so far
@@ -184,7 +191,11 @@ namespace VisiPlacement
                         maxRejectedWidth = maxWidth;
                     // if the first layout we found was too tall, then there will need to be some cropping
                     if (double.IsPositiveInfinity(bestAllowedDimensions.Width))
+                    {
+                        if (query.Debug)
+                            System.Diagnostics.Debug.WriteLine("TextLayout.Get_NonCropping_MinWidthLayout early returning null");
                         return null;
+                    }
                 }
                 // calculate a new size, by guessing based on required area
                 double desiredArea = newDimensions.Height * Math.Max(maxWidth, newDimensions.Width);
@@ -197,6 +208,9 @@ namespace VisiPlacement
                     {
                         // The first time that we find we have enough area to make the width very tiny, we calculate the true minimum amount of width required
                         Size desiredSize = this.formatText(maxWidth, query.Debug).Size;
+                        if (query.Debug)
+                            System.Diagnostics.Debug.WriteLine("TextLayout.Get_NonCropping_MinWidthLayout formatText got size of " + desiredSize);
+
                         if (desiredSize.Width > maxWidth)
                             maxRejectedWidth = desiredSize.Width - pixelSize / 2;
                         maxWidth = desiredSize.Width;
@@ -221,11 +235,28 @@ namespace VisiPlacement
                 System.Diagnostics.Debug.WriteLine("Spent " + numIterations + " iterations in Get_NonCropping_MinWidthLayout with query = " + query + " and text length = " + this.TextLength);
             if (!query.Accepts(bestAllowedDimensions))
                 return null;
+            if (query.Debug)
+                System.Diagnostics.Debug.WriteLine("TextLayout.Get_NonCropping_MinWidthLayout returning " + bestAllowedDimensions + " for query " + query);
+
             return bestAllowedDimensions;
+        }
+        private double roundWidthDown(double value)
+        {
+            return Math.Floor(value / pixelSize) * pixelSize;
+        }
+        private double roundWidthUp(double value)
+        {
+            return Math.Ceiling(value / pixelSize) * pixelSize;
+        }
+        private double roundHeightUp(double value)
+        {
+            // It shouldn't actually be necessary to round the height up, but it should be less confusing: more consistent with the width
+            return Math.Ceiling(value / pixelSize) * pixelSize;
         }
 
         private FormattedParagraph formatText(double maxWidth, bool debug)
         {
+            maxWidth = this.roundWidthDown(maxWidth);
             double fontSize = this.TrueFontSize;
             string fontName = this.font.Name;
             // check the cache
@@ -238,6 +269,8 @@ namespace VisiPlacement
             }
             // recompute and save into cache
             formatted = this.GetTextFormatter(fontName).FormatText(this.TextToFit, maxWidth, this.AllowSplittingWords, debug, fontSize);
+            formatted.Size.Width = this.roundWidthUp(formatted.Size.Width);
+            formatted.Size.Height = this.roundHeightUp(formatted.Size.Height);
             if (this.textItem_text == null || this.textItem_text == "")
                 formatted.Text = this.textItem_text;
             this.layoutsByWidth[maxWidth] = formatted;
@@ -661,10 +694,6 @@ namespace VisiPlacement
             return TextMeasurer.Instance.Measure(text, fontSize, this.fontName);
         }
 
-
-        private double fontLineHeight;
-        private double leftMargin;
-        // Dictionary<FontSize, Dictionary<Text, MeasuredSize>>
         private Dictionary<double, Dictionary<String, Size>> sizesCache = new Dictionary<double, Dictionary<string, Size>>();
         private string fontName;
     }
