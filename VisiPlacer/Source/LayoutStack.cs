@@ -11,6 +11,9 @@ namespace VisiPlacement
 {
     public class LayoutStack : ContainerLayout
     {
+
+        public event OnNavigate Navigated;
+        public delegate void OnNavigate();
         public LayoutStack(bool showBackButtons = true)
         {
             this.showBackButtons = showBackButtons;
@@ -80,6 +83,8 @@ namespace VisiPlacement
             {
                 this.setSublayout(null);
             }
+            if (this.Navigated != null)
+                this.Navigated.Invoke();
         }
         private void setSublayout(LayoutChoice_Set layout)
         {

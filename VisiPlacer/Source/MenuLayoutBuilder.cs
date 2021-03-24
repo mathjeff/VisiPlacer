@@ -43,7 +43,7 @@ namespace VisiPlacement
 
         public LayoutChoice_Set Build()
         {
-            return LayoutCache.For(new MenuLayout(this.layoutNameProviders, this.destinationProviders, this.layoutStack));
+            return new MenuLayout(this.layoutNameProviders, this.destinationProviders, this.layoutStack);
         }
 
         List<ValueProvider<MenuItem>> layoutNameProviders = new List<ValueProvider<MenuItem>>();
@@ -58,7 +58,15 @@ namespace VisiPlacement
             this.buttonNameProviders = buttonNameProviders;
             this.destinationProviders = destinationProviders;
             this.layoutStack = layoutStack;
+            this.layoutStack.Navigated += LayoutStack_Navigated;
         }
+
+        private void LayoutStack_Navigated()
+        {
+            // make sure that we get get the chance to update our button layouts if needed
+            this.AnnounceChange(false);
+        }
+
         public override SpecificLayout GetBestLayout(LayoutQuery query)
         {
             if (this.SubLayout == null)
@@ -104,7 +112,7 @@ namespace VisiPlacement
                 ValueProvider<StackEntry> destinationProvider = destinationProviders[i];
                 this.buttonDestinations[button] = destinationProvider;
             }
-            return mainBuilder.BuildAnyLayout();
+            return LayoutCache.For(mainBuilder.BuildAnyLayout());
         }
 
         private void Button_Clicked(object sender, System.EventArgs e)
