@@ -24,7 +24,7 @@ namespace VisiPlacement.Android
             int widthMeasureSpec = MeasureSpec.MakeMeasureSpec(0, MeasureSpecMode.Unspecified);
             int heightMeasureSpec = MeasureSpec.MakeMeasureSpec(0, MeasureSpecMode.Unspecified);
             double scale = global::Android.App.Application.Context.Resources.DisplayMetrics.Density;
-            textView.SetTextSize(ComplexUnitType.Dip, (float)fontSize);
+            textView.SetTextSize(ComplexUnitType.Sp, (float)fontSize);
             textView.Measure(widthMeasureSpec, heightMeasureSpec);
             // Add 1 to account for rounding error.
             // MeasuredWidth and MeasuredHeight are in pixels but the caller will want the result in Dips.
