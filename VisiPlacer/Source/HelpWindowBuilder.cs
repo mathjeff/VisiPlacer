@@ -64,9 +64,13 @@ namespace VisiPlacement
         }
         public LayoutChoice_Set Get(double fontsize, int numComponents)
         {
+            TextblockLayout result;
             if (numComponents > 1)
-                return new TextblockLayout("    " + this.text, fontsize);
-            return new TextblockLayout(this.text, fontsize);
+                result = new TextblockLayout("    " + this.text, fontsize);
+            else
+                result = new TextblockLayout(this.text, fontsize);
+            result.AlignVertically(Xamarin.Forms.TextAlignment.Center);
+            return result;
         }
         private string text;
     }
