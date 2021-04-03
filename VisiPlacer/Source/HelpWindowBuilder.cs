@@ -27,7 +27,6 @@ namespace VisiPlacement
         private LayoutChoice_Set MakeSublayout(double fontSize)
         {
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
-            GridLayout gridLayout = GridLayout.New(new BoundProperty_List(this.components.Count()), BoundProperty_List.Uniform(1), LayoutScore.Zero);
             foreach (HelpBlock block in this.components)
             {
                 builder.AddLayout(block.Get(fontSize, this.components.Count()));
@@ -37,8 +36,11 @@ namespace VisiPlacement
         public LayoutChoice_Set Build()
         {
             List<LayoutChoice_Set> fontChoices = new List<LayoutChoice_Set>();
-            LayoutChoice_Set large = this.MakeSublayout(20);
-            fontChoices.Add(ScrollLayout.New(large));
+            for (int i = 28; i >= 20; i -= 2)
+            {
+                LayoutChoice_Set large = this.MakeSublayout(i);
+                fontChoices.Add(large);
+            }
             LayoutChoice_Set small = this.MakeSublayout(16);
             fontChoices.Add(small);
             return new LayoutUnion(fontChoices);
