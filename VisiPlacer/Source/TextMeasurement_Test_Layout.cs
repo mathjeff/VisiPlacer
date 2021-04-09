@@ -18,7 +18,7 @@ namespace VisiPlacement
         }
         public TextMeasurement_Test_Layout()
         {
-            Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
+            GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
 
             Editor textBox = new Editor();
             textBox.TextChanged += TextBox_TextChanged;

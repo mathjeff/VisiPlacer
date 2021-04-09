@@ -115,7 +115,7 @@ namespace VisiPlacement
                     interestingPrevLayouts.Add(entry);
             }
 
-            Horizontal_GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
             foreach (StackEntry entry in interestingPrevLayouts)
             {
                 fullBuilder.AddLayout(this.JumpBack_ButtonLayout(entry));
@@ -125,7 +125,7 @@ namespace VisiPlacement
                 // If there are 2 or fewer previous layouts, then we show all of them
                 return fullBuilder.BuildAnyLayout();
             }
-            Horizontal_GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
+            GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
             abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 2]));
             abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 1]));
             return new LayoutUnion(abbreviatedBuilder.BuildAnyLayout(), fullBuilder.BuildAnyLayout());

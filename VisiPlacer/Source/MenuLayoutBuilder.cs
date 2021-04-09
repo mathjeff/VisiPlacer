@@ -81,7 +81,7 @@ namespace VisiPlacement
         }
         private LayoutChoice_Set build()
         {
-            Vertical_GridLayout_Builder mainBuilder = new Vertical_GridLayout_Builder().Uniform();
+            GridLayout_Builder mainBuilder = new Vertical_GridLayout_Builder().Uniform();
             this.buttons = new List<Button>();
             this.subtitles = new List<TextblockLayout>();
             this.buttonDestinations = new Dictionary<Button, ValueProvider<StackEntry>>();

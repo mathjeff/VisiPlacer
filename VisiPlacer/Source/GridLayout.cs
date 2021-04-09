@@ -445,7 +445,7 @@ namespace VisiPlacement
 
                         // recursively query the next dimension
                         newSublayouts = this.GetLayoutsToConsider(subQuery, currentLayout);
-                        
+
 
                         currentSublayout = GridLayout.PreferredLayout(subQuery, newSublayouts);
                         if (currentSublayout == null)
@@ -1231,14 +1231,14 @@ namespace VisiPlacement
 
     }
 
-    public class Vertical_GridLayout_Builder
+    public abstract class GridLayout_Builder
     {
-        public Vertical_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
+        public GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
         {
             this.subLayouts.Add(subLayout);
             return this;
         }
-        public Vertical_GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
+        public GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
         {
             foreach (LayoutChoice_Set subLayout in subLayouts)
             {
@@ -1246,29 +1246,15 @@ namespace VisiPlacement
             }
             return this;
         }
-        public Vertical_GridLayout_Builder Uniform()
+
+        public GridLayout_Builder Uniform()
         {
             this.uniform = true;
             return this;
         }
-        // builds a GridLayout
-        public GridLayout Build()
-        {
-            BoundProperty_List rowHeights = new BoundProperty_List(this.subLayouts.Count);
-            if (this.uniform)
-            {
-                for (int i = 1; i < rowHeights.NumProperties; i++)
-                {
-                    rowHeights.BindIndices(0, i);
-                }
-            }
-            GridLayout grid = GridLayout.New(rowHeights, new BoundProperty_List(1), LayoutScore.Zero);
-            foreach (LayoutChoice_Set sublayout in this.subLayouts)
-            {
-                grid.AddLayout(sublayout);
-            }
-            return grid;
-        }
+
+        public abstract GridLayout Build();
+
         public LayoutChoice_Set BuildAnyLayout()
         {
             if (this.subLayouts.Count == 1)
@@ -1276,31 +1262,15 @@ namespace VisiPlacement
             return this.Build();
         }
 
-        private List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
-        private bool uniform = false;
+        protected List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
+        protected bool uniform = false;
+
     }
 
-    public class Horizontal_GridLayout_Builder
+
+    public class Horizontal_GridLayout_Builder : GridLayout_Builder
     {
-        public Horizontal_GridLayout_Builder AddLayout(LayoutChoice_Set subLayout)
-        {
-            this.subLayouts.Add(subLayout);
-            return this;
-        }
-        public Horizontal_GridLayout_Builder AddLayouts(IEnumerable<LayoutChoice_Set> subLayouts)
-        {
-            foreach (LayoutChoice_Set subLayout in subLayouts)
-            {
-                this.AddLayout(subLayout);
-            }
-            return this;
-        }
-        public Horizontal_GridLayout_Builder Uniform()
-        {
-            this.uniform = true;
-            return this;
-        }
-        public GridLayout Build()
+        public override GridLayout Build()
         {
             BoundProperty_List columnWidths = new BoundProperty_List(this.subLayouts.Count);
             if (this.uniform)
@@ -1318,16 +1288,28 @@ namespace VisiPlacement
             }
             return grid;
         }
+    }
 
-        public LayoutChoice_Set BuildAnyLayout()
+    public class Vertical_GridLayout_Builder : GridLayout_Builder
+    {
+        // builds a GridLayout
+        public override GridLayout Build()
         {
-            if (this.subLayouts.Count == 1)
-                return this.subLayouts[0];
-            return this.Build();
+            BoundProperty_List rowHeights = new BoundProperty_List(this.subLayouts.Count);
+            if (this.uniform)
+            {
+                for (int i = 1; i < rowHeights.NumProperties; i++)
+                {
+                    rowHeights.BindIndices(0, i);
+                }
+            }
+            GridLayout grid = GridLayout.New(rowHeights, new BoundProperty_List(1), LayoutScore.Zero);
+            foreach (LayoutChoice_Set sublayout in this.subLayouts)
+            {
+                grid.AddLayout(sublayout);
+            }
+            return grid;
         }
-
-        private List<LayoutChoice_Set> subLayouts = new List<LayoutChoice_Set>();
-        private bool uniform = false;
     }
 
 

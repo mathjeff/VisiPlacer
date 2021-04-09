@@ -40,7 +40,7 @@ namespace VisiPlacement
             this.arrowLayouts = new List<LayoutChoice_Set>();
             for (int i = 0; i < this.itemLayouts.Count; i++)
             {
-                Vertical_GridLayout_Builder arrowBuilder = new Vertical_GridLayout_Builder().Uniform();
+                GridLayout_Builder arrowBuilder = new Vertical_GridLayout_Builder().Uniform();
                 if (i != 0)
                     arrowBuilder.AddLayout(this.Make_PrevButton(i));
                 if (i != this.itemLayouts.Count - 1)
