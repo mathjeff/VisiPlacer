@@ -81,7 +81,7 @@ namespace VisiPlacement
         }
         public void setBackgroundColor(Color color)
         {
-            this.textBlock.BackgroundColor = color;
+            this.configurer.BackgroundColor = color;
         }
 
         public string getText()
@@ -167,8 +167,8 @@ namespace VisiPlacement
         {
             this.Label = label;
             this.Layout = layout;
-            this.assignedTextColor = label.TextColor;
-            this.assignedBackgroundColor = label.BackgroundColor;
+            this.assignedTextColor = (label.TextColor.A > 0);
+            this.assignedBackgroundColor = (label.BackgroundColor.A > 0);
         }
 
         public double Width
@@ -220,16 +220,25 @@ namespace VisiPlacement
             set
             {
                 this.Label.TextColor = value;
-                this.assignedTextColor = value;
+                this.assignedTextColor = true;
+            }
+        }
+
+        public Color BackgroundColor
+        {
+            set
+            {
+                this.Label.BackgroundColor = value;
+                this.assignedBackgroundColor = true;
             }
         }
 
         public void ApplyDefaults(ViewDefaults layoutDefaults)
         {
             // apply defaults if colors weren't already set
-            if (this.assignedTextColor.A <= 0)
+            if (!this.assignedTextColor)
                 this.Label.TextColor = layoutDefaults.TextBlock_Defaults.TextColor;
-            if (this.assignedBackgroundColor.A <= 0)
+            if (!this.assignedBackgroundColor)
                 this.Label.BackgroundColor = layoutDefaults.TextBlock_Defaults.BackgroundColor;
         }
 
@@ -240,8 +249,8 @@ namespace VisiPlacement
 
         public Label Label;
         public TextblockLayout Layout;
-        public Color assignedTextColor;
-        public Color assignedBackgroundColor;
+        public bool assignedTextColor;
+        public bool assignedBackgroundColor;
     }
 
 }
