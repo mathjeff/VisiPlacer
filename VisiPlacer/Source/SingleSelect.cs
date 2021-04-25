@@ -21,6 +21,9 @@ namespace VisiPlacement
 
     public class SingleSelect : Button
     {
+        public event SingleSelect_UpdatedHandler Updated;
+        public delegate void SingleSelect_UpdatedHandler(SingleSelect singleSelect);
+
         public SingleSelect(List<String> choices)
         {
             List<SingleSelect_Choice> buttonChoices = new List<SingleSelect_Choice>();
@@ -82,6 +85,8 @@ namespace VisiPlacement
             Color backgroundColor = this.items[this.selectedIndex].BackgroundColor;
             if (backgroundColor.A > 0)
                 this.BackgroundColor = this.items[this.selectedIndex].BackgroundColor;
+            if (this.Updated != null)
+                this.Updated.Invoke(this);
         }
 
         List<SingleSelect_Choice> items;
