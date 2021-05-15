@@ -7,10 +7,11 @@ using Xamarin.Forms;
 namespace VisiPlacement
 {
     // a PopoutTextbox is a text box that becomes fullscreen while the user edits it
-    public class PopoutTextbox : ContainerLayout, OnBack_Listener
+    public class PopoutTextbox : TitledControl, OnBack_Listener
     {
-        public PopoutTextbox(string title, LayoutStack layoutStack)
+        public PopoutTextbox(string title, LayoutStack layoutStack) : base(title)
         {
+            this.TitleLayout.AlignVertically(TextAlignment.Center);
             this.title = title;
             this.layoutStack = layoutStack;
 
@@ -23,7 +24,7 @@ namespace VisiPlacement
             this.textBox = new Editor();
             this.detailsLayout = new TitledControl(title, ScrollLayout.New(new TextboxLayout(this.textBox)));
 
-            this.SubLayout = new TitledControl(title, buttonLayout);
+            this.SetContent(buttonLayout);
         }
 
         public void Placeholder(string text)
