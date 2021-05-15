@@ -57,8 +57,11 @@ namespace VisiPlacement
         }
         protected virtual Size chooseSize(Size availableSize)
         {
+            if (!this.ChildFillsAvailableSpace)
+                availableSize = this.Size;
             double subviewWidth = availableSize.Width - this.BorderThickness.Left - this.BorderThickness.Right;
             double subviewHeight = availableSize.Height - this.BorderThickness.Top - this.BorderThickness.Bottom;
+
             return new Size(subviewWidth, subviewHeight);
         }
 

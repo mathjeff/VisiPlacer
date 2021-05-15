@@ -83,7 +83,7 @@ namespace VisiPlacement
             {
                 // We have a sublayout and haven't been asked to wrap it in another view, so we can just forward the query on to it
                 sublayoutResult = this.SubLayout.GetBestLayout(query);
-                if (this.view == null)
+                if (this.view == null && this.ChildFillsAvailableSpace)
                 {
                     // If we haven't been asked to wrap the sublayout's result, we can just directly use it
                     return sublayoutResult;
@@ -110,7 +110,9 @@ namespace VisiPlacement
 
         protected virtual Specific_ContainerLayout makeSpecificLayout(View view, Size size, LayoutScore bonusScore, SpecificLayout subLayout, Thickness border)
         {
-            return new Specific_ContainerLayout(view, size, bonusScore, subLayout, border);
+            Specific_ContainerLayout result = new Specific_ContainerLayout(view, size, bonusScore, subLayout, border);
+            result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
+            return result;
         }
 
         LayoutChoice_Set subLayout;
