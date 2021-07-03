@@ -74,7 +74,8 @@ namespace VisiPlacement
             for (int i = 0; i < this.buttonNameProviders.Count; i++)
             {
                 MenuItem menuItem = this.buttonNameProviders[i].Get();
-                this.buttons[i].Text = menuItem.Name;
+                this.buttons[i].SetText(menuItem.Name);
+                this.buttons[i].SetEnabled(menuItem.Enabled);
                 this.subtitles[i].setText(menuItem.Subtitle);
             }
             return base.GetBestLayout(query);
@@ -82,16 +83,15 @@ namespace VisiPlacement
         private LayoutChoice_Set build()
         {
             GridLayout_Builder mainBuilder = new Vertical_GridLayout_Builder().Uniform();
-            this.buttons = new List<Button>();
+            this.buttons = new List<DisablableButtonLayout>();
             this.subtitles = new List<TextblockLayout>();
-            this.buttonDestinations = new Dictionary<Button, ValueProvider<StackEntry>>();
+            this.buttonDestinations = new Dictionary<DisablableButtonLayout, ValueProvider<StackEntry>>();
             for (int i = 0; i < this.buttonNameProviders.Count; i++)
             {
-                Button button = new Button();
+                DisablableButtonLayout button = new DisablableButtonLayout("");
                 button.Clicked += Button_Clicked;
                 this.buttons.Add(button);
 
-                ButtonLayout buttonLayout = new ButtonLayout(button);
                 TextblockLayout subtitleLayout = new TextblockLayout();
                 subtitleLayout.AlignHorizontally(TextAlignment.Center);
                 subtitleLayout.AlignVertically(TextAlignment.Center);
@@ -103,10 +103,10 @@ namespace VisiPlacement
                 columnWidths.SetPropertyScale(1, 1);
                 columnWidths.BindIndices(0, 1);
                 GridLayout entryGrid = GridLayout.New(new BoundProperty_List(1), columnWidths, LayoutScore.Get_UnCentered_LayoutScore(1));
-                entryGrid.AddLayout(buttonLayout);
+                entryGrid.AddLayout(button);
                 entryGrid.AddLayout(subtitleLayout);
 
-                LayoutUnion content = new LayoutUnion(entryGrid, buttonLayout);
+                LayoutUnion content = new LayoutUnion(entryGrid, button);
                 mainBuilder.AddLayout(content);
 
                 ValueProvider<StackEntry> destinationProvider = destinationProviders[i];
@@ -117,16 +117,16 @@ namespace VisiPlacement
 
         private void Button_Clicked(object sender, System.EventArgs e)
         {
-            Button button = sender as Button;
+            DisablableButtonLayout button = sender as DisablableButtonLayout;
             ValueProvider<StackEntry> destinationProvider = this.buttonDestinations[button];
             this.layoutStack.AddLayout(destinationProvider.Get());
         }
 
         List<ValueProvider<MenuItem>> buttonNameProviders;
         List<ValueProvider<StackEntry>> destinationProviders;
-        List<Button> buttons;
+        List<DisablableButtonLayout> buttons;
         List<TextblockLayout> subtitles;
-        Dictionary<Button, ValueProvider<StackEntry>> buttonDestinations;
+        Dictionary<DisablableButtonLayout, ValueProvider<StackEntry>> buttonDestinations;
         LayoutStack layoutStack;
     }
 
@@ -150,13 +150,15 @@ namespace VisiPlacement
 
     public class MenuItem
     {
-        public MenuItem(string name, string subtitle)
+        public MenuItem(string name, string subtitle, bool enabled = true)
         {
             this.Name = name;
             this.Subtitle = subtitle;
+            this.Enabled = enabled;
         }
         public string Name;
         public string Subtitle;
+        public bool Enabled;
     }
 
 }
