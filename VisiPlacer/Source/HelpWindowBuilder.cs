@@ -14,7 +14,8 @@ namespace VisiPlacement
 
         public HelpWindowBuilder AddMessage(string message)
         {
-            this.components.Add(new HelpParagraph(message));
+            bool isFirst = (this.components.Count == 0);
+            this.components.Add(new HelpParagraph(message, isFirst));
             return this;
         }
 
@@ -58,21 +59,34 @@ namespace VisiPlacement
     // a paragraph inside a help window
     class HelpParagraph : HelpBlock
     {
-        public HelpParagraph(string text)
+        public HelpParagraph(string text, bool isFirstBlock)
         {
             this.text = text;
+            this.isFirstBlock = isFirstBlock;
         }
         public LayoutChoice_Set Get(double fontsize, int numComponents)
         {
             TextblockLayout result;
             if (numComponents > 1)
-                result = new TextblockLayout("    " + this.text, fontsize);
+            {
+                // indent paragraphs unless there's only one
+                string prefix = "    ";
+                if (!isFirstBlock)
+                {
+                    // blank lines between paragraphs
+                    prefix = "\n" + prefix;
+                }
+                result = new TextblockLayout(prefix + this.text, fontsize);
+            }
             else
+            {
                 result = new TextblockLayout(this.text, fontsize);
+            }
             result.AlignVertically(Xamarin.Forms.TextAlignment.Center);
             return result;
         }
         private string text;
+        private bool isFirstBlock;
     }
 
     // a layout inside a help window
