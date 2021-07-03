@@ -79,6 +79,10 @@ namespace VisiPlacement
         {
             this.configurer.TextColor = color;
         }
+        public void resetTextColor()
+        {
+            this.configurer.resetTextColor();
+        }
         public void setBackgroundColor(Color color)
         {
             this.configurer.BackgroundColor = color;
@@ -222,6 +226,12 @@ namespace VisiPlacement
                 this.Label.TextColor = value;
                 this.assignedTextColor = true;
             }
+        }
+
+        // restores the text color back to the default applied by any VisualDefaults
+        public void resetTextColor()
+        {
+            this.assignedTextColor = false;
         }
 
         public Color BackgroundColor
