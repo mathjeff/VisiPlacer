@@ -39,8 +39,7 @@ namespace VisiPlacement
             List<LayoutChoice_Set> fontChoices = new List<LayoutChoice_Set>();
             for (int i = 28; i >= 20; i -= 2)
             {
-                LayoutChoice_Set large = this.MakeSublayout(i);
-                fontChoices.Add(large);
+                fontChoices.Add(ScrollLayout.New(this.MakeSublayout(i)));
             }
             LayoutChoice_Set small = this.MakeSublayout(16);
             fontChoices.Add(small);
