@@ -15,7 +15,7 @@ namespace VisiPlacement
         }
 
         public CheckBox(string falseValue, Color falseBackgroundColor, string trueValue, Color trueBackgroundColor)
-            : base(new List<SingleSelect_Choice>() { new SingleSelect_Choice(falseValue, falseBackgroundColor), new SingleSelect_Choice(trueValue, trueBackgroundColor) })
+            : base(null, new List<SingleSelect_Choice>() { new SingleSelect_Choice(falseValue, falseBackgroundColor), new SingleSelect_Choice(trueValue, trueBackgroundColor) })
         {
         }
 
