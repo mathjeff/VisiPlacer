@@ -211,6 +211,13 @@ namespace VisiPlacement
             this.minScore = value;
             if (!this.Accepts(this.proposedSolution_forDebugging))
                 this.proposedSolution_forDebugging = null;
+            if (this.Debug)
+            {
+                if (value.CompareTo(LayoutScore.Get_CutOff_LayoutScore(1)) <= 0 && this.MaxWidth > 0 && this.MaxHeight > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Cropping query score for query " + this);
+                }
+            }
         }
         protected void setLayoutDefaults(LayoutDefaults defaults)
         {
