@@ -128,12 +128,22 @@ namespace VisiPlacement
 
             // determine which views are currently focused so we can re-focus them after redoing the layout
             List<View> focusedViews = new List<View>();
+            Dictionary<ScrollView, Point> scrollPositions = new Dictionary<ScrollView, Point>();
             if (this.specificLayout != null)
             {
                 foreach (SpecificLayout layout in this.specificLayout.GetDescendents())
                 {
-                    if (layout.View != null && layout.View.IsFocused && layout.GetParticipatingChildren().Count() < 1)
-                        focusedViews.Add(layout.View);
+                    if (layout.View != null)
+                    {
+                        View view = layout.View;
+                        if (view != null && view.IsFocused && layout.GetParticipatingChildren().Count() < 1)
+                            focusedViews.Add(view);
+                        if (view is ScrollView)
+                        {
+                            ScrollView scrollView = view as ScrollView;
+                            scrollPositions[scrollView] = new Point(scrollView.ScrollX, scrollView.ScrollY);
+                        }
+                    }
                 }
             }
 
@@ -205,6 +215,12 @@ namespace VisiPlacement
             {
                 if (postParents.ContainsKey(view))
                     view.Focus();
+            }
+            foreach (ScrollView scrollView in scrollPositions.Keys)
+            {
+                Point where = scrollPositions[scrollView];
+                if (postParents.ContainsKey(scrollView))
+                    scrollView.ScrollToAsync(where.X, where.Y, false);
             }
 
             System.Diagnostics.Debug.WriteLine("ViewManager completed layout at " + DateTime.Now);
