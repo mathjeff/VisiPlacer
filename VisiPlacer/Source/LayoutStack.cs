@@ -114,21 +114,11 @@ namespace VisiPlacement
                 if (entry.BackPriority == maxPriority)
                     interestingPrevLayouts.Add(entry);
             }
-            if (interestingPrevLayouts.Count == 1)
-            {
-                // If there's exactly one back button, make it say "Back" to clarify that it's a Back button
-                // If there are multiple back buttons, we're hoping:
-                // A) the user will have noticed it saying "Back" before
-                // B) eventually the user will have nothing else to do other than press one of them
-                // C) the names on the buttons should be recognizable as places the user has been before
-                // so hopefully the user will eventually notice that they're back buttons
-                return this.JumpBackByOne_ButtonLayout("Back: " + interestingPrevLayouts[0].Name);
-            }
 
             GridLayout_Builder fullBuilder = new Horizontal_GridLayout_Builder().Uniform();
             foreach (StackEntry entry in interestingPrevLayouts)
             {
-                fullBuilder.AddLayout(this.JumpBackTo_ButtonLayout(entry));
+                fullBuilder.AddLayout(this.JumpBack_ButtonLayout(entry));
             }
             if (interestingPrevLayouts.Count <= 2)
             {
@@ -136,11 +126,11 @@ namespace VisiPlacement
                 return fullBuilder.BuildAnyLayout();
             }
             GridLayout_Builder abbreviatedBuilder = new Horizontal_GridLayout_Builder().Uniform();
-            abbreviatedBuilder.AddLayout(this.JumpBackTo_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 2]));
-            abbreviatedBuilder.AddLayout(this.JumpBackTo_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 1]));
+            abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 2]));
+            abbreviatedBuilder.AddLayout(this.JumpBack_ButtonLayout(interestingPrevLayouts[interestingPrevLayouts.Count - 1]));
             return new LayoutUnion(abbreviatedBuilder.BuildAnyLayout(), fullBuilder.BuildAnyLayout());
         }
-        private LayoutChoice_Set JumpBackTo_ButtonLayout(StackEntry stackEntry)
+        private LayoutChoice_Set JumpBack_ButtonLayout(StackEntry stackEntry)
         {
             int toIndex = -1;
             for (int i = 0; i < this.layoutEntries.Count; i++)
@@ -152,36 +142,19 @@ namespace VisiPlacement
                 }
             }
 
-            while (toIndex >= this.backButton_layouts.Count)
+            if (toIndex >= this.backButton_layouts.Count)
             {
                 Button newButton = new Button();
-                newButton.Clicked += GoTo_Clicked;
+                newButton.Clicked += Button_Clicked;
                 this.backButtons.Add(newButton);
                 this.backButton_layouts.Add(LayoutCache.For(new ButtonLayout(newButton)));
             }
             Button button = this.backButtons[toIndex];
-            button.Text = stackEntry.Name;
+            button.Text = "Back: " + stackEntry.Name;
             return this.backButton_layouts[toIndex];
         }
 
-        private LayoutChoice_Set JumpBackByOne_ButtonLayout(string text)
-        {
-            if (this.goBackOne_buttonLayout == null)
-            {
-                Button button = new Button();
-                this.goBackOne_buttonLayout = new ButtonLayout(button);
-                button.Clicked += GoBackOne_Clicked;
-            }
-            this.goBackOne_buttonLayout.setText(text);
-            return this.goBackOne_buttonLayout;
-        }
-
-        private void GoBackOne_Clicked(object sender, EventArgs e)
-        {
-            this.GoBack();
-        }
-
-        private void GoTo_Clicked(object sender, EventArgs e)
+        private void Button_Clicked(object sender, EventArgs e)
         {
             Button button = sender as Button;
             if (button == null)
@@ -206,7 +179,6 @@ namespace VisiPlacement
         private List<LayoutChoice_Set> backButton_layouts = new List<LayoutChoice_Set>();
         private GridLayout mainGrid;
         private bool showBackButtons;
-        ButtonLayout goBackOne_buttonLayout;
     }
 
     public class StackEntry
