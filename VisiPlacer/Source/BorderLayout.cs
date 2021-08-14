@@ -27,7 +27,7 @@ namespace VisiPlacement
 
         private void Initialize()
         {
-            this.ChildFillsAvailableSpace = true;
+            this.ChildFillsAvailableSpace = false;
         }
         public void CopyFrom(MustBorderLayout original)
         {
