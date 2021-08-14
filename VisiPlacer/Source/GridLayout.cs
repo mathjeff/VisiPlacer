@@ -2000,8 +2000,6 @@ namespace VisiPlacement
                 // It's probably faster to request a layout having score >= 0 because that means there's no cropping.
                 // So, we first try to get one of those
                 specificLayout = layout.GetBestLayout(this.SourceQuery.New_MaxScore_LayoutQuery(width, height, LayoutScore.Minimum));
-                if (specificLayout == null)
-                    ErrorReporter.ReportParadox("Could not find layout for size " + width + "x" + height);
             }
             this.sub_specificLayouts[columnIndex, rowIndex] = new SublayoutResponse(specificLayout, new Size(width, height));
             return specificLayout;
