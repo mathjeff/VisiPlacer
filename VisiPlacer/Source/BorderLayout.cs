@@ -42,7 +42,11 @@ namespace VisiPlacement
                 if (this.view == null)
                 {
                     if (!this.BorderThickness.Equals(new Thickness(0)))
-                        this.view = new ContainerView();
+                    {
+                        ContainerView containerView = new ContainerView();
+                        containerView.Padding = this.BorderThickness;
+                        this.view = containerView;
+                    }
                 }
                 return this.view;
             }
@@ -72,7 +76,7 @@ namespace VisiPlacement
                 SpecificLayout best_subLayout = this.SubLayout.GetBestLayout(subQuery);
                 if (best_subLayout != null)
                 {
-                    result = this.makeSpecificLayout(this.view, new Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), LayoutScore.Zero, best_subLayout, this.BorderThickness);
+                    result = this.makeSpecificLayout(this.View, new Size(best_subLayout.Width + borderWidth, best_subLayout.Height + borderHeight), LayoutScore.Zero, best_subLayout, this.BorderThickness);
                     result.ChildFillsAvailableSpace = this.ChildFillsAvailableSpace;
                     this.prepareLayoutForQuery(result, query);
                     return result;
@@ -80,7 +84,7 @@ namespace VisiPlacement
                 return null;
             }
             // if there is no subLayout, for now we just return an empty size
-            Specific_ContainerLayout empty = this.makeSpecificLayout(this.view, new Size(), LayoutScore.Zero, null, new Thickness());
+            Specific_ContainerLayout empty = this.makeSpecificLayout(this.View, new Size(), LayoutScore.Zero, null, new Thickness());
             if (query.Accepts(empty))
                 result = empty;
             else

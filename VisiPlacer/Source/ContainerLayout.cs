@@ -92,7 +92,7 @@ namespace VisiPlacement
                 {
                     if (sublayoutResult == null)
                         return null;
-                    result = this.makeSpecificLayout(this.view, sublayoutResult.Size, LayoutScore.Zero, sublayoutResult, new Thickness());
+                    result = this.makeSpecificLayout(this.View, sublayoutResult.Size, LayoutScore.Zero, sublayoutResult, new Thickness());
                     this.prepareLayoutForQuery(result, query);
                     return result;
                 }
