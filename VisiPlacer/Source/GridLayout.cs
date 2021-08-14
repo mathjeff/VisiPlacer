@@ -1623,7 +1623,8 @@ namespace VisiPlacement
                     if (subLayout != null)
                     {
                         SpecificLayout layout = this.GetChildLayout(columnNumber, rowNumber);
-                        totalScore = totalScore.Plus(layout.Score);
+                        if (layout != null)
+                            totalScore = totalScore.Plus(layout.Score);
                     }
                 }
             }
