@@ -639,10 +639,22 @@ namespace VisiPlacement
             int highCount = components.Count() - startIndex;
             while (highCount >= lowCount)
             {
+                // choose how many components to try now
                 int testCount = Math.Min(lowCount * 2, (lowCount + highCount) / 2);
 
-                string testText = String.Join("", components.GetRange(startIndex, testCount));
+                // if the last character is a space we don't need to measure it or include it, and we can instead just skip it
+                String last = components[testCount - 1];
+                int formatCount = testCount;
+                if (last == " ")
+                {
+                    formatCount--;
+                }
+
+                // determine how much text to measure and how big it is
+                string testText = String.Join("", components.GetRange(startIndex, formatCount));
                 Size requiredSize = this.getLineSize(testText, fontSize);
+
+                // update binary-search indices
                 if (requiredSize.Width <= desiredWidth)
                 {
                     // we found some characters that all fit into one line
