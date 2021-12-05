@@ -226,13 +226,32 @@ namespace VisiPlacement
                     this.button.TextColor = layoutDefaults.ButtonWithoutBevel_Defaults.TextColor;
             }
             if (this.IncludeBevel)
-                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.BackgroundColor;
+            {
+                ButtonViewDefaults buttonDefaults = layoutDefaults.ButtonWithBevel_Defaults;
+                if (buttonDefaults.BackgroundColorSecondary.A > 0)
+                {
+                    GradientStopCollection gradients = new GradientStopCollection();
+                    gradients.Add(new GradientStop(buttonDefaults.BackgroundColorPrimary, 0));
+                    gradients.Add(new GradientStop(buttonDefaults.BackgroundColorSecondary, (float)0.5));
+                    gradients.Add(new GradientStop(buttonDefaults.BackgroundColorPrimary, 1));
+
+                    this.buttonBackground.Background = new LinearGradientBrush(gradients, new Point(0, 0), new Point(0, 1));
+                }
+                else
+                {
+                    this.buttonBackground.Background = new SolidColorBrush(buttonDefaults.BackgroundColorPrimary);
+                }
+
+            }
             else
-                this.buttonBackground.BackgroundColor = layoutDefaults.ButtonWithoutBevel_Defaults.BackgroundColor;
+            {
+                this.buttonBackground.Background = new SolidColorBrush(layoutDefaults.ButtonWithoutBevel_Defaults.BackgroundColorPrimary);
+            }
             if (this.InnerBevel != null)
                 this.InnerBevel.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.InnerBevelColor;
             if (this.OuterBevel != null)
                 this.OuterBevel.BackgroundColor = layoutDefaults.ButtonWithBevel_Defaults.OuterBevelColor;
+
         }
 
         public void Add_TextChanged_Handler(System.ComponentModel.PropertyChangedEventHandler handler)

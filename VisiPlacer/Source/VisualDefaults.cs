@@ -51,10 +51,19 @@ namespace VisiPlacement
 
     public class ButtonViewDefaults
     {
+        // color of text in the button
         public Color TextColor;
+
+        // at the edges of the button there is a bevel. This is the color of the outer bevel
         public Color OuterBevelColor;
+        // color of the inner bevel
         public Color InnerBevelColor;
-        public Color BackgroundColor;
+
+        // primary color of background gradient
+        public Color BackgroundColorPrimary;
+        // secondary color of background gradient, if set
+        public Color BackgroundColorSecondary;
+
     }
 
     // A LayoutDefaults_Builder converts from properties that a user thinks about (normal text foreground color, normal text background color, etc)
@@ -87,6 +96,11 @@ namespace VisiPlacement
         public VisualDefaults_Builder ButtonOuterBevelColor(Color color)
         {
             this.buttonOuterBevelColor = color;
+            return this;
+        }
+        public VisualDefaults_Builder ButtonBackgroundSecondaryColor(Color color)
+        {
+            this.buttonBackgroundSecondaryColor = color;
             return this;
         }
         public VisualDefaults_Builder FontName(string name)
@@ -143,7 +157,9 @@ namespace VisiPlacement
 
             ButtonViewDefaults buttonDefaults = new ButtonViewDefaults();
             buttonDefaults.TextColor = this.uneditableTextColor;
-            buttonDefaults.BackgroundColor = this.uneditableTextBackgroundColor;
+            buttonDefaults.BackgroundColorPrimary = this.uneditableTextBackgroundColor;
+            if (this.buttonBackgroundSecondaryColor != null)
+                buttonDefaults.BackgroundColorSecondary = this.buttonBackgroundSecondaryColor.Value;
             if (this.buttonInnerBevelColor != null)
                 buttonDefaults.InnerBevelColor = this.buttonInnerBevelColor.Value;
             else
@@ -156,7 +172,7 @@ namespace VisiPlacement
 
             ButtonViewDefaults buttonWithoutBevelDefaults = new ButtonViewDefaults();
             buttonWithoutBevelDefaults.TextColor = this.uneditableTextBackgroundColor;
-            buttonWithoutBevelDefaults.BackgroundColor = this.uneditableTextColor;
+            buttonWithoutBevelDefaults.BackgroundColorPrimary = this.uneditableTextColor;
             viewDefaults.ButtonWithoutBevel_Defaults = buttonWithoutBevelDefaults;
 
             LayoutDefaults layoutDefaults = new LayoutDefaults();
@@ -184,6 +200,7 @@ namespace VisiPlacement
         private Color applicationBackground;
         private Color? buttonInnerBevelColor;
         private Color? buttonOuterBevelColor;
+        private Color? buttonBackgroundSecondaryColor;
         private string fontName;
         private double fontSizeMultiplier = 1;
     }
