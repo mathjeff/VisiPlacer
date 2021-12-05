@@ -82,7 +82,8 @@ namespace VisiPlacement
         }
         private LayoutChoice_Set build()
         {
-            GridLayout_Builder mainBuilder = new Vertical_GridLayout_Builder().Uniform();
+            GridLayout_Builder verticalBuilder = new Vertical_GridLayout_Builder().Uniform();
+            GridLayout_Builder horizontalBuilder = new Horizontal_GridLayout_Builder().Uniform();
             this.buttons = new List<DisablableButtonLayout>();
             this.subtitles = new List<TextblockLayout>();
             this.buttonDestinations = new Dictionary<DisablableButtonLayout, ValueProvider<StackEntry>>();
@@ -107,12 +108,15 @@ namespace VisiPlacement
                 entryGrid.AddLayout(subtitleLayout);
 
                 LayoutUnion content = new LayoutUnion(entryGrid, button);
-                mainBuilder.AddLayout(content);
+                verticalBuilder.AddLayout(content);
+                horizontalBuilder.AddLayout(content);
 
                 ValueProvider<StackEntry> destinationProvider = destinationProviders[i];
                 this.buttonDestinations[button] = destinationProvider;
             }
-            return LayoutCache.For(mainBuilder.BuildAnyLayout());
+            LayoutChoice_Set verticalLayout = verticalBuilder.BuildAnyLayout();
+            LayoutChoice_Set horizontalLayout = new ScoreShifted_Layout(horizontalBuilder.BuildAnyLayout(), LayoutScore.Get_UnCentered_LayoutScore(1));
+            return LayoutCache.For(new LayoutUnion(verticalLayout, horizontalLayout));
         }
 
         private void Button_Clicked(object sender, System.EventArgs e)
