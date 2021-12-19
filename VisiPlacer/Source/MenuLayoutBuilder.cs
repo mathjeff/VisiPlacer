@@ -106,10 +106,31 @@ namespace VisiPlacement
                 GridLayout entryGrid = GridLayout.New(new BoundProperty_List(1), columnWidths, LayoutScore.Get_UnCentered_LayoutScore(1));
                 entryGrid.AddLayout(button);
                 entryGrid.AddLayout(subtitleLayout);
+                LayoutChoice_Set content = new LayoutUnion(entryGrid, button);
+                LayoutChoice_Set fullContent = new LayoutUnion(entryGrid, button);
 
-                LayoutUnion content = new LayoutUnion(entryGrid, button);
-                verticalBuilder.AddLayout(content);
+                // Also consider embedding the destination layout if possible
+                // We can only add embed the destination layout if it didn't have an OnBack listener, because OnBack is ambiguous for an embedded layout
+                StackEntry destinationEntry = this.destinationProviders[i].Get();
+                if (destinationEntry.Listeners.Count < 1)
+                {
+                    LayoutChoice_Set destination = destinationEntry.Layout;
+                    // We don't want to recurse arbitrarily far because that would be wasteful, so we only enable this check if the layout being considered is another MenuLayout
+                    LayoutChoice_Set contained = destination;
+                    LayoutCache cache = contained as LayoutCache;
+                    if (cache != null)
+                        contained = cache.LayoutToManage;
+                    if (contained is MenuLayout)
+                    {
+                        // Allow dynamically embedding the layout if there's space.
+                        // Most of the time there won't be space, but this should usually be fast to determine
+                        LayoutChoice_Set inlinedContent = new Vertical_GridLayout_Builder().Uniform().AddLayout(content).AddLayout(destination).BuildAnyLayout();
+                        fullContent = new LayoutUnion(content, inlinedContent);
+                    }
+                }
+
                 horizontalBuilder.AddLayout(content);
+                verticalBuilder.AddLayout(fullContent);
 
                 ValueProvider<StackEntry> destinationProvider = destinationProviders[i];
                 this.buttonDestinations[button] = destinationProvider;

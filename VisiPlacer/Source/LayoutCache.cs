@@ -45,6 +45,10 @@ namespace VisiPlacement
 
                 this.AnnounceChange(true);
             }
+            get
+            {
+                return this.layoutToManage;
+            }
         }
         public void Check_RoundingError(double value)
         {
