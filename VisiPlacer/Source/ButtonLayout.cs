@@ -121,10 +121,14 @@ namespace VisiPlacement
         public void setTextColor(Color color)
         {
             this.buttonConfigurer.TextColor = color;
+            // need to announce change to prompt the ButtonConfigurer to update its button, considering the assigned color and the default
+            this.AnnounceChange(true);
         }
         public void resetTextColor()
         {
             this.buttonConfigurer.TextColor = null;
+            // need to announce change to retrigger recalculation of the default
+            this.AnnounceChange(true);
         }
 
         private ButtonConfigurer buttonConfigurer;
