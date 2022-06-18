@@ -42,7 +42,10 @@ namespace VisiPlacement
                 )
             );
 
-            subLayouts.Add(sublayoutCache);
+            // We also allow showing the content without scrolling (and usually prefer that when there's space).
+            // However, we still include the ScrollView in that case so that if the content becomes longer,
+            // we don't have to change the view structure and introduce new views and potentially reset information like where the cursor is in a contained textbox
+            subLayouts.Add(ContainerLayout.SameSize_Scroller(scrollView, subLayout));
             this.Set_LayoutChoices(subLayouts);
         }
 
