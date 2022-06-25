@@ -567,7 +567,7 @@ namespace VisiPlacement
                 maxWidth = Math.Max(maxWidth, blockSize.Width);
                 totalHeight += blockSize.Height;
             }
-            string formattedText = String.Join("\n",formattedStrings);
+            string formattedText = String.Join(Environment.NewLine,formattedStrings);
             result = new FormattedParagraph(new Size(maxWidth, totalHeight), formattedText);
             if (debug)
             {
@@ -629,7 +629,7 @@ namespace VisiPlacement
                     }
                 }
             }
-            return new FormattedParagraph(totalSize, String.Join("\n", formattedLines));
+            return new FormattedParagraph(totalSize, String.Join(Environment.NewLine, formattedLines));
         }
 
         private FormattedLine consumeComponents(List<string> components, int startIndex, double desiredWidth, double fontSize)

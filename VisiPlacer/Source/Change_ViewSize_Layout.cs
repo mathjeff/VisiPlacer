@@ -16,13 +16,12 @@ namespace VisiPlacement
             this.heightBox = new Editor();
             this.heightBox.Keyboard = Keyboard.Numeric;
             Button okButton = new Button();
-            okButton.Text = "Update";
             okButton.Clicked += OkButton_Clicked;
 
             this.SubLayout = new Vertical_GridLayout_Builder()
                 .AddLayout(new TitledControl("Display Width", new TextboxLayout(this.widthBox)))
                 .AddLayout(new TitledControl("Display Height", new TextboxLayout(this.heightBox)))
-                .AddLayout(new ButtonLayout(okButton))
+                .AddLayout(new ButtonLayout(okButton, "Update"))
                 .Build();
         }
 

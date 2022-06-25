@@ -14,9 +14,10 @@ namespace VisiPlacement
             Button button = new Button();
             button.Clicked += Button_Clicked;
             this.button = button;
+            this.buttonLayout = new ButtonLayout(button);
             this.viewManager = viewManager;
             this.UpdateText();
-            this.SubLayout = new ButtonLayout(button);
+            this.SubLayout = this.buttonLayout;
         }
 
         private void Button_Clicked(object sender, EventArgs e)
@@ -28,12 +29,13 @@ namespace VisiPlacement
         private void UpdateText()
         {
             if (this.viewManager.Debugging)
-                this.button.Text = "Disable Layout Debugging";
+                this.buttonLayout.setText("Disable Layout Debugging");
             else
-                this.button.Text = "Enable Layout Debugging";
+                this.buttonLayout.setText("Enable Layout Debugging");
         }
 
         private ViewManager viewManager;
         private Button button;
+        private ButtonLayout buttonLayout;
     }
 }

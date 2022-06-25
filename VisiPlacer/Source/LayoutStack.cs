@@ -147,11 +147,13 @@ namespace VisiPlacement
                 Button newButton = new Button();
                 newButton.Clicked += Button_Clicked;
                 this.backButtons.Add(newButton);
-                this.backButton_layouts.Add(LayoutCache.For(new ButtonLayout(newButton)));
+                ButtonLayout buttonLayout = new ButtonLayout(newButton);
+                LayoutChoice_Set cacheLayout = LayoutCache.For(buttonLayout);
+                this.backButton_layouts.Add(buttonLayout);
+                this.backButton_cacheLayouts.Add(cacheLayout);
             }
-            Button button = this.backButtons[toIndex];
-            button.Text = "Back: " + stackEntry.Name;
-            return this.backButton_layouts[toIndex];
+            this.backButton_layouts[toIndex].setText("Back: " + stackEntry.Name);
+            return this.backButton_cacheLayouts[toIndex];
         }
 
         private void Button_Clicked(object sender, EventArgs e)
@@ -176,7 +178,8 @@ namespace VisiPlacement
         // List of buttons that can be pressed to go back. May contain more buttons than necessary, in case we want to repurpose them later
         private List<Button> backButtons = new List<Button>();
         // List of layouts that can be pressed to go back. May contain more buttons than necessary, in case we want to repurpose them later
-        private List<LayoutChoice_Set> backButton_layouts = new List<LayoutChoice_Set>();
+        private List<LayoutChoice_Set> backButton_cacheLayouts = new List<LayoutChoice_Set>();
+        private List<ButtonLayout> backButton_layouts = new List<ButtonLayout>();
         private GridLayout mainGrid;
         private bool showBackButtons;
     }

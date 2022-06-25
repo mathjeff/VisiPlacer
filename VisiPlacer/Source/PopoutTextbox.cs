@@ -19,7 +19,7 @@ namespace VisiPlacement
             button.Clicked += Button_Clicked;
             this.button = button;
 
-            ButtonLayout buttonLayout = new ButtonLayout(button, null, -1, false, true, true);
+            this.buttonLayout = new ButtonLayout(button, null, -1, false, true, true);
 
             this.textBox = new Editor();
             this.detailsLayout = new TitledControl(title, ScrollLayout.New(new TextboxLayout(this.textBox)));
@@ -60,16 +60,17 @@ namespace VisiPlacement
             string text = this.textBox.Text;
             if ((text == null || text == "") && this.placeholder != null)
             {
-                this.button.Text = this.placeholder;
+                this.buttonLayout.setText(this.placeholder);
             }
             else
             {
                 // note that the button text may appear cropped if needed
-                this.button.Text = text;
+                this.buttonLayout.setText(text);
             }
         }
 
         private Button button;
+        private ButtonLayout buttonLayout;
         private Editor textBox;
         private LayoutChoice_Set detailsLayout;
         private LayoutStack layoutStack;

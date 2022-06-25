@@ -116,7 +116,11 @@ namespace VisiPlacement
 
         public void setText(string text)
         {
-            this.buttonConfigurer.ModelledText = text;
+            if (text != this.buttonConfigurer.ModelledText)
+            {
+                this.buttonConfigurer.ModelledText = text;
+                this.AnnounceChange(true);
+            }
         }
         public void setTextColor(Color color)
         {
@@ -141,6 +145,7 @@ namespace VisiPlacement
         {
             this.button = button;
             this.buttonBackground = buttonBackground;
+            this.modelledText = this.button.Text;
         }
 
         public double Width
@@ -176,24 +181,33 @@ namespace VisiPlacement
                 this.button.FontSize = value;
             }
         }
-        // ButtonLayout doesn't support having a separate ModelledText from DisplayText
-        // TODO: make ButtonLayout support this
+
         public string ModelledText
         {
             get
             {
-                string text = this.button.Text;
-                if (text == null)
-                    return null;
-                return text;
+                return this.modelledText;
+            }
+            set
+            {
+                this.modelledText = value;
+                // Not sure at the moment why occasionally our specific layout doesn't get a chance to update DisplayText
+                // This is supposed to be overwritten anyway so it should be safe to set it here too
+                this.DisplayText = value;
+            }
+        }
+
+        public string DisplayText
+        {
+            get
+            {
+                return this.button.Text;
             }
             set
             {
                 this.button.Text = value;
             }
         }
-
-        public string DisplayText { get; set; }
         public string FontName
         {
             get { return this.button.FontFamily; }
@@ -265,6 +279,7 @@ namespace VisiPlacement
         public Button button;
         public Color? TextColor;
         ContentView buttonBackground;
+        string modelledText;
 
     }
 }

@@ -90,7 +90,7 @@ namespace VisiPlacement
             ButtonLayout singleButton = this.SingleButtonLayout;
 
             SingleSelect_Choice choice = this.items[this.selectedIndex];
-            this.singleButton.Text = choice.Content;
+            singleButton.setText(choice.Content);
             this.singleButton.BackgroundColor = choice.BackgroundColor;
 
             if (this.items.Count <= 2)
