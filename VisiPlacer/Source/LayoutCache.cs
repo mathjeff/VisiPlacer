@@ -192,6 +192,8 @@ namespace VisiPlacement
                 if (this.true_queryResults.ContainsKey(query))
                     ErrorReporter.ReportParadox("Error, layoutCache repeated a query that was already present");
             }
+            if (this.layoutToManage == null)
+                return null;
             SpecificLayout result = this.layoutToManage.GetBestLayout(query);
             if (!query.Debug)
             {
