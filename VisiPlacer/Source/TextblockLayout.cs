@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // A TextblockLayout is what callers should make if they want to display uneditable text
 namespace VisiPlacement
@@ -171,8 +173,8 @@ namespace VisiPlacement
         {
             this.Label = label;
             this.Layout = layout;
-            this.assignedTextColor = (label.TextColor.A > 0);
-            this.assignedBackgroundColor = (label.BackgroundColor.A > 0);
+            this.assignedTextColor = (label.TextColor != null && label.TextColor.Alpha > 0);
+            this.assignedBackgroundColor = (label.BackgroundColor != null && label.BackgroundColor.Alpha > 0);
         }
 
         public double Width

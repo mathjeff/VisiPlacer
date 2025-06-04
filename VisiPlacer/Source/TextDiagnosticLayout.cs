@@ -1,4 +1,6 @@
-﻿using Xamarin.Forms;
+
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -22,14 +24,14 @@ namespace VisiPlacement
 
             GridLayout grid1 = GridLayout.New(heights, new BoundProperty_List(1), LayoutScore.Zero);
             View bottomView = new ContentView();
-            bottomView.BackgroundColor = Color.DarkGray;
+            bottomView.BackgroundColor = Colors.DarkGray;
 
             GridLayout grid2 = GridLayout.New(new BoundProperty_List(1), new BoundProperty_List(2), LayoutScore.Zero);
 
             this.editorToUpdate = new Editor();
             grid2.AddLayout(new TextboxLayout(this.editorToUpdate));
             View rightView = new ContentView();
-            rightView.BackgroundColor = Color.Green;
+            rightView.BackgroundColor = Colors.Green;
             grid2.AddLayout(new ImageLayout(rightView, LayoutScore.Get_UsedSpace_LayoutScore(1)));
 
             grid1.AddLayout(grid2);

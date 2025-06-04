@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // the GridLayout will arrange the child elements in a grid pattern
 namespace VisiPlacement

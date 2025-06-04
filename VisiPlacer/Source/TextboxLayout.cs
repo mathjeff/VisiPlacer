@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // A TextboxLayout is what callers should make if they want to display editable text
 namespace VisiPlacement
@@ -153,7 +155,7 @@ namespace VisiPlacement
 
         private void updateBackgroundWithDefaults()
         {
-            if (this.configuredBackgroundColor.A > 0)
+            if (this.configuredBackgroundColor != null && this.configuredBackgroundColor.Alpha > 0)
                 this.TextBox.BackgroundColor = this.configuredBackgroundColor;
             else
                 this.TextBox.BackgroundColor = this.defaultBackground;

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 
 // a ScoreShifted_LayoutSet is a LayoutChoice_Set that adds a specified score to its layout
 namespace VisiPlacement

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -81,7 +82,7 @@ namespace VisiPlacement
     class OverrideLayoutDefaults_SpecificLayout : Specific_ContainerLayout
     {
         public OverrideLayoutDefaults_SpecificLayout(SpecificLayout sublayout, ViewDefaults defaultsOverride)
-            : base(null, sublayout.Size, LayoutScore.Zero, sublayout, new Thickness(0))
+            : base(null, sublayout.Size, LayoutScore.Zero, sublayout, new Microsoft.Maui.Thickness(0))
         {
             this.defaultsOverride = defaultsOverride;
         }

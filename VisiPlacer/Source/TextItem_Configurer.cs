@@ -1,5 +1,5 @@
 ﻿using System;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
 
 // for getting/setting properties of a TextBox or Label
 namespace VisiPlacement

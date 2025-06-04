@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -28,7 +29,7 @@ namespace VisiPlacement
             for (double i = 0; i < 8; i += 1)
             {
                 Label textBlock1 = new Label();
-                textBlock1.BackgroundColor = Color.Red;
+                textBlock1.BackgroundColor = Colors.Red;
                 TextblockLayout textBlockLayout = new TextblockLayout(textBlock1, i + 16, false, true);
                 textBlockLayout.ScoreIfEmpty = false;
                 gridBuilder.AddLayout(textBlockLayout);
@@ -73,7 +74,7 @@ namespace VisiPlacement
             scoreWeight *= 2;
             return scoreWeight;
         }
-        private static List<Color> colorChoices = new List<Color>() { Color.Red, Color.Yellow, Color.Blue, Color.Orange, Color.Green, Color.Purple };
+        private static List<Color> colorChoices = new List<Color>() { Colors.Red, Colors.Yellow, Colors.Blue, Colors.Orange, Colors.Green, Colors.Purple };
 
         private Editor textBox;
         private List<TextblockLayout> textBlockLayouts = new List<TextblockLayout>();

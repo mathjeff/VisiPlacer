@@ -6,8 +6,8 @@ using System.Text;
 using Foundation;
 using UIKit;
 using VisiPlacement;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.iOS;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement.iOS
 {
@@ -18,25 +18,25 @@ namespace VisiPlacement.iOS
             ButtonClicker.Instance = new iOSButtonClicker();
         }
 
-        public override void ClickButton(Xamarin.Forms.Button button)
+        public override void ClickButton(Button button)
         {
             button.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
             ClickButton(Get_iOSButton(button));
         }
         public override void MakeButtonAppearPressed(Button button)
         {
-            button.BackgroundColor = Color.Green;
+            button.BackgroundColor = Colors.Green;
         }
 
         public void ClickButton(UIButton button)
         {
             button.SendActionForControlEvents(UIControlEvent.TouchUpInside);
         }
-        public UIButton Get_iOSButton(Xamarin.Forms.Button button)
+        public UIButton Get_iOSButton(Button button)
         {
-            foreach (Xamarin.Forms.Effect e in button.Effects)
+            foreach (Effect e in button.Effects)
             {
-                PlatformEffect platformEffect = e as PlatformEffect;
+                PlatformEffect<UIView, UIView> platformEffect = e as PlatformEffect<UIView, UIView>;
                 if (platformEffect != null)
                     return platformEffect.Control as UIButton;
             }

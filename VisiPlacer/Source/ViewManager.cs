@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Devices;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -16,6 +19,7 @@ namespace VisiPlacement
         {
             this.visualDefaults = layoutDefaults;
             this.callerHolder.AddParent(this);
+
             this.SetLayout(childLayout);
 
             this.mainView = new ManageableView(this);
@@ -32,6 +36,7 @@ namespace VisiPlacement
             {
                 this.displaySize = new Size();
             }
+            this.parentView = parentView;
             this.forceRelayout();
         }
         public void SetLayout(LayoutChoice_Set childLayout)
@@ -114,7 +119,8 @@ namespace VisiPlacement
                 Button button = view as Button;
                 if (button != null)
                 {
-                    if (button.Text == text)
+                    String buttonText = button.Text;
+                    if (buttonText != null && text == buttonText.Replace("\n", " "))
                         return button;
                 }
             }
@@ -275,21 +281,15 @@ namespace VisiPlacement
 
         private void forceRelayout()
         {
+            this.needsRelayout = false;
+
             // tell the framework to reinvoke the layout
             // for some reason, this.parentView.ForceLayout doesn't work
-            this.even = !this.even;
-            if (this.even)
-            {
-                this.mainView.VerticalOptions = LayoutOptions.CenterAndExpand;
-            }
-            else
-            {
-                this.mainView.VerticalOptions = LayoutOptions.Center;
-            }
+            this.mainView.Padding = new Thickness(1);
 
-            // update our own note that layout is needed
-            this.needsRelayout = true;
+            this.needsRelayout = true; // update our own note that layout is needed
 
+            this.mainView.Padding = new Thickness(0);
         }
 
         // tests that the layout satisfies all of the queries consistently
@@ -406,7 +406,7 @@ namespace VisiPlacement
             }
         }
 
-        private ContentView mainView;
+        private ManageableView mainView;
         // the layout that we put the caller's layout into
         private ContainerLayout callerHolder = new ContainerLayout();
         private Size displaySize;
@@ -416,6 +416,7 @@ namespace VisiPlacement
         private bool needsRelayout = true;
         private GridLayout debugLayout;
         private VisualDefaults visualDefaults;
+        private ContentView parentView;
     }
 
     // The ManageableView listens for changes in its dimensions and informs its ViewManager

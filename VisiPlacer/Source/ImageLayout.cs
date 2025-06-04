@@ -1,5 +1,5 @@
 ﻿using System;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
 
 // Intended for displaying an image
 // Just computes score = width * height * constant and answers LayoutQueries accordingly

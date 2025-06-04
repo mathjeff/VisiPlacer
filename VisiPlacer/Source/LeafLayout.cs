@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // a LeafLayout is a LayoutChoiceSet that just wishes to be a certain size and has no children
 namespace VisiPlacement

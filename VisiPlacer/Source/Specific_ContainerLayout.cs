@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // a Specific_ContainerLayout just has a view, a size, a subLayout, and a score
 namespace VisiPlacement
@@ -29,7 +31,7 @@ namespace VisiPlacement
             this.ChildFillsAvailableSpace = true;
         }
 
-        public bool ChildFillsAvailableSpace { get; set; }
+        public bool ChildFillsAvailableSpace = true;
         public override View DoLayout(Size displaySize, ViewDefaults layoutDefaults)
         {
             if (this.subLayout != null)

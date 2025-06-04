@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Maui;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -81,7 +82,7 @@ namespace VisiPlacement
             {
                 result = new TextblockLayout(this.text, fontsize);
             }
-            result.AlignVertically(Xamarin.Forms.TextAlignment.Center);
+            result.AlignVertically(TextAlignment.Center);
             return result;
         }
         private string text;

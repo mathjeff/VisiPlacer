@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // A LayoutDefaults contains settings that are likely to be common to many layouts but different across applications or users and are too verbose for us to
 // want to specify them explicitly on every layout
@@ -159,15 +160,15 @@ namespace VisiPlacement
             buttonDefaults.TextColor = this.uneditableTextColor;
             buttonDefaults.BackgroundColorPrimary = this.uneditableTextBackgroundColor;
             if (this.buttonBackgroundSecondaryColor != null)
-                buttonDefaults.BackgroundColorSecondary = this.buttonBackgroundSecondaryColor.Value;
+                buttonDefaults.BackgroundColorSecondary = this.buttonBackgroundSecondaryColor;
             if (this.buttonInnerBevelColor != null)
-                buttonDefaults.InnerBevelColor = this.buttonInnerBevelColor.Value;
+                buttonDefaults.InnerBevelColor = this.buttonInnerBevelColor;
             else
-                buttonDefaults.InnerBevelColor = Color.DarkGray;
+                buttonDefaults.InnerBevelColor = Colors.DarkGray;
             if (this.buttonOuterBevelColor != null)
-                buttonDefaults.OuterBevelColor = this.buttonOuterBevelColor.Value;
+                buttonDefaults.OuterBevelColor = this.buttonOuterBevelColor;
             else
-                buttonDefaults.OuterBevelColor = Color.LightGray;
+                buttonDefaults.OuterBevelColor = Colors.LightGray;
             viewDefaults.ButtonWithBevel_Defaults = buttonDefaults;
 
             ButtonViewDefaults buttonWithoutBevelDefaults = new ButtonViewDefaults();

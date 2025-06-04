@@ -1,5 +1,7 @@
 ﻿using System;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // Allows the user to enter a duration
 namespace VisiPlacement
@@ -42,11 +44,11 @@ namespace VisiPlacement
 
         private void appearValid()
         {
-            this.textBox.BackgroundColor = Color.LightGray;
+            this.textBox.BackgroundColor = Colors.LightGray;
         }
         private void appearInvalid()
         {
-            this.textBox.BackgroundColor = Color.Red;
+            this.textBox.BackgroundColor = Colors.Red;
         }
 
         private bool Parse(out TimeSpan result)
@@ -55,6 +57,9 @@ namespace VisiPlacement
             bool valid = double.TryParse(this.getText(), out numDays);
             if (valid) {
                 result = TimeSpan.FromDays(numDays);
+            } else
+            {
+                result = new TimeSpan(0);
             }
             return valid;
         }

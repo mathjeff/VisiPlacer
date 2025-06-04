@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -15,8 +17,8 @@ namespace VisiPlacement
 
             this.TextBox = textBox;
             this.TextBox.Margin = new Thickness();
-            TextBox.BackgroundColor = Color.White;
-            TextBox.TextColor = Color.Black;
+            TextBox.BackgroundColor = Colors.White;
+            TextBox.TextColor = Colors.Black;
 
             List<LayoutChoice_Set> layouts = new List<LayoutChoice_Set>();
             layouts.Add(new TextLayout(new SinglelineTextboxConfigurer(textBox), 30, false));

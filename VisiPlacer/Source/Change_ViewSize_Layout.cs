@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using VisiPlacement;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
+using Microsoft.Maui;
 
 namespace VisiPlacement
 {

@@ -4,7 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -16,8 +17,8 @@ namespace VisiPlacement
             this.picker = picker;
             this.SetTitle(picker.Title);
 
-            picker.BackgroundColor = Color.White;
-            picker.TextColor = Color.Black;
+            picker.BackgroundColor = Colors.White;
+            picker.TextColor = Colors.Black;
 
             this.SetContent(new TextLayout(new PickerConfigurer(picker), 16));
         }

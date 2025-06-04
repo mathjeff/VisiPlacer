@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.UI.Xaml.Media;
-using Xamarin.Forms.Platform.UWP;
+using System.Xml.Serialization;
 
 namespace VisiPlacement.UWP
 {
@@ -15,27 +16,27 @@ namespace VisiPlacement.UWP
         {
             ButtonClicker.Instance = new UWPButtonClicker();
         }
-        public override void ClickButton(Xamarin.Forms.Button button)
+        public override void ClickButton(Button button)
         {
             this.ClickButton(this.Get_UWPButton(button));
         }
-        public Windows.UI.Xaml.Controls.Button Get_UWPButton(Xamarin.Forms.Button button)
+        public Button Get_UWPButton(Button button)
         {
-            foreach (Xamarin.Forms.Effect e in button.Effects)
+            foreach (Effect e in button.Effects)
             {
-                PlatformEffect platformEffect = e as PlatformEffect;
+                PlatformEffect<Object, Button> platformEffect = e as PlatformEffect<Object, Button>;
                 if (platformEffect != null)
-                    return platformEffect.Control as Windows.UI.Xaml.Controls.Button;
+                    return platformEffect.Control;
             }
             return null;
         }
-        public void ClickButton(Windows.UI.Xaml.Controls.Button button)
+        /*public override void ClickButton(Button button)
         {
             throw new NotImplementedException();
-        }
-        public override void MakeButtonAppearPressed(Xamarin.Forms.Button button)
+        }*/
+        public override void MakeButtonAppearPressed(Button button)
         {
-            button.BackgroundColor = Color.Green;
+            button.BackgroundColor = Colors.Green;
         }
     }
 }

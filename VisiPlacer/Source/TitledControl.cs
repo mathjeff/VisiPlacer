@@ -1,6 +1,6 @@
-﻿using Xamarin.Forms;
+﻿// the TitledControl adds a title above another Control
+using Microsoft.Maui;
 
-// the TitledControl adds a title above another Control
 namespace VisiPlacement
 {
     public class TitledControl : LayoutCache

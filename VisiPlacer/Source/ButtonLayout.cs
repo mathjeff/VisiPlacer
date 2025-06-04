@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
 {
@@ -36,7 +37,9 @@ namespace VisiPlacement
 
         private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false, bool allowSplittingWords = false)
         {
-            bool isButtonColorSet = button.BackgroundColor.A > 0;
+            button.HorizontalOptions = LayoutOptions.Center;
+
+            bool isButtonColorSet = (button.BackgroundColor != null && button.BackgroundColor.Alpha > 0);
             LayoutChoice_Set sublayout;
             this.buttonBackground = new ContentView();
             ButtonConfigurer buttonConfigurer = new ButtonConfigurer(button, this.buttonBackground);
@@ -67,18 +70,18 @@ namespace VisiPlacement
             }
 
             // add a view behind the button to change its normal background color without changing its color when selected
-            ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, false);
+            ContainerLayout backgroundLayout = new ContainerLayout(buttonBackground, sublayout, true);
 
             if (includeBevel)
             {
-                buttonBackground.BackgroundColor = Color.Black;
+                buttonBackground.BackgroundColor = Colors.Black;
                 // add a small border, so that it's easy to see where the buttons end
                 Thickness innerBevelThickness = new Thickness(1);
                 ContentView insideBevel = new ContentView();
                 insideBevel.Padding = innerBevelThickness;
                 //insideBevel.BackgroundColor = Color.DarkGray;// Color.FromRgb(0.4, 0.4, 0.4);
                 buttonConfigurer.InnerBevel = insideBevel;
-                ContainerLayout middleLayout = new MustBorderLayout(insideBevel, backgroundLayout, innerBevelThickness, false);
+                ContainerLayout middleLayout = new MustBorderLayout(insideBevel, backgroundLayout, innerBevelThickness, true);
 
                 // add a bevel to the border
                 Thickness outerBevelThickness = new Thickness(1);
@@ -86,29 +89,29 @@ namespace VisiPlacement
                 outsideBevel.Padding = outerBevelThickness;
                 //outsideBevel.BackgroundColor = Color.LightGray;// Color.FromRgb(0.63, 0.63, 0.63);
                 buttonConfigurer.OuterBevel = outsideBevel;
-                ContainerLayout outsideLayout = new MustBorderLayout(outsideBevel, middleLayout, outerBevelThickness, false);
+                ContainerLayout outsideLayout = new MustBorderLayout(outsideBevel, middleLayout, outerBevelThickness, true);
 
                 // add some extra space around it
                 Thickness spacingThickness = new Thickness(1);
                 ContentView spacing = new ContentView();
                 spacing.Padding = spacingThickness;
                 spacing.BackgroundColor = Color.FromRgba(0, 0, 0, 0);
-                ContainerLayout spacingLayout = new MustBorderLayout(spacing, outsideLayout, spacingThickness, false);
+                ContainerLayout spacingLayout = new MustBorderLayout(spacing, outsideLayout, spacingThickness, true);
 
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { spacingLayout, new ScoreShifted_Layout(null, LayoutScore.Get_CutOff_LayoutScore(1)) });
 
-                button.TextColor = Color.LightGray;
+                button.TextColor = Colors.LightGray;
             }
             else
             {
                 if (!isButtonColorSet)
                 {
-                    buttonBackground.BackgroundColor = Color.White;
-                    button.TextColor = Color.Black;
+                    buttonBackground.BackgroundColor = Colors.White;
+                    button.TextColor = Colors.Black;
                 }
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { backgroundLayout });
             }
-            Effect effect = Effect.Resolve("VisiPlacement.ButtonEffect");
+            Effect effect = EffectFactory.Instance.Resolve("ActRec.ButtonEffect");
             button.Effects.Add(effect);
 
             this.buttonConfigurer = buttonConfigurer;
@@ -234,7 +237,7 @@ namespace VisiPlacement
         {
             if (this.TextColor != null)
             {
-                this.button.TextColor = this.TextColor.Value;
+                this.button.TextColor = this.TextColor;
             }
             else
             {
@@ -246,7 +249,7 @@ namespace VisiPlacement
             if (this.IncludeBevel)
             {
                 ButtonViewDefaults buttonDefaults = layoutDefaults.ButtonWithBevel_Defaults;
-                if (buttonDefaults.BackgroundColorSecondary.A > 0)
+                if (buttonDefaults.BackgroundColorSecondary != null && buttonDefaults.BackgroundColorSecondary.Alpha > 0)
                 {
                     GradientStopCollection gradients = new GradientStopCollection();
                     gradients.Add(new GradientStop(buttonDefaults.BackgroundColorPrimary, 0));

@@ -17,7 +17,7 @@ namespace VisiPlacement.iOS
             TextMeasurer.Instance = new iOSTextMeasurer();
         }
 
-        public override Xamarin.Forms.Size Measure(string text, double fontSize, string fontName)
+        public override Microsoft.Maui.Graphics.Size Measure(string text, double fontSize, string fontName)
         {
             UIFont font = this.getFont(fontName, fontSize);
 
@@ -37,7 +37,7 @@ namespace VisiPlacement.iOS
 
             nsText.Dispose();
 
-            return new Xamarin.Forms.Size(
+            return new Microsoft.Maui.Graphics.Size(
                 Math.Ceiling((double)resultSize.Width),
                 Math.Ceiling((double)resultSize.Height));
         }

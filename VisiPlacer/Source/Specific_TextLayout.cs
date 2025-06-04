@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // A Specific_TextLayout tells parameters (width, height, fontsize) of a piece of text (Label or TextBox)
 namespace VisiPlacement

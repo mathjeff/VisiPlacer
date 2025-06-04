@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 
 namespace VisiPlacement
 {
@@ -13,9 +14,9 @@ namespace VisiPlacement
         {
             this.InvalidateMeasure();
         }
-        protected override void OnChildRemoved(Element child)
+        /*protected override void OnChildRemoved(Element child)
         {
             this.InvalidateMeasure();
-        }
+        }*/
     }
 }

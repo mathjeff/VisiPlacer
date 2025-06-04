@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.Maui.Graphics;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media;
 
 namespace VisiPlacement.UWP
 {
@@ -16,7 +17,7 @@ namespace VisiPlacement.UWP
             TextMeasurer.Instance = new UWPTextMeasurer();
         }
 
-        public override global::Xamarin.Forms.Size Measure(string text, double fontSize, string fontName)
+        public override Size Measure(string text, double fontSize, string fontName)
         {
             TextBlock textBlock;
             if (fontName != null && fontName != "")
@@ -33,7 +34,7 @@ namespace VisiPlacement.UWP
             textBlock.FontSize = fontSize;
             textBlock.Measure(new Windows.Foundation.Size(Double.PositiveInfinity, Double.PositiveInfinity));
 
-            return new Xamarin.Forms.Size(textBlock.DesiredSize.Width, textBlock.DesiredSize.Height);
+            return new Size(textBlock.DesiredSize.Width, textBlock.DesiredSize.Height);
         }
 
         private FontFamily getFontFamily(string name)

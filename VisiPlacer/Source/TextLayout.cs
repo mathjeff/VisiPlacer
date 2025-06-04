@@ -4,7 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Transactions;
 using System.Xml.Schema;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // The TextLayout exists to consolidate some code between TextblockLayout and TextboxLayout
 // Most callers should use one of those classes instead

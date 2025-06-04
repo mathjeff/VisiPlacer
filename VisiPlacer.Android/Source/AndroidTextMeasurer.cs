@@ -2,6 +2,7 @@
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using Microsoft.Maui.Platform;
 using System;
 using System.Collections.Generic;
 using static Android.Views.View;
@@ -15,7 +16,7 @@ namespace VisiPlacement.Android
             TextMeasurer.Instance = new AndroidTextMeasurer();
         }
 
-        public override Xamarin.Forms.Size Measure(string text, double fontSize, string fontName)
+        public override Microsoft.Maui.Graphics.Size Measure(string text, double fontSize, string fontName)
         {
             TextView textView = new TextView(global::Android.App.Application.Context);
             textView.Typeface = this.getTypeface(fontName);
@@ -28,7 +29,7 @@ namespace VisiPlacement.Android
             textView.Measure(widthMeasureSpec, heightMeasureSpec);
             // Add 1 to account for rounding error.
             // MeasuredWidth and MeasuredHeight are in pixels but the caller will want the result in Dips.
-            return new Xamarin.Forms.Size((textView.MeasuredWidth + 1) / scale, (textView.MeasuredHeight + 1) / scale);
+            return new Microsoft.Maui.Graphics.Size((textView.MeasuredWidth + 1) / scale, (textView.MeasuredHeight + 1) / scale);
         }
 
         // Gets typeface, potentially using the cache

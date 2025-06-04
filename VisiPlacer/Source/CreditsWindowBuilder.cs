@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui;
 
 // A CreditsWindowBuilder builds a window containing attributions of ways that users have contributed to the application
 namespace VisiPlacement

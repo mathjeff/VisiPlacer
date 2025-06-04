@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // a LayoutCache acts like the layout provided to it, but faster by saving results
 namespace VisiPlacement

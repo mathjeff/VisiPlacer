@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using Xamarin.Forms;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
 
 // A SpecificLayout is the result of LayoutChoice_Set.GetBestLayout()
 // A SpecificLayout tells the computed dimensions of a view, which makes it suitable to cache.
