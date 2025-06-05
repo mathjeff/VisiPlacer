@@ -6,6 +6,7 @@
     <RootNamespace>VisiPlacer.iOS</RootNamespace>
     <Nullable>enable</Nullable>
     <UseMaui>true</UseMaui>
+    <UseMauiEssentials>false</UseMauiEssentials>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\VisiPlacer\VisiPlacer.csproj">
@@ -14,6 +15,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="Microsoft.Maui.Controls" Version="9.0.51" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.51" />
   </ItemGroup>
 </Project>
