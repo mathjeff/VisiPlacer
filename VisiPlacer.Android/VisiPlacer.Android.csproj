@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net9.0-android</TargetFramework>
     <OutputType>library</OutputType>
-    <Nullable>enable</Nullable>
     <UseMaui>true</UseMaui>
   </PropertyGroup>
   <ItemGroup>

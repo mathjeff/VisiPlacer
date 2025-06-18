@@ -4,7 +4,6 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <OutputType>library</OutputType>
     <RootNamespace>VisiPlacer.iOS</RootNamespace>
-    <Nullable>enable</Nullable>
     <UseMaui>true</UseMaui>
     <UseMauiEssentials>false</UseMauiEssentials>
   </PropertyGroup>
