@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 
@@ -97,9 +98,12 @@ namespace VisiPlacement
                     {
                         ErrorReporter.ReportParadox("Error; incorrect result for broadened query: broadened query " + broadened.Query + " returned " + broadened.Response +
                             " whereas the response from the sublayout for debug query " + debugQuery + " is " + correct_subLayout);
-                        LayoutQuery debugQuery2 = broadened.Query.DebugClone();
-                        debugQuery2.ProposedSolution_ForDebugging = correct_subLayout;
-                        this.GetBestLayout(debugQuery2);
+                        if (ErrorReporter.ShouldDebug())
+                        {
+                            LayoutQuery debugQuery2 = broadened.Query.DebugClone();
+                            debugQuery2.ProposedSolution_ForDebugging = correct_subLayout;
+                            this.GetBestLayout(debugQuery2);
+                        }
                     }
                 }
                 return this.inferredLayout(query, broadened.Response);
@@ -252,13 +256,16 @@ namespace VisiPlacement
                     query.ProposedSolution_ForDebugging = correctResult;
                     correct = false;
                 }
-                if (!correct)
+                if (ErrorReporter.ShouldDebug())
                 {
-                    this.GetBestLayout_Quickly(query);
-                    this.Query_SubLayout(query);
+                    if (!correct)
+                    {
+                        this.GetBestLayout_Quickly(query);
+                        this.Query_SubLayout(query);
+                    }
+                    this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
+                    return this.prepareLayoutForQuery(correctResult, query);
                 }
-                this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
-                return this.prepareLayoutForQuery(correctResult, query);
             }
             //this.debugCheck(new LayoutQuery_And_Response(query, fastResult));
             //if (fastResult != null)
@@ -450,16 +457,19 @@ namespace VisiPlacement
                         "Old response: " + other.Response + "\n" +
                         "New query   : " + query + "\n" +
                         "New response: " + result);
-                    LayoutQuery query2 = other.Query.Clone();
-                    query2.Debug = true;
-                    query2.ProposedSolution_ForDebugging = result;
-                    SpecificLayout oldQueryNewDebugResult = this.GetBestLayout(query2.Clone());
-                    LayoutQuery query1 = query.Clone();
-                    query1.Debug = true;
-                    SpecificLayout newQueryDebugResult = this.GetBestLayout(query1.Clone());
-                    System.Diagnostics.Debug.WriteLine("Results from LayoutCache discrepancy: Old query new result = " + oldQueryNewDebugResult + ", New query new result = " + newQueryDebugResult);
-                    this.layoutToManage.GetBestLayout(query2.Clone());
-                    this.layoutToManage.GetBestLayout(query1.Clone());
+                    if (ErrorReporter.ShouldDebug())
+                    {
+                        LayoutQuery query2 = other.Query.Clone();
+                        query2.Debug = true;
+                        query2.ProposedSolution_ForDebugging = result;
+                        SpecificLayout oldQueryNewDebugResult = this.GetBestLayout(query2.Clone());
+                        LayoutQuery query1 = query.Clone();
+                        query1.Debug = true;
+                        SpecificLayout newQueryDebugResult = this.GetBestLayout(query1.Clone());
+                        System.Diagnostics.Debug.WriteLine("Results from LayoutCache discrepancy: Old query new result = " + oldQueryNewDebugResult + ", New query new result = " + newQueryDebugResult);
+                        this.layoutToManage.GetBestLayout(query2.Clone());
+                        this.layoutToManage.GetBestLayout(query1.Clone());
+                    }
                 }
                 if (query.PreferredLayout(result, other.Response) != result)
                 {
@@ -469,17 +479,19 @@ namespace VisiPlacement
                         "Old response: " + other.Response + "\n" +
                         "New query   : " + query + "\n" +
                         "New response: " + result);
-
-                    LayoutQuery query1 = query.Clone();
-                    query1.Debug = true;
-                    query1.ProposedSolution_ForDebugging = other.Response;
-                    SpecificLayout newQueryDebugResult = this.GetBestLayout(query1);
-                    LayoutQuery query2 = other.Query.Clone();
-                    query2.Debug = true;
-                    SpecificLayout oldQueryNewDebugResult = this.GetBestLayout(query2);
-                    System.Diagnostics.Debug.WriteLine("Results from LayoutCache discrepancy: Old query new result = " + oldQueryNewDebugResult + ", New query new result = " + newQueryDebugResult);
-                    this.GetBestLayout(query1.Clone());
-                    this.GetBestLayout(query2.Clone());
+                    if (ErrorReporter.ShouldDebug())
+                    {
+                        LayoutQuery query1 = query.Clone();
+                        query1.Debug = true;
+                        query1.ProposedSolution_ForDebugging = other.Response;
+                        SpecificLayout newQueryDebugResult = this.GetBestLayout(query1);
+                        LayoutQuery query2 = other.Query.Clone();
+                        query2.Debug = true;
+                        SpecificLayout oldQueryNewDebugResult = this.GetBestLayout(query2);
+                        System.Diagnostics.Debug.WriteLine("Results from LayoutCache discrepancy: Old query new result = " + oldQueryNewDebugResult + ", New query new result = " + newQueryDebugResult);
+                        this.GetBestLayout(query1.Clone());
+                        this.GetBestLayout(query2.Clone());
+                    }
                 }
             }
 

@@ -66,8 +66,11 @@ namespace VisiPlacement
                 if (layout != null && !query.Accepts(layout))
                 {
                     ErrorReporter.ReportParadox("Error: the returned layout was not valid");
-                    LayoutQuery query2 = query.DebugClone();
-                    this.GetBestLayout(query2);
+                    if (ErrorReporter.ShouldDebug())
+                    {
+                        LayoutQuery query2 = query.DebugClone();
+                        this.GetBestLayout(query2);
+                    }
                 }
             }
 

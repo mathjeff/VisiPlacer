@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 
@@ -175,9 +176,12 @@ namespace VisiPlacement
             if (layout != null && !query.Accepts(layout))
             {
                 ErrorReporter.ReportParadox("error");
-                LayoutQuery debugQuery = query.Clone();
-                debugQuery.Debug = true;
-                SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight, query));
+                if (ErrorReporter.ShouldDebug())
+                {
+                    LayoutQuery debugQuery = query.Clone();
+                    debugQuery.Debug = true;
+                    SemiFixed_GridLayout debugResult = this.GetBestLayout(debugQuery, new SemiFixed_GridLayout(this.wrappedChildren, this.rowHeights, this.columnWidths, this.bonusScore, setWidthBeforeHeight, query));
+                }
             }
             if (query.MinScore.Equals(LayoutScore.Minimum))
             {
@@ -861,20 +865,23 @@ namespace VisiPlacement
                             if (layout2 == null)
                             {
                                 ErrorReporter.ReportParadox("Error: min-width query did not find result from max-score query");
-                                LayoutQuery debugQuery1 = query2.Clone();
-                                debugQuery1.Debug = true;
-                                debugQuery1.ProposedSolution_ForDebugging = bestLayout;
-                                SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
+                                if (ErrorReporter.ShouldDebug())
+                                {
+                                    LayoutQuery debugQuery1 = query2.Clone();
+                                    debugQuery1.Debug = true;
+                                    debugQuery1.ProposedSolution_ForDebugging = bestLayout;
+                                    SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
 
-                                // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                                /*LayoutQuery debugQuery2 = query.Clone();
-                                debugQuery2.Debug = true;
-                                debugQuery2.ProposedSolution_ForDebugging = debugResult1;
-                                subLayout.GetBestLayout(debugQuery2.Clone());*/
+                                    // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                                    /*LayoutQuery debugQuery2 = query.Clone();
+                                    debugQuery2.Debug = true;
+                                    debugQuery2.ProposedSolution_ForDebugging = debugResult1;
+                                    subLayout.GetBestLayout(debugQuery2.Clone());*/
 
-                                LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
-                                SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
-                                ErrorReporter.ReportParadox("");
+                                    LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
+                                    SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
+                                    ErrorReporter.ReportParadox("");
+                                }
                             }
                             if (!query2.Accepts(layout2))
                                 ErrorReporter.ReportParadox("Error: min-width query received an invalid response");
@@ -974,27 +981,31 @@ namespace VisiPlacement
                             if (layout2 == null)
                             {
                                 ErrorReporter.ReportParadox("Error: min-height query did not find result from max-score query");
-                                // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                                LayoutQuery debugQuery1 = query2.Clone();
-                                debugQuery1.Debug = true;
-                                debugQuery1.ProposedSolution_ForDebugging = bestLayout;
-                                SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
+                                if (ErrorReporter.ShouldDebug())
+                                {
+                                    // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                                    LayoutQuery debugQuery1 = query2.Clone();
+                                    debugQuery1.Debug = true;
+                                    debugQuery1.ProposedSolution_ForDebugging = bestLayout;
+                                    SpecificLayout debugResult1 = subLayout.GetBestLayout(debugQuery1.Clone());
 
-                                // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
-                                /*LayoutQuery debugQuery2 = query.Clone();
-                                debugQuery2.Debug = true;
-                                debugQuery2.ProposedSolution_ForDebugging = debugResult1;
-                                subLayout.GetBestLayout(debugQuery2.Clone());
-                                */
+                                    // note, also, that the layout cache seems to have an incorrect value for when minScore = -infinity
+                                    /*LayoutQuery debugQuery2 = query.Clone();
+                                    debugQuery2.Debug = true;
+                                    debugQuery2.ProposedSolution_ForDebugging = debugResult1;
+                                    subLayout.GetBestLayout(debugQuery2.Clone());
+                                    */
 
-                                LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
-                                SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
-                                ErrorReporter.ReportParadox("");
+                                    LayoutQuery debugQuery3 = debugQuery1.WithScore(LayoutScore.Minimum);
+                                    SpecificLayout layout3 = subLayout.GetBestLayout(debugQuery3);
+                                    ErrorReporter.ReportParadox("");
+                                }
                             }
 
                             if (!query2.Accepts(layout2))
                             {
                                 ErrorReporter.ReportParadox("Error: min-height query received an invalid response");
+                                layout2 = bestLayout;
                             }
                             actualScoreDecrease = actualScoreDecrease.Plus(bestLayout.Score.Minus(layout2.Score));
                         }
@@ -1147,10 +1158,13 @@ namespace VisiPlacement
                     if (newScore.CompareTo(previousScore) < 0)
                     {
                         ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
-                        LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
-                        query.Debug = true;
-                        query.ProposedSolution_ForDebugging = previousLayout;
-                        this.GetBestLayout(query);
+                        if (ErrorReporter.ShouldDebug())
+                        {
+                            LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
+                            query.Debug = true;
+                            query.ProposedSolution_ForDebugging = previousLayout;
+                            this.GetBestLayout(query);
+                        }
                     }
                 }
                 else
@@ -1171,12 +1185,15 @@ namespace VisiPlacement
                     if (newScore.CompareTo(previousScore) < 0)
                     {
                         ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
-                        if (!enableDebugging)
-                            this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
-                        LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
-                        query.Debug = true;
-                        query.ProposedSolution_ForDebugging = previousLayout;
-                        this.GetBestLayout(query);
+                        if (ErrorReporter.ShouldDebug())
+                        {
+                            if (!enableDebugging)
+                                this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
+                            LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
+                            query.Debug = true;
+                            query.ProposedSolution_ForDebugging = previousLayout;
+                            this.GetBestLayout(query);
+                        }
                     }
                 }
                 else
@@ -1199,12 +1216,15 @@ namespace VisiPlacement
             if (newScore.CompareTo(previousScore) < 0)
             {
                 ErrorReporter.ReportParadox("Rounding error appears to be taking place in a sublayout");
-                if (!enableDebugging)
-                    this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
-                LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
-                query.Debug = true;
-                query.ProposedSolution_ForDebugging = previousLayout;
-                this.GetBestLayout(query);
+                if (ErrorReporter.ShouldDebug())
+                {
+                    if (!enableDebugging)
+                        this.ShrinkLayout(new SemiFixed_GridLayout(previousLayout), true);
+                    LayoutQuery query = sourceQuery.New_MaxScore_LayoutQuery(previousLayout.Width, previousLayout.Height, previousLayout.Score);
+                    query.Debug = true;
+                    query.ProposedSolution_ForDebugging = previousLayout;
+                    this.GetBestLayout(query);
+                }
             }
 
             return layout;
