@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
+using Microsoft.Maui.Dispatching;
 using Microsoft.Maui.Graphics;
 
 namespace VisiPlacement
@@ -273,13 +275,33 @@ namespace VisiPlacement
 
         public override void On_ContentsChanged(bool mustRedraw)
         {
-            if (mustRedraw)
+            if (mustRedraw && !this.needsRelayout)
             {
                 this.forceRelayout();
             }
         }
 
+        // Declares that something has changed and that this ViewManager needs to update
         private void forceRelayout()
+        {
+            System.Diagnostics.Debug.WriteLine("ViewManager forceRelayout starting dispatch");
+            // It's possible that callers will make a bunch of changes to their layouts in short succession, but we're only supposed to update the views afterwards
+            // So, we pass these update requests through a separate thread which runs them slightly later
+            // This allows us to skip most intermediate updates
+            IDispatcher dispatcher = this.mainView.GetDispatcher();
+            if (dispatcher == null)
+            {
+                this.requestRelayout();
+            }
+            else
+            {
+                dispatcher.Dispatch(this.requestRelayout);
+            }
+            System.Diagnostics.Debug.WriteLine("ViewManager forceRelayout completing dispatch");
+        }
+
+        // uses the current thread to ask the ManageableView to redo layout
+        private void requestRelayout()
         {
             this.needsRelayout = false;
 
@@ -429,8 +451,16 @@ namespace VisiPlacement
 
         public ViewManager ViewManager { get; set; }
 
+        private IDispatcher dispatcher;
+        public IDispatcher GetDispatcher()
+        {
+            return this.dispatcher;
+        }
+
         protected override void OnSizeAllocated(double width, double height)
         {
+            if (this.dispatcher == null)
+                this.dispatcher = Microsoft.Maui.Dispatching.Dispatcher.GetForCurrentThread();
             base.OnSizeAllocated(width, height);
             if (width > 0 && height > 0)
             {
