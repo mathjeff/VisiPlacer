@@ -102,7 +102,7 @@ namespace VisiPlacement
         private void Initialize(Label textBlock, double fontsize, bool allowCropping, bool allowSplittingWords)
         {
             this.configurer = new TextBlock_Configurer(textBlock, this);
-            Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
+            Effect effect = EffectFactory.Instance.Resolve("VisiPlacement.TextItemEffect");
             textBlock.Effects.Add(effect);
             textBlock.Margin = new Thickness(0);
             this.textBlock = textBlock;

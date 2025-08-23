@@ -26,7 +26,7 @@ namespace VisiPlacement
         {
             if (fontSizes == null)
                 fontSizes = new List<double>() { 30, 16 };
-            Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
+            Effect effect = EffectFactory.Instance.Resolve("VisiPlacement.TextItemEffect");
             textBox.Effects.Add(effect);
 
             textBox.Margin = new Thickness();

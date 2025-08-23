@@ -10,7 +10,7 @@ namespace VisiPlacement
     {
         public SinglelineTextboxLayout(Entry textBox)
         {
-            Effect effect = Effect.Resolve("VisiPlacement.TextItemEffect");
+            Effect effect = EffectFactory.Instance.Resolve("VisiPlacement.TextItemEffect");
             textBox.Effects.Add(effect);
 
             textBox.Margin = new Thickness();
