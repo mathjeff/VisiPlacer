@@ -38,6 +38,7 @@ namespace VisiPlacement
         private void Initialize(Button button, double fontSize = -1, bool includeBevel = true, bool allowCropping = false, bool scoreIfEmpty = false, bool allowSplittingWords = false)
         {
             button.HorizontalOptions = LayoutOptions.Center;
+            button.LineBreakMode = LineBreakMode.WordWrap;
 
             bool isButtonColorSet = (button.BackgroundColor != null && button.BackgroundColor.Alpha > 0);
             LayoutChoice_Set sublayout;
