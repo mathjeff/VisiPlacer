@@ -5,7 +5,7 @@
     <UseMaui>true</UseMaui>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.80" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.100" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="..\..\..\deps\Fonts\Resources\BlackChancery.ttf">
