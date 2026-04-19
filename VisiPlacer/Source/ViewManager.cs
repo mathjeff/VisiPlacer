@@ -285,18 +285,7 @@ namespace VisiPlacement
         private void forceRelayout()
         {
             System.Diagnostics.Debug.WriteLine("ViewManager forceRelayout starting dispatch");
-            // It's possible that callers will make a bunch of changes to their layouts in short succession, but we're only supposed to update the views afterwards
-            // So, we pass these update requests through a separate thread which runs them slightly later
-            // This allows us to skip most intermediate updates
-            IDispatcher dispatcher = this.mainView.GetDispatcher();
-            if (dispatcher == null)
-            {
-                this.requestRelayout();
-            }
-            else
-            {
-                dispatcher.Dispatch(this.requestRelayout);
-            }
+            this.requestRelayout();
             System.Diagnostics.Debug.WriteLine("ViewManager forceRelayout completing dispatch");
         }
 
@@ -306,12 +295,9 @@ namespace VisiPlacement
             this.needsRelayout = false;
 
             // tell the framework to reinvoke the layout
-            // for some reason, this.parentView.ForceLayout doesn't work
-            this.mainView.Padding = new Thickness(1);
-
+            if (this.parentView != null)
+                this.parentView.InvalidateMeasure();
             this.needsRelayout = true; // update our own note that layout is needed
-
-            this.mainView.Padding = new Thickness(0);
         }
 
         // tests that the layout satisfies all of the queries consistently
@@ -457,24 +443,12 @@ namespace VisiPlacement
             return this.dispatcher;
         }
 
-        protected override void OnSizeAllocated(double width, double height)
-        {
-            if (this.dispatcher == null)
-                this.dispatcher = Microsoft.Maui.Dispatching.Dispatcher.GetForCurrentThread();
-            base.OnSizeAllocated(width, height);
-            if (width > 0 && height > 0)
-            {
-                Size bounds = new Size(width, height);
-                this.ViewManager.DoLayoutIfOutOfDate(bounds);
-            }
-        }
-
-        protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
+        protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
         {
             Size bounds = new Size(widthConstraint, heightConstraint);
-            this.ViewManager.DoLayoutIfOutOfDate(bounds);
-
-            return new SizeRequest(bounds);
+            Size size = new Size(bounds.Width, bounds.Height);
+            this.ViewManager.DoLayoutIfOutOfDate(size);
+            return base.MeasureOverride(widthConstraint, heightConstraint);
         }
     }
 
