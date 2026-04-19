@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-android</TargetFramework>
+    <TargetFramework>net10.0-android</TargetFramework>
     <OutputType>library</OutputType>
     <UseMaui>true</UseMaui>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.100" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="..\..\..\deps\Fonts\Resources\BlackChancery.ttf">
