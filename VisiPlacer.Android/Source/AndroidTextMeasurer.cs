@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using static Android.Views.View;
 
-namespace VisiPlacement.Android
+namespace VisiPlacement.Droid
 {
     public class AndroidTextMeasurer : TextMeasurer
     {

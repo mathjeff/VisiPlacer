@@ -112,7 +112,7 @@ namespace VisiPlacement
                 }
                 this.Set_LayoutChoices(new List<LayoutChoice_Set>() { backgroundLayout });
             }
-            Effect effect = EffectFactory.Instance.Resolve("ActRec.ButtonEffect");
+            Effect effect = EffectFactory.Instance.Resolve("VisiPlacement.ButtonEffect");
             button.Effects.Add(effect);
 
             this.buttonConfigurer = buttonConfigurer;
